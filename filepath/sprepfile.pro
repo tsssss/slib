@@ -18,6 +18,9 @@
 ;       replacement. 1 for time replacement, 0 for no. By default, no time 
 ;       replacement if tr0 is undefined. When tr0 is defined, do not do time
 ;       replacement for the root directory.
+;   nbase, in, int, optional. Set to combine the last n segments into a full
+;       base filename. This is a way to protect part of the base filename
+;       from replaced by time.
 ; Notes: none.
 ; Dependence: slib.
 ; History:
@@ -25,7 +28,7 @@
 ;   2016-03-05, Sheng Tian, updated.
 ;-
 
-function sprepfile, tr0, dt = dt, paths = paths, flags = flags
+function sprepfile, tr0, dt=dt, paths=paths, flags=flags, nbase=nbase
 
     ; prepare ets, paths, flags, files.
     npath = n_elements(paths)
@@ -58,6 +61,12 @@ function sprepfile, tr0, dt = dt, paths = paths, flags = flags
             tmp = strjoin(tpaths[idx],'%')
             tmp = sfmepoch(ets[0,i],tmp)
             tpaths[idx] = strsplit(tmp,'%',/extract)
+            if n_elements(nbase) ne 0 then begin
+                ntpath = n_elements(tpaths)
+                tidx = ntpath-nbase
+                tpaths[tidx] = strjoin(tpaths[tidx:*])
+                tpaths = tpaths[0:tidx]
+            endif
         endif
         files[i] = strjoin(tpaths,'/')
     endfor
