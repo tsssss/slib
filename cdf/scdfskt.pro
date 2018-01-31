@@ -194,6 +194,9 @@ pro scdfskt, cdf0, skeleton, filename = fn
 
     if n_elements(gatts) ne 0 then $
         skeleton = create_struct(skeleton, 'att', gatts)
+    
+    if n_elements(vattnames) ne 0 then $
+        skeleton = create_struct(skeleton, 'vatt', vattnames)
 
     if n_elements(var) ne 0 then $
         skeleton = create_struct(skeleton, 'var', var)

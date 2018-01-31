@@ -1,5 +1,6 @@
 
-pro scdfwrite, cdf0, vname, recs, skt = skt, value = val, attributes = attinfo, reset = reset
+pro scdfwrite, cdf0, vname, recs, skt = skt, value = val, $
+    attributes = vattinfo, reset = reset, gattributes = gattinfo
 
     compile_opt idl2
     on_error, 0
@@ -19,6 +20,29 @@ pro scdfwrite, cdf0, vname, recs, skt = skt, value = val, attributes = attinfo, 
 
     ; read skeleton.
     if n_elements(skt) eq 0 then scdfskt, cdfid, skt
+    
+    ; global attributions.
+    ngatt = skt.header.ngatt
+    if ngatt gt 0 then gatts = tag_names(skt.att)
+    if n_elements(gattinfo) ne 0 then begin
+        gattnames = tag_names(gattinfo)
+        ngattname = n_elements(gattnames)
+        for i = 0, ngattname-1 do begin
+            if ngatt eq 0 then newatt = 1 else begin
+                idx = where(gatts eq gattnames[i], cnt)
+                if cnt eq 0 then newatt = 1 else newatt = 0
+            endelse
+            if newatt eq 1 then $
+                attid = cdf_attcreate(cdfid, gattnames[i], /global_scope)
+            gentry = newatt? attid: idx
+            cdf_attput, cdfid, gattnames[i], gentry, gattinfo.(i)
+        endfor
+    endif
+    
+    if n_elements(vname) eq 0 then begin
+        cdf_close, cdfid
+        return
+    endif
 
     ; original variable names.
     novar = skt.header.nrvar+skt.header.nzvar
@@ -48,7 +72,7 @@ pro scdfwrite, cdf0, vname, recs, skt = skt, value = val, attributes = attinfo, 
     
     ; variable attributions.
     nvatt = skt.header.nvatt
-    if nvatt gt 0 then vatts = tag_names(skt.att)
+    if nvatt gt 0 then vatts = skt.vatt
     if n_elements(vattinfo) ne 0 then begin
         vattnames = tag_names(vattinfo)
         nvattname = n_elements(vattnames)
@@ -62,15 +86,7 @@ pro scdfwrite, cdf0, vname, recs, skt = skt, value = val, attributes = attinfo, 
             cdf_attput, cdfid, vattnames[i], vname, vattinfo.(i)
         endfor
     endif
-    
-    if n_elements(vattinfo0) ne 0 then begin
-        vattnames = tag_names(vattinfo0)
-        nvattname = n_elements(vattnames)
-        for i = 0, nvattname-1 do begin
-            cdf_attput, cdfid, vattnames[i], vname, vattinfo0.(i).value
-        endfor
-    endif
-    
+        
     cdf_close, cdfid
 
 end
