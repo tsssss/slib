@@ -1,6 +1,10 @@
-
+;+
+; Sett variable type in extra!!.
+;-
 pro scdfwrite, cdf0, vname, recs, skt = skt, value = val, $
-    attributes = vattinfo, reset = reset, gattributes = gattinfo
+    cdftype = cdftype, $
+    attributes = vattinfo, reset = reset, gattributes = gattinfo, $
+    _extra = extra
 
     compile_opt idl2
     on_error, 0
@@ -61,10 +65,18 @@ pro scdfwrite, cdf0, vname, recs, skt = skt, value = val, $
     endif
     
     if newvar eq 1 then begin
+        ; deal with cdf_type.
+        vtype = keyword_set(cdftype)? cdftype: scdffmidltype(size(val[0],/type))
+        if n_elements(extra) eq 0 then extra1 = create_struct(vtype,1) else begin
+            idx = where(tag_names(extra) eq strupcase(vtype), cnt)
+            if cnt eq 0 then extra1 = create_struct(vtype,1, extra) else begin
+                extra1 = extra & extra1.(idx) = 1
+            endelse
+        endelse
         if n_elements(dimvary) eq 0 then begin
-            varid = cdf_varcreate(cdfid, vname, _extra = extra, /zvariable)
+            varid = cdf_varcreate(cdfid, vname, _extra = extra1, /zvariable)
         endif else begin
-            varid = cdf_varcreate(cdfid, vname, dimvary, _extra = extra, /zvariable)
+            varid = cdf_varcreate(cdfid, vname, dimvary, _extra = extra1, /zvariable)
         endelse
     endif
 
