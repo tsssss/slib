@@ -2,7 +2,7 @@
 ; Sett variable type in extra!!.
 ;-
 pro scdfwrite, cdf0, vname, recs, skt = skt, value = val, $
-    cdftype = cdftype, $
+    cdftype = cdftype, dimvary=dimvary, $
     attributes = vattinfo, reset = reset, gattributes = gattinfo, $
     _extra = extra
 
