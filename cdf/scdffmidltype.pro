@@ -26,9 +26,13 @@ function scdffmidltype, types, structure=structure
     ntype = n_elements(types)
     ncdftype = n_elements(cdftypes)
     if size(types,/type) eq 7 then begin
-        vinfo = {}
-        for i=ncdftype-1,0,-1 do $
-            vinfo = create_struct(cdftypes[i],0,vinfo)
+        for i=ncdftype-1,0,-1 do begin
+            if n_elements(vinfo) eq 0 then begin
+                vinfo = create_struct(cdftypes[i],0)
+            endif else begin
+                vinfo = create_struct(cdftypes[i],0,vinfo)
+            endelse
+        endfor
         for i=0, ntype-1 do begin
             idx = where(cdftypes eq strupcase(types[i]), cnt)
             if cnt ne 0 then vinfo.(idx[0]) = 1
@@ -46,9 +50,13 @@ function scdffmidltype, types, structure=structure
         if ntype eq 1 then vtpys = vtpys[0]
         return, vtpys
     endif else begin
-        vinfo = {}
-        for i=ncdftype-1,0,-1 do $
-            vinfo = create_struct(cdftypes[i],0,vinfo)
+        for i=ncdftype-1,0,-1 do begin
+            if n_elements(vinfo) eq 0 then begin
+                vinfo = create_struct(cdftypes[i],0)
+            endif else begin
+                vinfo = create_struct(cdftypes[i],0,vinfo)
+            endelse
+        endfor
         for i=0, ntype-1 do begin
             idx = where(idltypes eq types[i], cnt)
             if cnt ne 0 then vinfo.(idx[0]) = 1

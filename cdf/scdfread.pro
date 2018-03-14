@@ -96,7 +96,6 @@ function scdfread, cdf0, vnames, recs0, drec = drec, skt = skt, silent = silent
     
     
     ; read vars.
-    vars = []
     if ~keyword_set(silent) then print, 'reading '+skt.name+' ...'
     for i = 0, nvar-1 do begin
         idx = where(strtrim(ovnames,2) eq vnames[i], cnt)
@@ -126,7 +125,7 @@ function scdfread, cdf0, vnames, recs0, drec = drec, skt = skt, silent = silent
         if nrec le 0 then begin
             if ~keyword_set(silent) then print, vinfo.name+' no data ...'
             tvar = {name:vinfo.name, value:ptr_new(), nrec:0}
-            vars = [vars, tvar]
+            vars = (n_elements(vars) eq 0)? tvar: [vars, tvar]
             continue
         endif
         ; check for nonvary dimensions.
@@ -152,7 +151,7 @@ function scdfread, cdf0, vnames, recs0, drec = drec, skt = skt, silent = silent
                 vals = transpose(vals,shift(indgen(n_elements(vinfo.dims)+1),1))
         endelse
         tvar = {name: vinfo.name, value: ptr_new(vals), nrec:long64(nrec)}
-        vars = [vars, tvar]
+        vars = (n_elements(vars) eq 0)? tvar: [vars, tvar]
     endfor
     
     ; free cdfid.

@@ -66,7 +66,6 @@ pro scdfskt, cdf0, skeleton, filename = fn
     endif
 
     ; global attribute.
-    gatts = {}           ; idl 8.0 or higher.
     if ngatt gt 0 then begin
         attids = where(scpflags eq 1B)
         for ii = 0, ngatt-1 do begin
@@ -79,17 +78,22 @@ pro scdfskt, cdf0, skeleton, filename = fn
             maxentrys = attinfo.maxgentry
             ; read entry values.
             if nentrys le 0 then begin
-                gatts = create_struct(gatts, attname, $
-                    {name: attname0, value: ''})
+                if n_elements(gatts) eq 0 then begin
+                    gatts = create_struct(attname, {name:attname0, value:''})
+                endif else begin
+                    gatts = create_struct(gatts, attname, {name:attname0, value:''})
+                endelse
             endif else begin
-                value = []          ; need idl 8.0 or higher.
                 for jj = 0, maxentrys do begin
                     if not cdf_attexists(cdfid, attname0, jj) then continue
                     cdf_attget, cdfid, attname0, jj, tvalue
-                    value = [value, tvalue]
+                    value = (n_elements(value) eq 0)? tvalue: [value,tvalue]
                 endfor
-                gatts = create_struct(gatts, attname, $
-                    {name: attname0, value: value})
+                if n_elements(gatts) eq 0 then begin
+                    gatts = create_struct(attname, {name:attname0, value:value})
+                endif else begin
+                    gatts = create_struct(gatts, attname, {name:attname0, value:value})
+                endelse
             endelse
         endfor
     endif
@@ -103,7 +107,6 @@ pro scdfskt, cdf0, skeleton, filename = fn
 
     ; variables.
     nvar = nrvar+nzvar
-    var = {}        ; idl 8,0 or higher.
 
     ; rvariable.
     if nrvar gt 0 then begin
@@ -130,18 +133,26 @@ pro scdfskt, cdf0, skeleton, filename = fn
                 if cnt ne 0 then vname = vname+'x'  ; fix vars: +15V & -15V.
             endif
             ; vatt.
-            vatts = {}
             for kk = 0, nvatt-1 do begin
                 if ~cdf_attexists(cdfid, vattnames0[kk], vname0) then continue
                 cdf_attget, cdfid, vattnames0[kk], vname0, value
-                vatts = create_struct(vatts, vattnames[kk], $
-                    {name: vattnames0[kk], value: value})
+                if n_elements(vatts) eq 0 then begin
+                    vatts = create_struct(vattnames[kk], $
+                        {name: vattnames0[kk], value: value})
+                endif else begin
+                    vatts = create_struct(vatts, vattnames[kk], $
+                        {name: vattnames0[kk], value: value})
+                endelse
                 info.natts++
             endfor
             ; add to info.
             if n_elements(vatts) ne 0 then $
                 info = create_struct(info, 'att', vatts)
-            var = create_struct(var, vname, info)
+            if n_elements(var) eq 0 then begin
+                var = create_struct(vname, info)
+            endif else begin
+                var = create_struct(var, vname, info)
+            endelse
         endfor
     endif
 
@@ -170,18 +181,27 @@ pro scdfskt, cdf0, skeleton, filename = fn
                 if cnt ne 0 then vname = vname+'x'  ; fix vars: +15V & -15V.
             endif
             ; vatt.
-            vatts = {}
+            if n_elements(vatts) ne 0 then tmp = temporary(vatts)
             for kk = 0, nvatt-1 do begin
                 if ~cdf_attexists(cdfid, vattnames0[kk], vname0) then continue
                 cdf_attget, cdfid, vattnames0[kk], vname0, value
-                vatts = create_struct(vatts, vattnames[kk], $
-                    {name: vattnames0[kk], value: value})
+                if n_elements(vatts) eq 0 then begin
+                    vatts = create_struct(vattnames[kk], $
+                        {name: vattnames0[kk], value: value})
+                endif else begin
+                    vatts = create_struct(vatts, vattnames[kk], $
+                        {name: vattnames0[kk], value: value})
+                endelse
                 info.natts++
             endfor
             ; add to info.
             if n_elements(vatts) ne 0 then $
                 info = create_struct(info, 'att', vatts)
-            var = create_struct(var, vname, info)
+            if n_elements(var) eq 0 then begin
+                var = create_struct(vname, info)
+            endif else begin
+                var = create_struct(var, vname, info)
+            endelse
         endfor
     endif
 

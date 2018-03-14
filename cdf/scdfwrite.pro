@@ -3,6 +3,7 @@
 ;-
 pro scdfwrite, cdf0, vname, recs, skt = skt, value = val, $
     cdftype = cdftype, dimvary=dimvary, $
+    compress = compress, $
     attributes = vattinfo, reset = reset, gattributes = gattinfo, $
     _extra = extra
 
@@ -44,6 +45,8 @@ pro scdfwrite, cdf0, vname, recs, skt = skt, value = val, $
     endif
     
     if n_elements(vname) eq 0 then begin
+        if keyword_set(compress) then $
+            cdf_compression, cdfid, set_gzip_level=compress
         cdf_close, cdfid
         return
     endif
@@ -80,6 +83,8 @@ pro scdfwrite, cdf0, vname, recs, skt = skt, value = val, $
         endelse
     endif
 
+    if keyword_set(compress) then $
+        cdf_compression, cdfid, set_var_gzip_level=compress, variable=varid, /zvariable
     cdf_varput, cdfid, vname, val
     
     ; variable attributions.
