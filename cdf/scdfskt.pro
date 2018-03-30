@@ -133,6 +133,7 @@ pro scdfskt, cdf0, skeleton, filename = fn
                 if cnt ne 0 then vname = vname+'x'  ; fix vars: +15V & -15V.
             endif
             ; vatt.
+            if n_elements(vatts) ne 0 then tmp = temporary(vatts)
             for kk = 0, nvatt-1 do begin
                 if ~cdf_attexists(cdfid, vattnames0[kk], vname0) then continue
                 cdf_attget, cdfid, vattnames0[kk], vname0, value
