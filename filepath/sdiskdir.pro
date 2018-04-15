@@ -46,6 +46,6 @@ function sdiskdir, disk, trailing_slash = trailing_slash
     
     if not file_test(diskdir, /directory) then message, 'no such drive ...'
     if keyword_set(trailing_slash) then diskdir+= sep
-    return, diskdir
+    return, diskdir[0]
 
 end
