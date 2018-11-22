@@ -11,7 +11,7 @@
 ;   2012-09-28, Sheng Tian, create.
 ;-
 
-function sdatarate, t0s
+function sdatarate, t0s, median=median
   compile_opt idl2
   on_error, 2
   
@@ -28,11 +28,11 @@ function sdatarate, t0s
   
   ; get difference.
   diff = t1s[1:sz[1]-1] - t1s[0:sz[1]-2]
+  if keyword_set(median) then return, median(diff)
   
   ; check monotonically increase.
   idx = where(diff lt 0D)
-  if idx[0] ne -1 then $
-    message, 'time series is not monotonically increasing ...'
+  if idx[0] ne -1 then message, 'time series is not monotonically increasing ...'
     
   ; compute predominant data rate.
   minrate = min(diff)

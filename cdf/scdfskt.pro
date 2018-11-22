@@ -17,6 +17,7 @@ pro scdfskt, cdf0, skeleton, filename = fn
     compile_opt idl2
     on_error, 0
 
+
     ; get cdf id.
     if size(cdf0, /type) eq 7 then begin
         if ~file_test(cdf0) then $
@@ -224,5 +225,6 @@ pro scdfskt, cdf0, skeleton, filename = fn
 
     ; output.
     if n_params() eq 1 then scdfsktlpr, skeleton, fn
+
 
 end
