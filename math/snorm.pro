@@ -55,8 +55,7 @@ function snorm, vec, transpose = transpose
   if sz[0] ne 2 then message, 'wrong dimension ...'
  
   ; vec in [m, n].
-  if n_elements(transpose) eq 0 then $
-    return, sqrt(total(vec^2, 2)) $
+  if n_elements(transpose) eq 0 then return, sqrt(total(vec^2, 2)) $
   else return, sqrt(total(vec^2, 1))
 
 end

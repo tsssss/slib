@@ -48,7 +48,7 @@ pro scdfskt, cdf0, skeleton, filename = fn
         nzvar: nzvar, $
         nrvar: nrvar }
 
-    ; attribute.
+;---attribute.
     natts = cdfinq.natts
     if natts ne 0 then begin
         attnames = strarr(natts)
@@ -105,7 +105,7 @@ pro scdfskt, cdf0, skeleton, filename = fn
         vattnames  = idl_validname(vattnames0, /convert_all)
     endif
 
-    ; variables.
+;---variables.
     nvar = nrvar+nzvar
 
     ; rvariable.

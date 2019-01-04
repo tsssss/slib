@@ -12,7 +12,9 @@
 ;   2013-04-04, Sheng Tian, combine scdfskt2file and scdfskt2console.
 ;-
 pro scdfsktlpr, skt, fn
-    compile_opt idl2 & on_error, 0
+
+    compile_opt idl2
+    on_error, 0
 
     tenter = ''     ; this works better than string(10B) or string(13B).
 
@@ -38,7 +40,6 @@ pro scdfsktlpr, skt, fn
     tformat = '(A, T6, A, T16, A, T26, A, T36, A)'
     printf, lun, '!', 'R.Vars', 'Z.Vars', 'G.Atts', 'V.Atts', format = tformat
     printf, lun, '!', '------', '------', '------', '------', format = tformat
-    tformat = '(T6, I0, T16, I0, T26, I0, T36, I0)'
     
     ngatt = skt.header.ngatt
     nvatt = skt.header.nvatt
@@ -46,6 +47,7 @@ pro scdfsktlpr, skt, fn
     nzvar = skt.header.nzvar
     nvar = nrvar + nzvar
     
+    tformat = '(T6, I0, T16, I0, T26, I0, T36, I0)'
     printf, lun, nrvar, nzvar, ngatt, nvatt, format = tformat
     printf, lun, tenter
     

@@ -16,6 +16,8 @@ pro scdfwrite, cdf0, vname, recs, skt = skt, value = val, $
     if size(cdf0, /type) eq 7 then begin
         if ~file_test(cdf0) then begin  ; creat the file.
             message, 'file ' + cdf0 + ' does not exist ...', /continue
+            odir = file_dirname(cdf0)
+            if file_test(odir,/directory) eq 0 then file_mkdir, odir
             cdfid = cdf_create(cdf0)
             newfile = 1
         endif else newfile = 0
