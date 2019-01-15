@@ -21,9 +21,12 @@
 ;   2013-03-15, Sheng Tian, use spawn in Windows.
 ;-
 
-function sdiskdir, disk, trailing_slash = trailing_slash
+function sdiskdir, disk, trailing_slash = trailing_slash, errmsg=errmsg
 
-    if n_elements(disk) eq 0 then message, 'no hard disk name ...'
+    if n_elements(disk) eq 0 then begin
+        errmsg = handle_error('No input hard disk ...')
+        return, ''
+    endif
     sep = path_sep()    ; OS dependent.
     
     case !version.os of
@@ -41,11 +44,17 @@ function sdiskdir, disk, trailing_slash = trailing_slash
             idx = where(stregex(outputs, 'DeviceID') ne -1)
             diskdir = strmid(strtrim(outputs[idx],2),1,/reverse_offset)
             end
-        else: message, 'unkown OS ...'
+        else: begin
+            errmsg = handle_error('Unkown OS ...')
+            return, ''
+            end
     endcase
     
-    if not file_test(diskdir, /directory) then message, 'no such drive ...'
-    if keyword_set(trailing_slash) then diskdir+= sep
+    if ~file_test(diskdir, /directory) then begin
+        errmsg = handle_error('No such drive: '+diskdir+' ...')
+        return, ''
+    endif
+    if keyword_set(trailing_slash) then diskdir += sep
     return, diskdir[0]
 
 end

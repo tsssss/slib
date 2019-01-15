@@ -61,7 +61,7 @@
 ;   2012-10-03, Sheng Tian, documented.
 ;   2013-03-06, Sheng Tian, revised.
 ;-
-function scdfread, cdf0, vnames, recs0, drec = drec, skt = skt, silent = silent
+function scdfread, cdf0, vnames, recs0, rec_info=recs1, drec=drec, skt=skt, silent=silent
     
     compile_opt idl2
     on_error, 0
@@ -88,6 +88,9 @@ function scdfread, cdf0, vnames, recs0, drec = drec, skt = skt, silent = silent
     ; claimed variable names.
     vnames = (n_elements(vnames) ne 0)? vnames: ovnames
     nvar = n_elements(vnames)
+    
+    ; rec_info.
+    if n_elements(recs1) ne 0 then recs0 = recs1
     case n_elements(recs0) of
         0: recs = lonarr(nvar,2)-1
         1: recs = [[replicate(recs0,nvar)],[replicate(recs0,nvar)]]
@@ -107,14 +110,8 @@ function scdfread, cdf0, vnames, recs0, drec = drec, skt = skt, silent = silent
             ; no vary, read one record.
             rec0 = 0 & nrec = 1
         endif else begin
-            ; deal with negative recs. [-1,-1] read all, -1 to read last.
-            if recs[i,0] eq -1 and recs[i,1] eq -1 then begin
-                if n_elements(recs0) eq 1 then recs[i,*]+= vinfo.maxrec $
-                else recs[i,*] = [0,vinfo.maxrec]
-            endif else begin
-                idx = where(recs[i,*] lt 0, cnt)
-                if cnt gt 0 then recs[i,idx]+= vinfo.maxrec
-            endelse
+            ; deal with negative recs. [-1,-1] read all.
+            if recs[i,0] lt 0 or recs[i,1] lt 0 then recs[i,*] = [0,vinfo.maxrec]
             rec0 = recs[i,0]>0 & recs[i,1]<=vinfo.maxrec
             nrec = recs[i,1]-rec0
             if nrec le 0 then nrec = 1      ; read one record.

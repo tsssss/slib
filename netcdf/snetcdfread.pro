@@ -59,15 +59,14 @@
 ; History:
 ;   2019-01-01, Sheng Tian, create.
 ;-
-function snetcdfread, nc0, vnames, recs0, drec = drec, skt = skt, silent = silent
+function snetcdfread, nc0, vnames, recs0, rec_info=recs1, skt=skt, silent=silent
     
     compile_opt idl2
     on_error, 0
     quiet0 = !quiet
     !quiet = 1
     
-    if n_elements(drec) eq 0 then drec = 1
-
+    
     ; get netcdf id.
     if size(nc0, /type) eq 7 then begin
         if ~file_test(nc0) then $
@@ -86,7 +85,11 @@ function snetcdfread, nc0, vnames, recs0, drec = drec, skt = skt, silent = silen
 
     ; claimed variable names.
     vnames = (n_elements(vnames) ne 0)? vnames: ovnames
+    if vnames[0] eq '' then vnames = ovnames
     nvar = n_elements(vnames)
+    
+    ; rec_info.
+    if n_elements(recs1) ne 0 then recs0 = recs1
     case n_elements(recs0) of
         0: recs = lonarr(nvar,2)-1
         1: recs = [[replicate(recs0,nvar)],[replicate(recs0,nvar)]]
@@ -97,7 +100,7 @@ function snetcdfread, nc0, vnames, recs0, drec = drec, skt = skt, silent = silen
     ; read vars.
     vars = []
     if ~keyword_set(silent) then print, 'reading '+skt.name+' ...'
-    for i = 0, nvar-1 do begin
+    for i=0, nvar-1 do begin
         idx = where(strtrim(ovnames,2) eq vnames[i], cnt)
         if cnt eq 0 then continue
         vinfo = skt.vars.(idx)
@@ -106,7 +109,16 @@ function snetcdfread, nc0, vnames, recs0, drec = drec, skt = skt, silent = silen
         varid = ncdf_varid(ncid, vinfo.name)
         ncdf_varget, ncid, varid, value
         dims = size(value, /dimensions)
-        tvar = {name: vinfo.name, value: ptr_new(value), nrec:long64(dims[0])}
+        nrec = dims[0]
+        ; trim data.
+        rec_info = (nrec-1)<recs[i,*]>0
+        if rec_info[0] gt 0 and rec_info[1] gt 0 then begin
+            ; works for both A=B and A<B.
+            if rec_info[0] gt rec_info[1] then rec_info = rec_info[[1,0]]
+            nrec = rec_info[1]-rec_info[0]+1
+            value = reform(value[rec_info[0]:rec_info[1],*,*,*,*,*,*,*])
+        endif
+        tvar = {name: vinfo.name, value: ptr_new(value), nrec:long64(nrec)}
         vars = [vars, tvar]
     endfor
     
@@ -119,7 +131,6 @@ function snetcdfread, nc0, vnames, recs0, drec = drec, skt = skt, silent = silen
 end
 
 
-
 fn = '/Users/Sheng/data/goes/new_full/2014/08/goes15/netcdf/g15_magneto_512ms_20140828_20140828.nc'
-dat = snetcdfread(fn)
+dat = snetcdfread(fn, rec_info=[1,2])
 end
