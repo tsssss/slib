@@ -102,14 +102,9 @@ function sfmdate, d0, f10
 
     ; get current time.
     ut0 = systime(1)
-    ; default settings.
-    yr = 0
-    mo = 1
-    dy = 1
-    hr = 0
-    mi = 0
-    sc = 0
-    msc = 0
+    ep0 = 1000d*(ut0+var)
+    ep0 = ep0-(ep0 mod 86400000d)   ; start of the day.
+    cdf_epoch, ep0, yr, mo, dy, hr, mi, sc, msc, /breakdown_epoch
 
     for i = 0, nfc-1 do begin
         tfc = fcs[i]

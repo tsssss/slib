@@ -26,7 +26,7 @@ pro themis_read_asi, time, id=datatype, site=site, $
     print_datatype=print_datatype, errmsg=errmsg, $
     in_vars=in_vars, out_vars=out_vars, files=files, version=version, $
     local_root=local_root, remote_root=remote_root, $
-    sync_after=sync_after, file_times=file_times, index_file=index_file, $
+    sync_after=sync_after, file_times=file_times, index_file=index_file, skip_index=skip_index, $
     sync_index=sync_index, sync_files=sync_files, stay_local=stay_local, $
     time_var_name=time_var_name, time_var_type=time_var_type, generic_time=generic_time
 
@@ -123,6 +123,7 @@ pro themis_read_asi, time, id=datatype, site=site, $
         file_times=file_times, index_file=index_file, time=time, $
         stay_local=stay_local, sync_index=sync_index, $
         sync_files=sync_files, sync_after=sync_time, $
+        skip_index=skip_index, $
         _extra=myinfo)
     if errmsg ne '' then begin
         errmsg = handle_error('Error in finding files ...')

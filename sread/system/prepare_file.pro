@@ -41,6 +41,7 @@ function prepare_file, files=files, errmsg=errmsg, $
         if n_elements(cadence) eq 0 then cadence = 'day'
         file_times = break_down_times(time, cadence)
     endif
+    nfile_time = n_elements(file_times)
     
     ; Prepare patterns.
     if n_elements(base_pattern) eq 0 then begin
@@ -78,7 +79,6 @@ function prepare_file, files=files, errmsg=errmsg, $
     
 ;---Prepare index file.
     if ~keyword_set(skip_index) then begin
-        nfile_time = n_elements(file_times)
         loc_paths = strarr(nfile_time)
         for i=0, nfile_time-1 do loc_paths[i] = apply_time_to_pattern(local_pattern, file_times[i])
         index = uniq(local_paths)

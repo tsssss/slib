@@ -35,6 +35,7 @@ pro themis_gen_mltimg, time0, site=site, errmsg=errmsg, $
     
     ; Convert to MLT image.
     
+    
     ; Calculate the midnight mlon.
     
 
