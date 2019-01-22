@@ -8,7 +8,7 @@ function default_local_root, disk
     if n_elements(disk) eq 0 then begin
         case susrhost() of
             'Sheng@rMBP-3.local': disk = 'Research'
-            else: disk = ''
+            else: disk = 'xxx'
         endcase
     endif
     

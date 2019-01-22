@@ -1,11 +1,11 @@
 ;+
 ; Sett variable type in extra!!.
 ;-
-pro scdfwrite, cdf0, vname, recs, skt = skt, value = val, $
-    cdftype = cdftype, dimvary=dimvary, $
-    compress = compress, $
-    attributes = vattinfo, reset = reset, gattributes = gattinfo, $
-    _extra = extra
+pro scdfwrite, cdf0, vname, skt=skt, value=val, $
+    cdftype=cdftype, dimvary=dimvary, $
+    compress=compress, $
+    attributes=vattinfo, reset=reset, gattributes=gattinfo, $
+    _extra=extra
 
     compile_opt idl2
     on_error, 0

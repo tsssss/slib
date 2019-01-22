@@ -89,6 +89,9 @@ pro add_setting, var, settings, smart=smart
             'plot': begin
                 options, var, 'spec', 0
                 end
+            'image': begin
+                ; Placeholder, do nothing.
+                end
         endcase
     endif
 

@@ -91,7 +91,7 @@ function prepare_file, files=files, errmsg=errmsg, $
         if local_only then begin
             for i=0, nloc_path-1 do begin
                 if file_test(index_ffns[i]) eq 0 then continue
-                make_index_file, index_ffn[i]
+                make_index_file, index_ffns[i]
             endfor
     ;---Sync with remote.
         endif else begin
