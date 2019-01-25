@@ -129,7 +129,7 @@ pro themis_read_asi, time, id=datatype, site=site, $
         errmsg = handle_error('Error in finding files ...')
         return
     endif
-    read_and_store_var, files, time_info=time, times=times, errmsg=errmsg, $
+    read_and_store_var, files, time_info=time, errmsg=errmsg, $
         in_vars=in_vars, out_vars=out_vars, generic_time=generic_time, _extra=myinfo
     if errmsg ne '' then begin
         errmsg = handle_error('Error in reading or storing data ...')

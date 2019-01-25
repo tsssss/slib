@@ -123,7 +123,7 @@ function prepare_file, files=files, errmsg=errmsg, $
         download_file = file_time gt sync_time
         files[i] = find_file(file_time, base_pattern, local_pattern, $
             remote_pattern=remote_pattern, index_file=index_file, $
-            download_file=download_file, local_only=local_only)
+            download_file=download_file, local_only=local_only, errmsg=errmsg)
     endfor
     
     return, files

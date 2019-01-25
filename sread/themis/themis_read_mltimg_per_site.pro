@@ -38,7 +38,8 @@ pro themis_read_mltimg_per_site, time, site=site, errmsg=errmsg, $
     
 ;---Read ASF raw image, after preprocessed.
     ; thg_site_asf and thg_site_asf_elev
-    themis_read_asf, time, site=site, min_elev=-5
+    themis_read_asf, time, site=site, min_elev=-5, errmsg=errmsg
+    if errmsg ne '' then return
     elev_var = pre0+'asf_elev'
     center_elevs = get_var_data(elev_var)
     ;weight = sin(reform(center_elevs[0,*,*])*rad)  ; Sheng: weight has little effect for single site.
@@ -88,8 +89,8 @@ pro themis_read_mltimg_per_site, time, site=site, errmsg=errmsg, $
             ycor = round(ycor)
             ib = max(xcor, min=ia)
             jb = max(ycor, min=ja)
-            ia = ia > 0
-            ja = ja > 0
+            ia = ia < (full_size-1) > 0
+            ja = ja < (full_size-1) > 0
             ib = ib < (full_size-1) > ia
             jb = jb < (full_size-1) > ja
             mltimg[ia:ib,ja:jb] += asfimg[good_pixels[j]]

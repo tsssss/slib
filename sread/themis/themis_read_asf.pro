@@ -18,7 +18,8 @@ pro themis_read_asf, time, site=site, errmsg=errmsg, min_elev=min_elev, $
 
     ; Read the raw image. 
     asf_var = pre0+'asf' 
-    themis_read_asi, time, id='asf', site=site
+    themis_read_asi, time, id='asf', site=site, errmsg=errmsg
+    if errmsg ne '' then return
     if keyword_set(raw_image) then return
 
 
