@@ -263,6 +263,7 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
 
         ; midn mlon in deg for current time.
         midn = interpol(cmlon, cmidn, (uts[i]/86400d mod 1)*24, /nan)
+        midn = 0
         midns[i] = midn
 
         if type eq 'asf' then begin

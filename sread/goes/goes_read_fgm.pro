@@ -20,7 +20,7 @@ pro goes_read_fgm, time, datatype, probe=probe, print_datatype=print_datatype, $
     
     if n_elements(resolution) eq 0 then resolution = '512ms'
     if n_elements(coord) eq 0 then coord = 'gsm'
-    loc_root = join_path([data_root_dir(),'data','goes'])
+    loc_root = join_path([default_local_root(),'data','goes'])
     rem_root = 'https://satdat.ngdc.noaa.gov/sem/goes/data'
     version = (n_elements(version) eq 0)? 'v[0-9]{2}': version
     pre0 = 'g'+probe
@@ -28,9 +28,9 @@ pro goes_read_fgm, time, datatype, probe=probe, print_datatype=print_datatype, $
     type_dispatch = []
     type_dispatch = [type_dispatch, $
         {id: '512ms', $
-        base_pattern: 'goes'+probe+'_magneto_512ms_%Y%m%d_%Y%m%d.nc', $
-        remote_pattern: join_path([rem_root,'new_full','%Y','%m','goes'+probe]), $
-        local_pattern: join_path([loc_root,'goes'+probe,'fgm','512ms','%Y'])}]
+        base_pattern: 'g'+probe+'_magneto_512ms_%Y%m%d_%Y%m%d.nc', $
+        remote_pattern: join_path([rem_root,'new_full','%Y','%m','goes'+probe,'netcdf']), $
+        local_pattern: join_path([loc_root,'goes'+probe,'fgm','512ms','%Y','netcdf'])}]
 ; haven't tested yet.
 ;    type_dispatch = [type_dispatch, $
 ;        {id: '1min', $
@@ -116,9 +116,9 @@ pro goes_read_fgm, time, datatype, probe=probe, print_datatype=print_datatype, $
 end
 
 utr0 = time_double(['2014-08-28','2014-08-29'])
-probe = '15'
+probe = '13'
 pre0 = 'g'+probe+'_'
-goes_read_fgm, utr0, probe=probe, file='/Users/Sheng/data/goes/new_full/2014/08/goes15/netcdf/g15_magneto_512ms_20140828_20140828.nc'
+goes_read_fgm, utr0, probe=probe
 get_data, pre0+'b_gsm', uts, bgsm
 ets = stoepoch(uts, 'unix')
 bsm = sgsm2sm(bgsm, ets)

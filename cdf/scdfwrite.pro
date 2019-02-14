@@ -1,16 +1,21 @@
 ;+
 ; Sett variable type in extra!!.
 ;-
-pro scdfwrite, cdf0, vname, skt=skt, value=val, $
+pro scdfwrite, cdf0, vname, skt=skt, value=val, errmsg=errmsg, $
     cdftype=cdftype, dimvary=dimvary, $
     compress=compress, $
     attributes=vattinfo, reset=reset, gattributes=gattinfo, $
     _extra=extra
 
     compile_opt idl2
-    on_error, 0
-    quiet0 = !quiet
-    !quiet = 1
+    
+    catch, error
+    if error ne 0 then begin
+        catch, /cancel
+        if n_elements(cdfid) ne 0 then cdf_close, cdfid
+        errmsg = !error_state.msg
+        return
+    endif
 
     ; get cdf id.
     if size(cdf0, /type) eq 7 then begin

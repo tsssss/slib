@@ -4,6 +4,8 @@
 ; Parameters:
 ; 	num, in, int/long/float/double, required. The given number.
 ; Keywords:
+;   ndec. A number sets # of decimals.
+;   nsgn. A number sets # of significant numbers.
 ; Return: string. String of the number.
 ; Notes: Do not deal with complex(6) and dcomplex(9), maybe later.
 ;   Any settings, includes 3 flavors: natural, maximum, and required. For 

@@ -90,7 +90,7 @@ function scdfread, cdf0, vnames, recs0, rec_info=recs1, drec=drec, skt=skt, sile
     nvar = n_elements(vnames)
     
     ; rec_info.
-    if n_elements(recs1) ne 0 then recs0 = recs1
+    if n_elements(recs1) ne 0 then recs0 = long64(recs1)    ; need long to work with large # of record.
     case n_elements(recs0) of
         0: recs = lonarr(nvar,2)-1
         1: recs = [[replicate(recs0,nvar)],[replicate(recs0,nvar)]]

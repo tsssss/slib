@@ -56,29 +56,31 @@ pro themis_read_asc, time, vars=vars, id=id, site=site, errmsg=errmsg, $
 
 
 ;---Now treat the calibration files.
-    elev_var = pre3+'asf_elev'
-    index = where(out_vars eq elev_var, count)
-    if count ne 0 then begin
+    pos_vars = pre3+'asf_'+['elev','azim']
+    foreach pos_var, pos_vars do begin
+        index = where(out_vars eq pos_var, count)
+        if count eq 0 then continue
         case version of
             'v01': begin
             ;---For calibration files of version 01.
-                get_data, elev_var, tmp, dat
-                store_data, elev_var, time[0], reform(dat[0,*,*])
+                get_data, pos_var, tmp, dat
+                store_data, pos_var, time[0], reform(dat[0,*,*])
                 end
             'v02': begin
             ;---For calibration files of version 02.
                 times = get_var_data(time_var)
-                dat = get_var_data(elev_var)
+                dat = get_var_data(pos_var)
                 index = where(times lt time[0], count)
                 if count eq 0 then index = 0
-                store_data, elev_var, time[0], reform(dat[index,*,*])
+                store_data, pos_var, time[0], reform(dat[index,*,*])
                 end
         endcase
-        add_setting, elev_var, /smart, {$
+        add_setting, pos_var, /smart, {$
             display_type: 'image', $
             unit: 'deg', $
-            short_name: site[0]+' elev'}
-    endif
+            short_name: site[0]+' '+strmid(pos_var, 0,4, /reverse)}
+    endforeach
+
 
     pos_vars = pre3+'asf_'+['mlon','mlat','glon','glat']
     foreach pos_var, pos_vars do begin

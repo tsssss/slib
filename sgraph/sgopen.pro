@@ -46,6 +46,7 @@ pro sgopen, id0, xsize = xsize, ysize = ysize, cm = cm, inch = inch, $
     if n_elements(xsize) eq 0 then xsz = !d.x_size else xsz = double(xsize)
     if n_elements(ysize) eq 0 then ysz = !d.y_size else ysz = double(ysize)
     
+    
     ; convert to pixel from cm or inch.
 ;    cm2px = 40d & in2cm = 2.54d & in2px = 101.6d    ; in2px = in2cm*cm2px.
     px2cm = 0.025d
@@ -56,6 +57,10 @@ pro sgopen, id0, xsize = xsize, ysize = ysize, cm = cm, inch = inch, $
         keyword_set(inch): tmp = 101.6d ; in2px = in2cm*2.54.
         else: tmp = 1d
     endcase
+    
+    ; try to do a smart thing: if xsz or ysz is small (say < 10) then it's inch.
+    if (xsz le 10) or (ysz le 10) and tmp eq 1 then tmp = 101.6d
+    
     
     ; apply magnfication to canvas.
     tmp *= magc

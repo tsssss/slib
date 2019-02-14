@@ -25,9 +25,9 @@ pro goes_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg, _
     goes_read_fgm, utr0, probe=probe, coord='gsm', resolution=resolution, errmsg=errmsg, _extra=ex
     if errmsg ne '' then return
     
-
+    pre0 = 'g'+probe+'_'
+    
     bvar = pre0+'b_gsm'
-    rename_var, 'mag', to=bvar
     add_setting, bvar, /smart, {$
         display_type: 'vector', $
         unit: 'nT', $
@@ -38,4 +38,9 @@ pro goes_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg, _
         
     uniform_time, bvar, dt
 
+end
+
+time = time_double(['2014-08-28/04:00','2014-08-28/11:00'])
+probe = '13'
+goes_read_bfield, time, probe=probe
 end

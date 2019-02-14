@@ -14,11 +14,11 @@ pro rbsp_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg
     endcase
     
     ; read 'rbspx_b_gsm'
-    rbsp_read_emfisis, utr0, 'magnetometer', probe=probe, level='l3', resolution=resolution, coord='gsm', errmsg=errmsg
+    rbsp_read_emfisis, utr0, id='l3%magnetometer', probe=probe, $
+        resolution=resolution, coord='gsm', errmsg=errmsg
     if errmsg ne '' then return
     
     bvar = pre0+'b_gsm'
-    rename_var, 'mag', to=bvar
     add_setting, bvar, /smart, {$
         display_type: 'vector', $
         unit: 'nT', $
@@ -31,6 +31,7 @@ pro rbsp_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg
  
 end
 
-utr0 = time_double(['2013-06-10/05:57:20','2013-06-10/05:59:40']) ; a shorter time range for test purpose.
-rbsp_read_bfield, utr0, 'b'
+utr0 = time_double(['2013-06-10/05:57:20','2013-06-10/05:59:40'])   ; a shorter time range for test purpose.
+utr0 = time_double(['2013-06-07/04:40','2013-06-07/05:10'])         ; a longer time range for test purpose.
+rbsp_read_bfield, utr0, probe='b'
 end
