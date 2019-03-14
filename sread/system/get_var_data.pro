@@ -2,9 +2,18 @@
 ; Return data for a variable.
 ;-
 ;
-function get_var_data, var, raw=raw
+function get_var_data, var, at=time, raw=raw
 
     get_data, var, tmp, dat
+    
+    if keyword_set(time) ne 0 then begin
+        index = where(tmp eq time, count)
+        if count eq 0 then begin
+            dat = sinterpol(dat, tmp, time)
+        endif else begin
+            dat = dat[index,*,*,*,*,*,*,*]
+        endelse
+    endif
     
     if keyword_set(raw) then return, dat
     

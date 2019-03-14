@@ -30,7 +30,7 @@ function sinterpol, data, oldabs, newabs, _extra = extra
   oldsize = size(oldyy)
   oldndims = oldsize[0]
   
-  if oldndims gt 2 then $
+  if oldndims gt 3 then $
     message, '# of dimension greater than 2 ...'
       
   if oldndims eq 0 then begin
@@ -43,21 +43,35 @@ function sinterpol, data, oldabs, newabs, _extra = extra
     return, interpol(oldyy, oldxx, newxx, _extra = extra)
   
   ; vector array.
-  ; data in [n0, m].
-  if oldsize[1] eq n_elements(oldxx) then begin
-    newdims = [n_elements(newxx), oldsize[2]]
-    newyy = replicate(oldyy[0], newdims)    ; keep type.
-    for ii = 0, newdims[1]-1 do $
-      newyy[*,ii] = interpol(oldyy[*,ii], oldxx, newxx, _extra = extra)
-  ; data in [m, n0].
-  endif else begin
-    if oldsize[2] ne n_elements(oldxx) then $
-      message, 'data incorrect dimension ...'
-    newdims = [oldsize[1], n_elements(newxx)]
-    newyy = replicate(oldyy[0], newdims)
-    for ii = 0, newdims[0]-1 do $
-      newyy[ii,*] = interpol(oldyy[ii,*], oldxx, newxx, _extra = extra)
-  endelse
-    
-  return, newyy
+  old_dims = size(data,/dimensions)
+  nold_dim = n_elements(old_dims)
+  ncomp = product(old_dims[1:nold_dim-1])
+  old_dim1 = [old_dims[0],ncomp]
+  old_data = reform(data, old_dim1)
+  new_dims = [n_elements(newabs),old_dims[1:nold_dim-1]]
+  new_dim1 = [new_dims[0],ncomp]
+  new_data = dblarr(new_dim1)
+  for ii=0, ncomp-1 do begin
+    new_data[*,ii] = interpol(old_data[*,ii], oldxx, newxx, _extra=extra)
+  endfor
+  new_data = reform(new_data, new_dims)
+  return, new_data
+  
+;  ; data in [n0, m].
+;  if oldsize[1] eq n_elements(oldxx) then begin
+;    newdims = [n_elements(newxx), oldsize[2]]
+;    newyy = replicate(oldyy[0], newdims)    ; keep type.
+;    for ii = 0, newdims[1]-1 do $
+;      newyy[*,ii] = interpol(oldyy[*,ii], oldxx, newxx, _extra = extra)
+;  ; data in [m, n0].
+;  endif else begin
+;    if oldsize[2] ne n_elements(oldxx) then $
+;      message, 'data incorrect dimension ...'
+;    newdims = [oldsize[1], n_elements(newxx)]
+;    newyy = replicate(oldyy[0], newdims)
+;    for ii = 0, newdims[0]-1 do $
+;      newyy[ii,*] = interpol(oldyy[ii,*], oldxx, newxx, _extra = extra)
+;  endelse
+;    
+;  return, newyy
 end

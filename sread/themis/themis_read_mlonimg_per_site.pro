@@ -4,6 +4,8 @@
 ; the MLon image and the raw ASF image is the former unwraps the fish-eye
 ; perspective in the latter.
 ; 
+; Note: the value at each pixel is in the raw count, not some physical unit.
+; 
 ; time. A time or time range in UT sec.
 ; site. A string for the site, see themis_asi_sites for available sites.
 ; height. A number sets the assumed emission height in km altitude. The default
@@ -12,7 +14,7 @@
 ;
 
 pro themis_read_mlonimg_per_site, time, site=site, errmsg=errmsg, $
-    height=height
+    height=height, extra=_extra
     
     compile_opt idl2
     on_error, 0
@@ -38,7 +40,7 @@ pro themis_read_mlonimg_per_site, time, site=site, errmsg=errmsg, $
     
 ;---Read ASF raw image, after preprocessed; convert to MLon image.
     ; thg_site_asf and thg_site_asf_elev
-    themis_read_asf, time, site=site, errmsg=errmsg
+    themis_read_asf, time, site=site, errmsg=errmsg, raw_image=1, extra=_extra
     if errmsg ne '' then return
 
     ; Check for the mapping indices.

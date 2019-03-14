@@ -139,7 +139,7 @@ end
 
 themis_read_asi, /print_datatype
 time = time_double(['2014-08-28/10:00','2014-08-28/10:03'])
-;themis_read_asi, time, 'cal', site='whit'
-themis_read_asi, time, 'ast', site='whit'
-themis_read_asi, time, 'asf', site='whit'
+;themis_read_asi, time, id='cal', site='whit'
+themis_read_asi, time, id='ast', site='whit'
+themis_read_asi, time, id='asf', site='whit'
 end

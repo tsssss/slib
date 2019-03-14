@@ -123,7 +123,7 @@ pro themis_read_mlonimg_read_file, filename=file
     
 end
 
-pro themis_read_mlonimg_gen_file, time, site=site, filename=file, errmsg=errmsg
+pro themis_read_mlonimg_gen_file, time, site=site, filename=file, errmsg=errmsg, extra=_extra
 
     errmsg = ''
 
@@ -134,7 +134,7 @@ pro themis_read_mlonimg_gen_file, time, site=site, filename=file, errmsg=errmsg
 
     ; Read data to memory.
     ;time = time[0]+[0,9]   ; for tests.
-    themis_read_mlonimg_per_site, time, site=site, errmsg=errmsg
+    themis_read_mlonimg_per_site, time, site=site, errmsg=errmsg, extra=_extra
     if errmsg ne '' then return
     pre0 = 'thg_'+site+'_asf_'
 
@@ -207,13 +207,17 @@ end
 
 
 pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
-    height=height, min_lat=min_lat, mlon_range=mlon_range, mlat_range=mlat_range, min_elev=min_elev, $
-    local_root=local_root, version=version
+    height=height, min_lat=min_lat, mlon_range=mlon_range, mlat_range=mlat_range, min_elevs=min_elevs, $
+    local_root=local_root, version=version, renew_file=renew_file, extra=_extra
 
     compile_opt idl2
     on_error, 0
     errmsg = ''
 
+    deg = 180d/!dpi
+    rad = !dpi/180d
+    
+    test = 1
 
 ;---Check inputs.
     if n_elements(time) eq 0 then begin
@@ -234,7 +238,7 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
     if n_elements(min_lat) eq 0 then min_lat = 50d  ; deg.
     if n_elements(mlat_range) eq 0 then mlat_range = [min_lat,90]
     if n_elements(mlon_range) eq 0 then mlon_range = [-180d,180]
-    if n_elements(min_elev) eq 0 then min_elev = 7d ; deg.
+    if n_elements(min_elevs) eq 0 then min_elevs = 7+fltarr(nsite) ; deg.
 
     
     if n_elements(version) eq 0 then version = 'v01'
@@ -251,7 +255,8 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
         files = list()
         foreach file_time, file_times do begin
             file = apply_time_to_pattern(local_pattern, file_time)
-            if file_test(file) eq 0 then themis_read_mlonimg_gen_file, file_time+[0,cadence], site=site, filename=file, errmsg=errmsg
+            if keyword_set(renew_file) then if file_test(file) eq 1 then file_delete, file
+            if file_test(file) eq 0 then themis_read_mlonimg_gen_file, file_time+[0,cadence], site=site, filename=file, errmsg=errmsg, extra=_extra
             if file_test(file) eq 1 then files.add, file
         endforeach
         
@@ -266,7 +271,33 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
     
 
 ;---Merge MLon images from sites together.
-
+    ; Scale raw count to photon count.
+    foreach site, sites do begin
+        pre0 = 'thg_'+site+'_asf_'
+        get_data, pre0+'mlon_image', times, mlonimgs
+        ntime = n_elements(times)
+;        min_counts = fltarr(ntime)
+;        max_counts = fltarr(ntime)
+;        avg_counts = fltarr(ntime)
+;        med_counts = fltarr(ntime)
+;        for ii=0, ntime-1 do begin
+;            timg = reform(mlonimgs[ii,*,*])
+;            index = where(timg ne 0, count)
+;            if count eq 0 then continue
+;            tdat = timg[index]
+;            min_counts[ii] = min(tdat)
+;            max_counts[ii] = max(tdat)
+;            avg_counts[ii] = mean(tdat)
+;            med_counts[ii] = median(tdat)
+;        endfor
+        ; min is about 3500
+        ; max is about 8000
+        ; median/avg is about 4000
+        bg_count = 3000d
+        scale_factor = 60d/(4000-3000)
+        mlonimgs = (mlonimgs-bg_count)*scale_factor
+        store_data, pre0+'mlon_image', times, mlonimgs
+    endforeach
     
     ; Prepare the meta-data.
     elev_2ds = list()
@@ -287,14 +318,20 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
     pre1 = 'thg_mlonimg_pixel_'
     all_xs = get_var_data(pre1+'mlons')
     all_ys = get_var_data(pre1+'mlats')
+    npx = get_var_data(pre1+'npixel')       ; # of pixels that have data.
+    px_mlons = get_var_data(pre1+'mlons')   ; the mlon in deg for each pixel.
+    px_mlats = get_var_data(pre1+'mlats')   ; the mlat in deg for each pixel.
+    px_elevs = get_var_data(pre1+'elevs')   ; the elev in deg for each pixel.
+    px_sites = get_var_data(pre1+'sites')   ; the sites for each pixel.
     
     
-    stop
-    bin_size = get_var_data('bin_size')
+    bin_size = get_var_data(pre1+'bin_size')
     dmlon_bin = bin_size[0]
     dmlat_bin = bin_size[1]
-    x_bins = fix(make_bins(round(mlon_range/dmlon_bin),1))
-    y_bins = fix(make_bins(round(mlat_range/dmlat_bin),1))
+    x_bins = fix(make_bins(round((mlon_range-mlon_range[0])/dmlon_bin),1))
+    y_bins = fix(make_bins(round((mlat_range-mlat_range[0])/dmlat_bin),1))
+    px_is = round(px_mlons/dmlon_bin)-x_bins[0]
+    px_js = round(px_mlats/dmlat_bin)-y_bins[0]
     
     nx_bin = n_elements(x_bins)
     ny_bin = n_elements(y_bins)
@@ -302,28 +339,109 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
     cadence = 3d
     times = (n_elements(time) eq 1)? time: make_bins(time,cadence)
     ntime = n_elements(times)
-    ;mosimgs = fltarr([ntime,image_size])
+    mosimgs = fltarr([ntime,image_size])
+    
+    if keyword_set(test) then begin
+        window, 0, xsize=image_size[0], ysize=image_size[1]
+        loadct, 40
+        device, decomposed=0
+    endif
+
     for ii=0, ntime-1 do begin
         mosimg = fltarr(image_size)
+        moscnt = intarr(image_size)
         
+        ; Fill in the pixels by sites.
         for jj=0, nsite-1 do begin
             pre0 = 'thg_'+sites[jj]+'_asf_'
-            get_data, pre0+'mlon_image', uts, tmp
-            timg = reform(tmp[where(uts eq times[ii]),*,*])
-            index = where(elev_2ds[jj] ge min_elev, count)
-            for kk=0, count-1 do begin
-                
-            endfor
-        endfor
-        stop
-    endfor
-    
-stop
+            timg = get_var_data(pre0+'mlon_image', at=times[ii])
+            tmlons = get_var_data(pre0+'new_mlon_bins')
+            tmlats = get_var_data(pre0+'new_mlat_bins')
+            televs = get_var_data(pre0+'new_elevs')
+            
+            ; Filter by elevation.
+            min_elev = min_elevs[jj]
+            index = where(televs le min_elev, count)
+            if count ne 0 then begin
+                timg[index] = 0
+                televs[index] = min_elev
+            endif
+            
+            tcnt = intarr(size(timg,/dimensions))
+            index = where(timg ne 0, count)
+            if count ne 0 then tcnt[index] = 1
+            
+            ; Normalize by elevation.
+            ;timg = timg*sin(televs*rad)
+            
 
+            ; Crop image.
+            a1 = 0
+            a2 = n_elements(tmlons)-1
+            b1 = 0
+            b2 = n_elements(tmlats)-1
+            
+            i1 = round((tmlons[0]-mlon_range[0])/dmlon_bin)
+            j1 = round((tmlats[0]-mlat_range[0])/dmlat_bin)
+            i2 = i1+a2
+            j2 = j1+b2
+            
+            if i1 lt 0 then begin
+                a1 = a1+(0-i1)
+                i1 = 0
+            endif
+            if i2 gt image_size[0]-1 then begin
+                a2 = a2+(image_size[0]-1-i2)
+                i2 = image_size[0]-1
+            endif
+            if j1 lt 0 then begin
+                b1 = b1+(0-j1)
+                j1 = 0
+            endif
+            if j2 gt image_size[1]-1 then begin
+                b2 = b2+(image_size[1]-1-j2)
+                j2 = image_size[1]-1
+            endif
+            mosimg[i1:i2,j1:j2] += timg[a1:a2,b1:b2]
+            moscnt[i1:i2,j1:j2] += tcnt[a1:a2,b1:b2]
+        endfor
+
+        ;mosimg = mosimg/moscnt
+        if keyword_set(test) then begin
+            tv, bytscl(mosimg, max=700, top=254)
+            wait, 0.05
+        endif
+        
+        mosimgs[ii,*,*] = mosimg
+    endfor
+
+    store_data, 'thg_mlonimg', times, mosimgs
+    stop
+    mosinfo = {$
+        mlon_bins:mlon_range[0]+x_bins*dmlon_bin, $
+        mlat_bins:mlat_range[0]+y_bins*dmlat_bin, $
+        nmlon_bin:nx_bin, $
+        nmlat_bin:ny_bin}
+    store_data, 'thg_mlonimg_info', 0, mosinfo
 end
 
 
-time = time_double(['2014-08-28/10:00','2014-08-28/10:05'])
+time = time_double(['2014-08-28/10:05','2014-08-28/10:15'])
 sites = ['whit','fsim']
-themis_read_mlonimg, time, sites=sites
+min_elevs = [5,10]
+mlon_range = [-100,-55]
+mlat_range = [55,75]
+renew_file = 0
+
+time = time_double(['2014-08-28/05:00','2014-08-28/05:07'])
+time = time_double(['2014-08-28/04:55','2014-08-28/05:07'])
+;time = time_double(['2014-08-28/05:05','2014-08-28/05:06'])
+sites = ['pina','kapu','snkq']
+min_elevs = [5,10,10]
+mlon_range = [-50,10]
+mlat_range = [55,75]
+
+;themis_read_mlonimg, time, sites=sites, min_elevs=min_elevs, mlon_range=mlon_range, mlat_range=mlat_range, renew_file=renew_file
+
+
 end

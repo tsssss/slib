@@ -19,11 +19,11 @@ function make_bins, dat0, step, inner=inner
     range0 = double([min(dat0,/nan),max(dat0,/nan)])
     range1 = range0-(range0 mod step0)
     if keyword_set(inner) then begin
-        if range1[0] le range0[0] then range1[0] += step0
-        if range1[1] ge range0[1] then range1[1] -= step0
+        if range1[0] lt range0[0] then range1[0] += step0
+        if range1[1] gt range0[1] then range1[1] -= step0
     endif else begin
-        if range1[0] ge range0[0] then range1[0] -= step0
-        if range1[1] le range0[1] then range1[1] += step0
+        if range1[0] gt range0[0] then range1[0] -= step0
+        if range1[1] lt range0[1] then range1[1] += step0
     endelse
     
     if range1[0] gt range1[1] then return, []

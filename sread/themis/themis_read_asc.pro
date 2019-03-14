@@ -43,7 +43,7 @@ pro themis_read_asc, time, vars=vars, id=id, site=site, errmsg=errmsg, $
     pre3 = 'thg_'+site+'_'
 
     case version of
-        'v01': tvars = ['time',vars]
+        'v01': tvars = ['time','alti',vars]
         'v02': tvars = ['alti',vars]
     endcase
     in_vars = pre1+tvars
