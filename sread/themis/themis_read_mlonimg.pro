@@ -276,27 +276,7 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
         pre0 = 'thg_'+site+'_asf_'
         get_data, pre0+'mlon_image', times, mlonimgs
         ntime = n_elements(times)
-;        min_counts = fltarr(ntime)
-;        max_counts = fltarr(ntime)
-;        avg_counts = fltarr(ntime)
-;        med_counts = fltarr(ntime)
-;        for ii=0, ntime-1 do begin
-;            timg = reform(mlonimgs[ii,*,*])
-;            index = where(timg ne 0, count)
-;            if count eq 0 then continue
-;            tdat = timg[index]
-;            min_counts[ii] = min(tdat)
-;            max_counts[ii] = max(tdat)
-;            avg_counts[ii] = mean(tdat)
-;            med_counts[ii] = median(tdat)
-;        endfor
-        ; min is about 3500
-        ; max is about 8000
-        ; median/avg is about 4000
-        bg_count = 3000d
-        scale_factor = 60d/(4000-3000)
-        mlonimgs = (mlonimgs-bg_count)*scale_factor
-        store_data, pre0+'mlon_image', times, mlonimgs
+        themis_read_asi_treat_raw_count, pre0+'mlon_image', to=pre0+'mlon_image_norm'
     endforeach
     
     ; Prepare the meta-data.
@@ -354,7 +334,7 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
         ; Fill in the pixels by sites.
         for jj=0, nsite-1 do begin
             pre0 = 'thg_'+sites[jj]+'_asf_'
-            timg = get_var_data(pre0+'mlon_image', at=times[ii])
+            timg = get_var_data(pre0+'mlon_image_norm', at=times[ii])
             tmlons = get_var_data(pre0+'new_mlon_bins')
             tmlats = get_var_data(pre0+'new_mlat_bins')
             televs = get_var_data(pre0+'new_elevs')
@@ -369,13 +349,9 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
             
             tcnt = intarr(size(timg,/dimensions))
             index = where(timg ne 0, count)
-            if count ne 0 then tcnt[index] = 1
-            
-            ; Normalize by elevation.
-            ;timg = timg*sin(televs*rad)
-            
+            if count ne 0 then tcnt[index] = 1    ; only count the good pixels.
 
-            ; Crop image.
+            ; Crop the image from a site and paste it to the mosaic.
             a1 = 0
             a2 = n_elements(tmlons)-1
             b1 = 0
@@ -406,7 +382,10 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
             moscnt[i1:i2,j1:j2] += tcnt[a1:a2,b1:b2]
         endfor
 
-        ;mosimg = mosimg/moscnt
+        
+        ; Treat the overlapping points.
+        
+        
         if keyword_set(test) then begin
             tv, bytscl(mosimg, max=700, top=254)
             wait, 0.05
