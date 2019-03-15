@@ -9,7 +9,8 @@ function default_local_root, disk
         case susrhost() of
             'Sheng@rMBP-3.local': disk = 'Research'
             'shengtian@m472e.space.umn.edu': disk = 'Research'
-            else: disk = 'xxx'
+            'Sheng Tian@DESKTOP-2N7I6Q7': disk = 'Research'
+            else: disk = 'xxx'  ; means to cause an error.
         endcase
     endif
     

@@ -440,8 +440,10 @@ sites = ['pina','kapu','snkq']
 min_elevs = [5,10,10]
 mlon_range = [-50,10]
 mlat_range = [55,75]
+renew_file = 0
 
-;themis_read_mlonimg, time, sites=sites, min_elevs=min_elevs, mlon_range=mlon_range, mlat_range=mlat_range, renew_file=renew_file
+themis_read_mlonimg, time, sites=sites, min_elevs=min_elevs, $
+    mlon_range=mlon_range, mlat_range=mlat_range, renew_file=renew_file
 
 
 end

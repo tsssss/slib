@@ -45,28 +45,28 @@ pro themis_read_asf, time, site=site, errmsg=errmsg, min_elev=min_elev, $
     raw_images = float(raw_images)  ; It's crucial to cast uint to float.
     
     
-    ; Get the scale for calibration.
-    if keyword_set(scale_info) eq 0 then begin
-        bg_counts = fltarr(ntime)
-        scale_factors = fltarr(ntime)
-        
-        for ii=0, ntime-1 do begin
-            timg = reform(raw_images[ii,*,*])
-            ;bg_count = mean(timg[0:10,0:10], /nan)
-            bg_counts[ii] = median(timg[edge0]) ; Sheng: I think use median is better than mean.
-            timg = (timg-bg_counts[ii])>0
-            scale_factors[ii] = 64d/(median(timg[center0])>1)   ; Sheng: scale to median=64.
-        endfor
-        
-        scale_info = {bg_count:median(bg_counts),scale_factor:median(scale_factors)}
-    endif
+;    ; Get the scale for calibration.
+;    if keyword_set(scale_info) eq 0 then begin
+;        bg_counts = fltarr(ntime)
+;        scale_factors = fltarr(ntime)
+;        
+;        for ii=0, ntime-1 do begin
+;            timg = reform(raw_images[ii,*,*])
+;            ;bg_count = mean(timg[0:10,0:10], /nan)
+;            bg_counts[ii] = median(timg[edge0]) ; Sheng: I think use median is better than mean.
+;            timg = (timg-bg_counts[ii])>0
+;            scale_factors[ii] = 64d/(median(timg[center0])>1)   ; Sheng: scale to median=64.
+;        endfor
+;        
+;        scale_info = {bg_count:median(bg_counts),scale_factor:median(scale_factors)}
+;    endif
     
     
     ; Scale raw count to "photon count".
-    print, 'Background count: ', scale_info.bg_count
-    print, 'Scale factor: ', scale_info.scale_factor
-    raw_images = (raw_images-scale_info.bg_count)>0
-    raw_images *= scale_info.scale_factor
+    ;print, 'Background count: ', scale_info.bg_count
+    ;print, 'Scale factor: ', scale_info.scale_factor
+    ;raw_images = (raw_images-scale_info.bg_count)>0
+    ;raw_images *= scale_info.scale_factor
 
 ;    for i=0, ntime-1 do begin
 ;        timg = reform(raw_images[i,*,*])
