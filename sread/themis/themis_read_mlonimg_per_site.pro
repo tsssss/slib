@@ -40,7 +40,7 @@ pro themis_read_mlonimg_per_site, time, site=site, errmsg=errmsg, $
     
 ;---Read ASF raw image, after preprocessed; convert to MLon image.
     ; thg_site_asf and thg_site_asf_elev
-    themis_read_asf, time, site=site, errmsg=errmsg, raw_image=1, extra=_extra
+    themis_read_asf, time, site=site, errmsg=errmsg, extra=_extra
     if errmsg ne '' then return
 
     ; Check for the mapping indices.
