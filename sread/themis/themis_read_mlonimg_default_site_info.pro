@@ -12,13 +12,19 @@ function themis_read_mlonimg_default_site_info, sites, errmsg=errmsg
 
     site_info = {$
         name:'', $      ; a string in lower case for the site.
-        min_elev:7d, $  ; the minimum elevation for edge.
+        min_elev:5d, $  ; the minimum elevation for edge.
         dmlon:0.2, $    ; the bin size for mlon bins.
         dmlat:0.1, $    ; the bin size for mlat bins.
         placeholder:0b}
 
     site_infos = replicate(site_info, nsite)
     foreach site, sites, ii do site_infos[ii].name = strlowcase(site)
+
+    ; fsim has trees, so we want a higher min_elev
+    index = where(sites eq 'fsim', count)
+    if count ne 0 then begin
+        site_infos[index].min_elev = 20
+    endif
 
     return, site_infos
 end

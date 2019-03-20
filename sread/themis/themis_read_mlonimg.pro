@@ -1,10 +1,27 @@
 ;+
-;-
+; Read MLon image for a given time range, sites and settings.
 ;
-
-;+
-; Calculate the weight for each mlon image.
+; time. A time or time range in UT sec.
+; sites. A string or an array of site names in lower cases.
+; site_infos. An array of structures. This is used to fine tune properties of each site. See details in themis_read_mlonimg_default_site_info.
+; merge_method. A string sets how to deal with overlapping pixels.
+;   'max_elev'. Use the pixel from the site has the largest elevation. This is the default option.
+;   'merge_elev'. Weight the pixel of each site by its elevation. The weight is its elevation over the sum of elevations of all overlapping sites.
+; height. A number sets the emission height in km in altitude. The default value is 110 km. Do not recommend to set this unless intentional.
+; mlon_range. In [2], the range of MLon in deg. Optional.
+; mlat_range. In [2], the range of MLat in deg. Optional.
+; local_root. A string sets the local root directory for the CDFs of MLon images.
+; version. A string for meta data.
+; renew_file. A boolean to renew the CDF files for MLon images.
+;
+; Note: The program saves the "mosaic" MLon image to memory. The tplot name is 'thg_mlonimg'. The properties include 'mlon_bins', 'mlat_bins', and 'bin_size', 'image_size'. 'bin_size' is the [dmlon,dmlat] for the mlat/mlon bins.
+; The program generates a CDF of MLon image for each CDF of the raw ASF data. The only difference between the MLon and ASF images is that the MLon images are flat in perspective.
+; The program then merges the MLon images from each site. There are several ways to merge overlapping pixels.
 ;-
+
+
+
+; Calculate the weight for each mlon image.
 pro themis_read_mlonimg_gen_metadata, time, sites=sites, errmsg=errmsg, $
     site_infos=site_infos, merge_method=merge_method
 
@@ -152,6 +169,7 @@ pro themis_read_mlonimg_gen_metadata, time, sites=sites, errmsg=errmsg, $
 end
 
 
+; Read data from the CDF files for the MLon image.
 pro themis_read_mlonimg_read_file, filename=file
 
     pre0 = 'thg_mlonimg_pixel_'
@@ -162,6 +180,8 @@ pro themis_read_mlonimg_read_file, filename=file
     if load then tplot_restore, filename=file
 end
 
+
+; Save the MLon image for a corresponding ASF data file. This is usually a file for one site, for one hour.
 pro themis_read_mlonimg_gen_file, time, site=site, filename=file, errmsg=errmsg, extra=_extra
 
     errmsg = ''
@@ -246,7 +266,7 @@ end
 
 pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
     site_infos=site_infos, merge_method=merge_method, $
-    height=height, min_lat=min_lat, mlon_range=mlon_range, mlat_range=mlat_range, $
+    height=height, mlon_range=mlon_range, mlat_range=mlat_range, $
     local_root=local_root, version=version, renew_file=renew_file, extra=_extra
 
     compile_opt idl2
@@ -291,7 +311,7 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
         foreach file_time, file_times do begin
             file = apply_time_to_pattern(local_pattern, file_time)
             if keyword_set(renew_file) then if file_test(file) eq 1 then file_delete, file
-            if file_test(file) eq 0 then themis_read_mlonimg_gen_file, file_time+[0,cadence], site=site, filename=file, errmsg=errmsg, extra=_extra
+            if file_test(file) eq 0 then themis_read_mlonimg_gen_file, file_time+[0,cadence], site=site, filename=file, errmsg=errmsg, height=height, extra=_extra
             if file_test(file) eq 1 then files.add, file
         endforeach
 
@@ -311,7 +331,7 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
         pre0 = 'thg_'+site+'_asf_'
         get_data, pre0+'mlon_image', times, mlonimgs
         ntime = n_elements(times)
-        themis_read_asi_treat_raw_count, pre0+'mlon_image', to=pre0+'mlon_image_norm'
+        themis_read_asi_treat_raw_count, pre0+'mlon_image',     to=pre0+'mlon_image_norm'
     endforeach
 
 ;---Get the meta data for merging.
@@ -373,11 +393,14 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
 
     mos_mlons = mos_xbins*mos_bin_size[0]
     mos_mlats = mos_ybins*mos_bin_size[1]
-    mosinfo = {$
-        mlon_bins:mos_mlons, $
-        mlat_bins:mos_mlats}
-    store_data, 'thg_mlonimg', times, mos_images, mosinfo
-    
+    mlonimg_var = 'thg_mlonimg
+    store_data, mlonimg_var, times, mos_images
+    add_setting, mlonimg_var, /smart, {$
+        'bin_size':mos_bin_size, $
+        'image_size':image_size, $
+        'mlon_bins':mos_mlons, $
+        'mlat_bins':mos_mlats}
+
     if keyword_set(test) then begin
         image_size = size(reform(mos_images[0,*,*]),/dimensions)
         window, 0, xsize=image_size[0], ysize=image_size[1]

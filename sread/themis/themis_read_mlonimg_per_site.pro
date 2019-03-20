@@ -3,19 +3,17 @@
 ; has uniform MLon and MLat as its coordinate. The main difference between
 ; the MLon image and the raw ASF image is the former unwraps the fish-eye
 ; perspective in the latter.
-; 
+;
 ; Note: the value at each pixel is in the raw count, not some physical unit.
-; 
+;
 ; time. A time or time range in UT sec.
 ; site. A string for the site, see themis_asi_sites for available sites.
-; height. A number sets the assumed emission height in km altitude. The default
-;   value is 110 km. Do not recommend to set this unless intentional.
+; height. A number sets the assumed emission height in km altitude. The default value is 110 km. Do not recommend to set this unless intentional.
 ;-
-;
 
 pro themis_read_mlonimg_per_site, time, site=site, errmsg=errmsg, $
     height=height, extra=_extra
-    
+
     compile_opt idl2
     on_error, 0
     errmsg = ''
@@ -36,8 +34,8 @@ pro themis_read_mlonimg_per_site, time, site=site, errmsg=errmsg, $
     pre1 = pre0+'asf_'
 
     if n_elements(height) eq 0 then height = 110d   ; km.
-    
-    
+
+
 ;---Read ASF raw image, after preprocessed; convert to MLon image.
     ; thg_site_asf and thg_site_asf_elev
     themis_read_asf, time, site=site, errmsg=errmsg, extra=_extra
@@ -46,7 +44,7 @@ pro themis_read_mlonimg_per_site, time, site=site, errmsg=errmsg, $
     ; Check for the mapping indices.
     ; thg_site_asf_[old,new]_dict
     themis_read_mlonimg_metadata, time, site=site, errmsg=errmsg
-    
+
     asfimg_var = pre0+'asf'
     old_image_size = get_var_data(pre1+'old_image_size')
     get_data, asfimg_var, times, oldimgs
@@ -56,15 +54,15 @@ pro themis_read_mlonimg_per_site, time, site=site, errmsg=errmsg, $
         errmsg = handle_error('ASF image size does not agree with meta-data ...')
         return
     endif
-    
+
     mlonimg_var = pre1+'mlonimg'
     new_image_size = get_var_data(pre1+'new_image_size')
     newimgs = fltarr([nrec,new_image_size])
     new_1d_size = product(new_image_size)
-    
+
     new_dict = get_var_data(pre1+'new_dict')
     new_uniq_index = get_var_data(pre1+'new_uniq_index')
-    
+
     lprmsg, 'Converting ASF raw image to MLon image ...'
     for jj=0, nrec-1 do begin
         lprmsg, '    '+time_string(times[jj])+' ...'
@@ -78,7 +76,7 @@ pro themis_read_mlonimg_per_site, time, site=site, errmsg=errmsg, $
         endforeach
         newimgs[jj,*,*] = reform(new_image, new_image_size)
     endfor
-    
+
     store_data, mlonimg_var, times, newimgs
 
 end
