@@ -121,8 +121,8 @@ pro read_geopack_info, r_var, errmsg=errmsg, $
     fmlt = mlon2mlt(fmlon, times)
     ; mapping coefficient, |B_footpoint|/|B_model|.
     ; this is c0map, since it uses the model field.
-    ; once the measured |B| is available, we can get the real
-    ; mapping coefficient cmap = c0map *|B_model|/|B|.
+    ; once the measured |B0| is available, we can get the real
+    ; mapping coefficient cmap = c0map *|B_model|/|B0|.
     c0map = vec_mag(fbgsm)/vec_mag(b0gsm)
 
 

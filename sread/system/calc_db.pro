@@ -45,7 +45,7 @@ pro calc_db, bvar, bmodvar, db_name=dbvar, b0_name=b0var, smooth=width
         ; Smooth if a valid window size is provided.
         no_smooth = 0
         if n_elements(width) eq 0 then no_smooth = 1 else if width le dt then no_smooth = 1
-        if no_smooth then begin
+        if ~no_smooth then begin
             drec = width/dt
             for i=0, ndim-1 do dbgsm[*,i] -= smooth(dbgsm[*,i], drec, /edge_mirror)
         endif
