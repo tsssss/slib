@@ -396,10 +396,10 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
     mlonimg_var = 'thg_mlonimg
     store_data, mlonimg_var, times, mos_images
     add_setting, mlonimg_var, /smart, {$
-        'bin_size':mos_bin_size, $
-        'image_size':image_size, $
-        'mlon_bins':mos_mlons, $
-        'mlat_bins':mos_mlats}
+        bin_size:mos_bin_size, $
+        image_size:image_size, $
+        mlon_bins:mos_mlons, $
+        mlat_bins:mos_mlats}
 
     if keyword_set(test) then begin
         image_size = size(reform(mos_images[0,*,*]),/dimensions)
