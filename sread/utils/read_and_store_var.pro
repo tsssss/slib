@@ -98,7 +98,13 @@ pro read_and_store_var, files, in_vars=in_vars, errmsg=errmsg, $
         endif else begin
             time_ranges = time_info[1]<time_ranges>time_info[0]
             for i=0, nfile-1 do begin
-                index = where(times ge time_ranges[i,0] and times le time_ranges[i,1], count)
+                dtype = size(times,/type)
+                if dtype eq 9 or dtype eq 6 then begin    ; where doesn't work properly with complex number
+                    times = real_part(times)    ; can overwrite times, it will be read again later.
+                    time_ranges = real_part(time_ranges)
+                endif
+                index = lazy_where(times, time_ranges[i,*], count=count)
+                
                 rec_infos[i,*] = index[0]+[0,count]
                 if count eq 0 then begin
                     errmsg = handle_error('No data found in for given time_info ...')
