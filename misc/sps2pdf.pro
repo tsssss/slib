@@ -40,10 +40,18 @@ pro sps2pdf, fns, rm = rm
         spawn, cmd, ostr, errmsg
 
         ; find ps2pdf, add it to path.
-        if errmsg ne '' then begin
+        if errmsg[0] ne '' then begin
             ; for Windows.
-            if !version.os_family eq 'Windows' then $
-                message, 'Please install GhostScript printer to device ...'
+            if !version.os_family eq 'Windows' then begin
+                print, 'Please install GhostScript printer to device ...'
+                print, errmsg
+                print, 'Need to add <ps>\bin and <gs>\lib to system path'
+                print, '<gs> is where Ghostscript is installed, usually at C:\Program Files\gs\gs0.26'
+                print, 'To add paths, go to "View advanced system settings" in "Controal Panel", click "Environment Variables", select "Path" and click "Edit", click "New" to add new paths'
+                print, 'After installing GS, one needs to restart IDL, or re-open a powershell or commond line to restart IDL'
+                stop
+            endif
+            
             ; for Unix/Linux/Mac OS.
             paths = ['/usr/local/bin','/usr/bin','/bin','/usr/sbin', $
                 '/sbin','/opt/X11/bin','/usr/texbin','/opt/local/bin']
