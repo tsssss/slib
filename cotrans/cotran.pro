@@ -7,7 +7,7 @@
 ; msg. A string in the format of 'gsm2gse', where 2 separates the
 ;   input and output coordinates.
 ;-
-function cotran, vec0, time, msg, errmsg=errmsg
+function cotran, vec0, time, msg, errmsg=errmsg, _extra=ex
     compile_opt idl2 & on_error, 2
 
     errmsg = ''
@@ -35,6 +35,7 @@ function cotran, vec0, time, msg, errmsg=errmsg
         'gei': vec1 = gei2gse(vec0,time)
         'geo': vec1 = gei2gse(geo2gei(vec0,time),time)
         'mag': vec1 = gei2gse(geo2gei(mag2geo(vec0,time),time),time)
+        'mgse': vec1 = mgse2gse(vec0,time,_extra=ex)
         else: begin
             errmsg = handle_error('Unknown input coord: '+coords[0]+' ...')
             return, retval
@@ -47,6 +48,7 @@ function cotran, vec0, time, msg, errmsg=errmsg
         'gei': return, gse2gei(vec1,time)
         'geo': return, gei2geo(gse2gei(vec1,time),time)
         'mag': return, geo2mag(gei2geo(gse2gei(vec1,time),time),time)
+        'mgse': return, gse2mgse(vee1,time,_extra=ex)
         else: begin
             errmsg = handle_error('Unknown output coord: '+coords[1]+' ...')
             return, retval
