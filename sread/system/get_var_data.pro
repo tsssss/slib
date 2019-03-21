@@ -1,5 +1,9 @@
 ;+
 ; Return data for a variable.
+; 
+; var. A string for tplot name.
+; at. Set it to load the data at the given time.
+; raw. A boolean. By default, the program shrinks unnecessary dimensions. Set raw to preserve all dimensions.
 ;-
 ;
 function get_var_data, var, at=time, raw=raw
