@@ -182,7 +182,7 @@ end
 
 
 ; Save the MLon image for a corresponding ASF data file. This is usually a file for one site, for one hour.
-pro themis_read_mlonimg_gen_file, time, site=site, filename=file, errmsg=errmsg, extra=_extra
+pro themis_read_mlonimg_gen_file, time, site=site, height=height, filename=file, errmsg=errmsg, extra=_extra
 
     errmsg = ''
 
@@ -193,7 +193,7 @@ pro themis_read_mlonimg_gen_file, time, site=site, filename=file, errmsg=errmsg,
 
     ; Read data to memory.
     ;time = time[0]+[0,9]   ; for tests.
-    themis_read_mlonimg_per_site, time, site=site, errmsg=errmsg, extra=_extra
+    themis_read_mlonimg_per_site, time, site=site, errmsg=errmsg, height=height, extra=_extra
     if errmsg ne '' then return
     pre0 = 'thg_'+site+'_asf_'
 
@@ -331,7 +331,7 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
         pre0 = 'thg_'+site+'_asf_'
         get_data, pre0+'mlon_image', times, mlonimgs
         ntime = n_elements(times)
-        themis_read_asi_treat_raw_count, pre0+'mlon_image',     to=pre0+'mlon_image_norm'
+        themis_read_asi_treat_raw_count, pre0+'mlon_image', to=pre0+'mlon_image_norm'
     endforeach
 
 ;---Get the meta data for merging.
@@ -431,6 +431,14 @@ merge_method = 'merge_elev'
 ;renew_file = 0
 ;merge_method = 'max_elev'
 
+time = time_double(['2014-08-28/10:02','2014-08-28/10:30'])
+time = time_double(['2014-08-28/10:10','2014-08-28/10:35'])
+sites = ['whit','fsim','atha']
+min_elevs = [5,20,7]
+mlon_range = [-100,-40]
+mlat_range = [60,75]
+renew_file = 0
+merge_method = 'max_elev'
 
 site_infos = themis_read_mlonimg_default_site_info(sites)
 foreach min_elev, min_elevs, ii do site_infos[ii].min_elev = min_elev
