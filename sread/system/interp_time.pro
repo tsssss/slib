@@ -3,7 +3,7 @@
 ; 
 ; var. A string of a variable name.
 ; times. An array of times to be interpolated to.
-; new_var. A string specified the varialbe, whos times will be used.
+; to. A string specified the varialbe, whos times will be used.
 ;-
 
 pro interp_time, var, times, to=new_var
