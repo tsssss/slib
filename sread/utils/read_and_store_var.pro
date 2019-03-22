@@ -131,17 +131,10 @@ pro read_and_store_var, files, in_vars=in_vars, errmsg=errmsg, $
 
 
 ;---Store data in memory.    
-    if n_elements(times) eq 0 then begin
-        for i=0, ndep_var-1 do begin
-            store_data, out_vars[i], 0, temporary(*ptr_dats[i])
-            ptr_free, ptr_dats[i]
-        endfor
-    endif else begin
-        times = convert_time(times, from=time_var_type, to=time_type)
-        for i=0, ndep_var-1 do begin
-            store_data, out_vars[i], times, temporary(*ptr_dats[i])
-            ptr_free, ptr_dats[i]
-        endfor
-    endelse
+    if n_elements(times) eq 0 then times = 0
+    for i=0, ndep_var-1 do begin
+        store_data, out_vars[i], times, temporary(*ptr_dats[i])
+        ptr_free, ptr_dats[i]
+    endfor
     
 end
