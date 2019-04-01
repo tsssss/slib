@@ -70,7 +70,7 @@ pro read_and_store_var, files, in_vars=in_vars, errmsg=errmsg, $
     
     
 ;---Find a rec_infos using time info.
-    rec_infos = intarr(nfile,2)-1
+    rec_infos = lon64arr(nfile,2)-1
     check_rec_info = n_elements(time) ne 0 and has_time_var
     
     if check_rec_info then begin
