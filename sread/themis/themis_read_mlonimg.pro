@@ -276,7 +276,7 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
     deg = 180d/!dpi
     rad = !dpi/180d
 
-    test = 1
+    test = 0
 
 ;---Check inputs.
     if n_elements(time) eq 0 then begin
@@ -411,6 +411,7 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
             tv, bytscl(mos_image, max=700, top=254)
             wait, 0.02
         endfor
+        stop
     endif
 end
 
@@ -432,10 +433,10 @@ merge_method = 'merge_elev'
 ;merge_method = 'max_elev'
 
 time = time_double(['2014-08-28/10:02','2014-08-28/10:30'])
-time = time_double(['2014-08-28/10:10','2014-08-28/10:35'])
-sites = ['whit','fsim','atha']
-min_elevs = [5,20,7]
-mlon_range = [-100,-40]
+time = time_double(['2014-08-28/10:13:03','2014-08-28/10:13:06'])
+sites = ['whit','fsim']
+min_elevs = [5,20]
+mlon_range = [-100,-55]
 mlat_range = [60,75]
 renew_file = 0
 merge_method = 'max_elev'
