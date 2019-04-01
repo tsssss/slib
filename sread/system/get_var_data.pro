@@ -8,6 +8,8 @@
 ;
 function get_var_data, var, at=time, raw=raw
 
+    if tnames(var) eq '' then return, !null
+    
     get_data, var, tmp, dat
     
     if keyword_set(time) ne 0 then begin
