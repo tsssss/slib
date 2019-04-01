@@ -1,0 +1,65 @@
+ LOCATOR_GENERAL OUTPUT: 
+    User: apache
+    Date: Fri 29-Mar-2019 (088) 12:31:55
+  Status: request completed successfully
+
+
+GROUP 1    Satellite   Resolution   Factor
+            rbspa          60         1
+
+           Start Time           Stop Time 
+           2013 158  4.91667    2013 158  4.93333
+
+
+ Coord/            Min/Max      Range Filter          Filter
+Component   Output Markers    Minimum     Maximum    Mins/Maxes
+GEI/TOD X    YES      -         -           -             -   
+GEI/TOD Y    YES      -         -           -             -   
+GEI/TOD Z    YES      -         -           -             -   
+GEO X        YES      -         -           -             -   
+GEO Y        YES      -         -           -             -   
+GEO Z        YES      -         -           -             -   
+GEO Lat      YES      -         -           -             -   
+GEO Lon      YES      -         -           -             -   
+GEO LT       YES      -         -           -             -   
+GM X         YES      -         -           -             -   
+GM Y         YES      -         -           -             -   
+GM Z         YES      -         -           -             -   
+GM Lat       YES      -         -           -             -   
+GM Lon       YES      -         -           -             -   
+GM LT        YES      -         -           -             -   
+GSE X        YES      -         -           -             -   
+GSE Y        YES      -         -           -             -   
+GSE Z        YES      -         -           -             -   
+GSM X        YES      -         -           -             -   
+GSM Y        YES      -         -           -             -   
+GSM Z        YES      -         -           -             -   
+SM X         YES      -         -           -             -   
+SM Y         YES      -         -           -             -   
+SM Z         YES      -         -           -             -   
+
+
+Perform the following magnetic field traces:
+    North trace for GM footpoint; Output: lat, lon, arclen.
+
+Magnetic field model:
+    Internal: IGRF
+    External: Tsyganenko 89C 
+    External: Tsyganenko 89C     Kp:  3-,3,3+
+    Stop trace altitude (km):   100.00
+
+Output - File: 
+         lines per page: 0
+ 
+Formats and units:
+    Day/Time format: YYYY DDD HH:MM:SS
+    Degrees/Hemisphere format: Decimal degrees with 2 place(s).
+        Longitude -180 to 180, latitude -90 to 90.
+    Distance format: Earth radii with 2 place(s).
+
+rbspa
+       Time                   GEI (RE)                         GEO (RE)                   GEO        geoLT               GM (RE)                   GM         gmLT               GSE (RE)                         GSM (RE)                          SM (RE)                    N_Btrace_GM      
+yyyy ddd hh:mm:ss      X          Y          Z          X          Y          Z       Lat    Long  hh:mm:ss      X          Y          Z       Lat    Long  hh:mm:ss      X          Y          Z          X          Y          Z          X          Y          Z       Lat    Long    ArcLen 
+
+2013 158 04:55:00      -3.28      -4.48       0.95      -0.56      -5.52       0.95   9.70  -95.74 22:32:01       4.86      -2.19       1.80  18.68  -24.29 22:28:50      -4.39       2.33       2.65      -4.39       2.07       2.86      -4.92       2.07       1.80  63.98  -28.56      5.31
+2013 158 04:56:00      -3.26      -4.48       0.95      -0.56      -5.52       0.95   9.71  -95.81 22:32:45       4.85      -2.20       1.80  18.68  -24.36 22:29:30      -4.39       2.31       2.65      -4.39       2.05       2.86      -4.92       2.05       1.80  63.97  -28.62      5.31
