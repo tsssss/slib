@@ -61,9 +61,6 @@ pro read_geopack_info, r_var, errmsg=errmsg, $
     fgsm = fltarr(ntime,ndim)   ; footpoint position in GSM.
     fbgsm = fltarr(ntime,ndim)  ; footpoint B field in GSM.
     b0gsm = fltarr(ntime,ndim)  ; in-situ B field in GSM.
-    fmlat = fltarr(ntime)       ; footpoint MLat in deg.
-    fmlon = fltarr(ntime)       ; footpoint MLon in deg.
-
 
     t89 = (model eq 't89')? 1: 0
     t96 = (model eq 't96')? 1: 0
@@ -91,7 +88,7 @@ pro read_geopack_info, r_var, errmsg=errmsg, $
             't89': geopack_t89, par, rx,ry,rz, dbx,dby,dbz
             't96': geopack_t96, par, rx,ry,rz, dbx,dby,dbz
             't01': geopack_t01, par, rx,ry,rz, dbx,dby,dbz
-            't04': geopack_ts04, par, rx,ry,rz, dbx,dby,dbz
+            't04s': geopack_ts04, par, rx,ry,rz, dbx,dby,dbz
         endcase
         b0gsm[ii,*] = [bx,by,bz]+[dbx,dby,dbz]
 
@@ -99,25 +96,22 @@ pro read_geopack_info, r_var, errmsg=errmsg, $
         if auto_dir then begin
             if rz ge 0 then dir = -1 else dir = 1   ; -1 is along B, i.e., to ionosphere for nothern hemisphere.
         endif
-        geopack_trace, rx,ry,rz, dir, par, $
-            fx,fy,fz, r0=r0, /refine, /ionosphere, $
-            t89=t89, t96=t96, t01=t01, ts04=ts04, storm=storm
+        ; r0 is in Re, using /refine and /ionosphere forces r0 = 1+100km/Re.
+        geopack_trace, rx,ry,rz, dir, par, tilt=tilt, $
+            fx,fy,fz, r0=r0, /igrf, $
+            t89=t89, t96=t96, t01=t01, ts04=t04s, storm=storm
         fgsm[ii,*] = [fx,fy,fz]
 
         ; footpoint B field.
         geopack_igrf_gsm, fx,fy,fz, bx,by,bz
         fbgsm[ii,*] = [bx,by,bz]
-
-        ; other footpoint quantities.
-        geopack_conv_coord, fx,fy,fz, /from_gsm, fa,fb,fc, /to_mag
-        fmlat[ii] = asin(fc/r0)
-        fmlon[ii] = atan(fb,fa)
     endfor
 
     ; footpoint MLat, MLon, and MLT.
     deg = 180d/!dpi
-    fmlat *= deg
-    fmlon *= deg
+    fmag = cotran(fgsm, times, 'gsm2mag')
+    fmlat = asin(fmag[*,2]/snorm(fmag))*deg
+    fmlon = atan(fmag[*,1],fmag[*,0])*deg
     fmlt = mlon2mlt(fmlon, times)
     ; mapping coefficient, |B_footpoint|/|B_model|.
     ; this is c0map, since it uses the model field.
@@ -179,5 +173,40 @@ pro read_geopack_info, r_var, errmsg=errmsg, $
         display_type: 'scalar', $
         unit: 'deg', $
         short_name: 'MLT'}
+
+end
+
+
+times = time_double(['2014-08-28/10:12','2014-08-28/10:13'])
+the_time = times[0]
+r_mag = transpose([[2.14,-6.86,0.53],[2.13,-6.89,0.53]])    ; th-d.
+r_gsm = cotran(r_mag, times, 'mag2gsm')
+r_gsm = transpose([[-8.64,-2.86,2.19],[-8.64,-2.87,2.20]])    ; th-e.
+r_var = 'r_gsm'
+model = 't89'
+par = 2.
+store_data, r_var, times, r_gsm
+read_geopack_info, r_var, model=model, h0=h0
+
+    print, ''
+    print, 'read_geopack_info.pro'
+    fmlon_var = 'r_fmlon_'+model
+    fmlat_var = 'r_fmlat_'+model
+    print, 'MLon, MLat'
+    print, get_var_data(fmlon_var, at=the_time)
+    print, get_var_data(fmlat_var, at=the_time)
+    
+    fpt_var = 'r_fpt_gsm_'+model
+    print, 'Footpoint in GSM in Re'
+    print, get_var_data(fpt_var, at=the_time)
+    
+
+;---Test against spedas.
+    print, ''
+    print, 'SPEDAS results'
+    fpt_var = 'f_gsm'
+    ttrace2iono,r_var,newname=fpt_var,external_model=model,par=par
+    print, 'Footpoint in GSM in Re'
+    print, get_var_data(fpt_var, at=the_time)
 
 end
