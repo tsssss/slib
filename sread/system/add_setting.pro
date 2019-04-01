@@ -43,17 +43,19 @@ pro add_setting, var, settings, smart=smart
                 if not exist then short_name = ''
                 options, var, 'ytitle', short_name+'!C('+unit+')'
                 get_data, var, uts, dat, vals
-                value_unit = get_setting(var, 'value_unit', exist)
-                if not exist then value_unit = ''
                 nval = n_elements(vals)
-                labels = strarr(nval)
-                for i=0, nval-1 do labels[i] = sgnum2str(sround(vals[i]))+' '+value_unit
+                if size(vals[0],/type) ne 7 then begin
+                    value_unit = get_setting(var, 'value_unit', exist)
+                    if not exist then value_unit = ''
+                    labels = strarr(nval)
+                    for i=0, nval-1 do labels[i] = sgnum2str(sround(vals[i]))+' '+value_unit
+                endif else labels = vals
+                
                 bottom = 7d
                 top = 250d
                 colors = reverse(fix(smkarthm(bottom, top, nval, 'n')))
                 options, var, 'labels', labels
                 options, var, 'colors', colors
-                options, var, 'ylog', 1
                 end
             'spec': begin
                 options, var, 'spec', 1
