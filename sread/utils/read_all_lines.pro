@@ -2,7 +2,7 @@
 ; Read all lines in a simple text file.
 ; 
 ; txtfile. A string of the full filename of the txt file.
-; nheader. Set it to an integer to skip headers in the beginning of the file.
+; skip_header=. Set it to an integer to skip headers in the beginning of the file.
 ;-
 function read_all_lines, txtfile, skip_header=nheader
     
