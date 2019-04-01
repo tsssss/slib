@@ -5,7 +5,7 @@
 function lazy_where, data, relation, range, count=count, _extra=ex
 
     if n_params() eq 2 then begin
-        rel = 'within'
+        rel = 'in'
         val = relation
     endif else begin
         rel = relation
