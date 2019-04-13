@@ -51,9 +51,11 @@ pro add_setting, var, settings, smart=smart
                     for i=0, nval-1 do labels[i] = sgnum2str(sround(vals[i]))+' '+value_unit
                 endif else labels = vals
                 
-                bottom = 7d
+                bottom = 100d
                 top = 250d
-                colors = reverse(fix(smkarthm(bottom, top, nval, 'n')))
+                colors = reverse(long(smkarthm(bottom, top, nval, 'n')))
+                color_table = get_setting(var, 'color_table', exist)
+                if exist then for ii=0, nval-1 do colors[ii] = sgcolor(colors[ii], ct=color_table)
                 options, var, 'labels', labels
                 options, var, 'colors', colors
                 end
