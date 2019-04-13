@@ -13,14 +13,13 @@
 ;   will set files directly.
 ; version. A string sets the version of data. Default behaviour is to read
 ;   the highest version. Set this keyword to read specific version.
-;
 ;-
 pro rbsp_read_efw, time, id=datatype, probe=probe, $
     print_datatype=print_datatype, errmsg=errmsg, $
     in_vars=in_vars, out_vars=out_vars, files=files, version=version, $
     local_root=local_root, remote_root=remote_root, $
     sync_after=sync_after, file_times=file_times, index_file=index_file, skip_index=skip_index, $
-    sync_index=sync_index, sync_files=sync_files, stay_local=stay_loca, $
+    sync_index=sync_index, sync_files=sync_files, stay_local=stay_local, $
     time_var_name=time_var_name, time_var_type=time_var_type, generic_time=generic_time
 
     compile_opt idl2

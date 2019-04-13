@@ -5,24 +5,24 @@
 pro goes_read_fgm, time, datatype, probe=probe, print_datatype=print_datatype, $
     variable=vars, files=files, level=level, version=version, id=id, errmsg=errmsg, $
     resolution=resolution, coordinate=coord
-    
+
     compile_opt idl2
     on_error, 0
     errmsg = ''
 
-    
+
     nfile=n_elements(files)
     if n_elements(time) eq 0 and nfile eq 0 and ~keyword_set(print_datatype) then begin
         errmsg = handle_error('No time or file is given ...')
         return
     endif
     if keyword_set(print_datatype) then probe = 'x'
-    
+
     if n_elements(resolution) eq 0 then resolution = '512ms'
     if n_elements(coord) eq 0 then coord = 'gsm'
     loc_root = join_path([default_local_root(),'data','goes'])
     rem_root = 'https://satdat.ngdc.noaa.gov/sem/goes/data'
-    version = (n_elements(version) eq 0)? 'v[0-9]{2}': version
+    version = ''    ; dummy parameter.
     pre0 = 'g'+probe
 
     type_dispatch = []
@@ -41,7 +41,7 @@ pro goes_read_fgm, time, datatype, probe=probe, print_datatype=print_datatype, $
 ;        {id: '5min', $
 ;        base_pattern: 'goes'+probe+'_magneto_5m_%Y%m01_%Y%m[0-9]{2}.nc', $
 ;        remote_pattern: join_path([rem_root,'new_avg','%Y','%m']), $
-;        local_pattern: join_path([loc_root,'fgm','5min','%Y'])}]        
+;        local_pattern: join_path([loc_root,'fgm','5min','%Y'])}]
     if keyword_set(print_datatype) then begin
         print, 'Suported data type: '
         ids = type_dispatch.id
@@ -55,7 +55,7 @@ pro goes_read_fgm, time, datatype, probe=probe, print_datatype=print_datatype, $
     idx = where(ids eq id, cnt)
     if cnt eq 0 then message, 'Do not support type '+id+' yet ...'
     myinfo = type_dispatch[idx[0]]
-  
+
     ; find files to be read. download directly if local file does not exist.
     file_cadence = 86400.
     if nfile eq 0 then begin
@@ -65,7 +65,7 @@ pro goes_read_fgm, time, datatype, probe=probe, print_datatype=print_datatype, $
         files = find_data_file(time, patterns, index_file, $
             file_cadence=file_cadence)
     endif
-    
+
     ; no file is found.
     if n_elements(files) eq 1 and files[0] eq '' then begin
         errmsg = handle_error('No file is found ...')
@@ -75,7 +75,7 @@ pro goes_read_fgm, time, datatype, probe=probe, print_datatype=print_datatype, $
     ; read data to tplot.
     netcdf2tplot, files
     goes_combine_tdata, datatype='fgm', probe=probe, /noephem
-    
+
     ; convert to fgm.
     pre1 = 'g'+probe+'_'
 ;    goes_read_orbit, time, probe=probe
@@ -93,7 +93,7 @@ pro goes_read_fgm, time, datatype, probe=probe, print_datatype=print_datatype, $
     get_data, bgeivar, uts, bgei
     ets = stoepoch(uts,'unix')
     bgsm = sgei2gsm(bgei, ets)
-    
+
     bgsmvar = pre1+'b_gsm'
     case n_elements(time) of
         2: idx = where(uts ge time[0] and uts le time[1])
@@ -107,7 +107,7 @@ pro goes_read_fgm, time, datatype, probe=probe, print_datatype=print_datatype, $
     bgsm = bgsm[idx,*]
     store_data, bgsmvar, uts, bgsm, limits=$
         {colors:[6,4,2],labels:'GSM B'+['x','y','z'],ytitle:'(nT)',labflag:-1}
-    
+
     ; cleanup.
     vars = ['BTSC_?','HT_?','H_enp_?','Bsc_?','Bsens_?',$
         pre1+'pos_gei',pre1+'pos_gei_enp_mat',bgeivar]
