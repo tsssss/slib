@@ -117,6 +117,6 @@ pro rbsp_read_kev_electron, time_range, probe=probe, errmsg=errmsg, pitch_angle=
 
 end
 
-time_range = time_double(['2014-08-28/09:00','2014-08-28/11:00'])
-rbsp_read_kev_electron, time_range, probe='b', energy=[0,1000], pitch_angle=90
+time_range = time_double(['2014-08-28/09:30','2014-08-28/11:00'])
+rbsp_read_kev_electron, time_range, probe='b', energy=[0,1000]
 end

@@ -1,5 +1,8 @@
+;+
+; pitch_angle. A dummy keyword.
+;-
 
-pro lanl_read_kev_proton, time_range, probe=probe, errmsg=errmsg, energy=energy
+pro lanl_read_kev_proton, time_range, probe=probe, errmsg=errmsg, energy=energy, pitch_angle=pitch_angle
 
     errmsg = ''
     pre0 = probe+'_'
@@ -19,19 +22,19 @@ pro lanl_read_kev_proton, time_range, probe=probe, errmsg=errmsg, energy=energy
 
     get_data, var, times, dat
     var = pre0+'kev_h_flux'
-    enbins = get_var_data('p_energy')
-    nenbin = n_elements(enbins)
+    energy_bins = get_var_data('p_energy')
+    nenergy_bin = n_elements(energy_bins)
 
     ; apply energy range.
-    if n_elements(energy) eq 0 then enidx = findgen(nenbin) else begin
+    if n_elements(energy) eq 0 then energy_index = findgen(nenergy_bin) else begin
         case n_elements(energy) of
             1: begin
-                enidx = where(enbins eq energy, cnt)
-                if cnt eq 0 then tmp = min(enbins-energy[0], /absolute, enidx)
+                energy_index = where(energy_bins eq energy, count)
+                if count eq 0 then tmp = min(energy_bins-energy[0], /absolute, energy_index)
             end
             2: begin
-                enidx = where(enbins ge energy[0] and enbins le energy[1], cnt)
-                if cnt eq 0 then begin
+                energy_index = lazy_where(energy_bins, energy, count=count)
+                if count eq 0 then begin
                     errmsg = 'no energy in given range ...'
                     return
                 endif
@@ -42,11 +45,11 @@ pro lanl_read_kev_proton, time_range, probe=probe, errmsg=errmsg, energy=energy
             end
         endcase
     endelse
-    dat = dat[*,enidx]
-    enbins = enbins[enidx]
-    nenbin = n_elements(enbins)
+    dat = dat[*,energy_index]
+    energy_bins = energy_bins[energy_index]
+    nenergy_bin = n_elements(energy_bins)
 
-    store_data, var, times, dat, enbins
+    store_data, var, times, dat, energy_bins
 
     yrange = 10d^ceil(alog10(minmax(dat)))
     add_setting, var, /smart, {$

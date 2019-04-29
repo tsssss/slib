@@ -3,7 +3,7 @@
 ;
 ;-
 
-pro goes_read_kev_electron, time_range, probe=probe, errmsg=errmsg
+pro goes_read_kev_electron, time_range, probe=probe, errmsg=errmsg, energy=energy, pitch_angle=pitch_angle
 
     goes_init
     !goes.local_data_dir = join_path([default_local_root(),'data','goes'])
@@ -30,6 +30,28 @@ pro goes_read_kev_electron, time_range, probe=probe, errmsg=errmsg
         flux[*,ii] = total(tflux,2,/nan)/frac_total_sa
     endfor
 
+    ; Apply energy range.
+    nenergy_bin = n_elements(energy_bins)
+    if n_elements(energy) eq 0 then energy_index = findgen(nenergy_bin) else begin
+        case n_elements(energy) of
+            1: tmp = min(energy_bins-energy[0], /absolute, energy_index)
+            2: begin
+                energy_index = lazy_where(energy_bins, energy, count=count)
+                if count eq 0 then begin
+                    errmsg = handle_error('No energy in given range ...')
+                    return
+                endif
+                end
+            else: begin
+                errmsg = handle_error('Wrong # of input energy ...')
+                return
+                end
+        endcase
+    endelse
+    flux = flux[*,energy_index]
+    energy_bins = energy_bins[energy_index]
+
+    ; Save data.
     yrange = 10d^ceil(alog10(minmax(flux)))
     tvar = pre0+'kev_e_flux'
     store_data, tvar, times, flux, energy_bins

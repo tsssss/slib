@@ -4,16 +4,16 @@
 ;
 ; set pitch_angle to load data for a specific pitch angle, otherwise load all pitch angles.
 ;-
-pro rbsp_read_kev_proton, utr0, probe, errmsg=errmsg, pitch_angle=pitch_angle, energy=energy
+pro rbsp_read_kev_proton, time_range, probe=probe, errmsg=errmsg, pitch_angle=pitch_angle, energy=energy
 
     pre0 = 'rbsp'+probe+'_'
 
     ; read 'rbspx_kev_ele_flux'
     vars = ['Epoch','FPDU_Alpha','FPDU_Energy','FPDU']
-    rbsp_read_mageis, utr0, 'rel03', probe, level='l3', errmsg=errmsg, variable=vars
+    rbsp_read_mageis, time_range, 'rel03', probe, level='l3', errmsg=errmsg, variable=vars
     if errmsg ne 0 then return
 
-    var = pre0+'kev_ion_flux'
+    var = pre0+'kev_h_flux'
     get_data, 'FPDU_Energy', uts, dat
     tmp = size(dat,/dimensions)
     nenbin = tmp[1]
@@ -118,16 +118,15 @@ pro rbsp_read_kev_proton, utr0, probe, errmsg=errmsg, pitch_angle=pitch_angle, e
 
 end
 
-utr0 = time_double(['2014-08-28/03:00','2014-08-28/15:00'])
+time_range = time_double(['2014-08-28/03:00','2014-08-28/15:00'])
 probe = 'b'
 pitch_angle = 90
 energy = [100,300]
 
-utr0 = time_double(['2014-08-28/03:00','2014-08-28/15:00'])
+time_range = time_double(['2014-08-28/03:00','2014-08-28/15:00'])
 probe = 'a'
 pitch_angle = 45
 energy = [30,300]
 
-rbsp_read_kev_proton, utr0, probe, pitch_angle=pitch_angle, energy=energy
-rbsp_read_kev_electron, utr0, probe, pitch_angle=pitch_angle, energy=energy
+rbsp_read_kev_proton, time_range, probe=probe, pitch_angle=pitch_angle, energy=energy
 end
