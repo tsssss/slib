@@ -4,7 +4,7 @@
 ; Read Themis B field in GSM. Default is 3 sec.
 ;+
 ;
-pro themis_read_bfield, utr0, probe=probe, resolution=resolution, _extra=ex
+pro themis_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg, _extra=ex
 
     pre0 = 'th'+probe+'_'
 
@@ -18,7 +18,8 @@ pro themis_read_bfield, utr0, probe=probe, resolution=resolution, _extra=ex
     endcase
 
     ; read 'thx_fgs_gsm'
-    themis_read_fgm, utr0, type, level='l2', probe=probe, _extra=ex
+    themis_read_fgm, utr0, type, level='l2', probe=probe, errmsg=errmsg, _extra=ex
+    if errmsg ne '' then return
     
     var = pre0+'b_gsm'
     rename_var, pre0+type+'_gsm', to=var

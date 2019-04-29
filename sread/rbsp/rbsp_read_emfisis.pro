@@ -23,11 +23,11 @@ pro rbsp_read_emfisis, time, id=datatype, probe=probe, $
     sync_after=sync_after, file_times=file_times, index_file=index_file, skip_index=skip_index, $
     sync_index=sync_index, sync_files=sync_files, stay_local=stay_loca, $
     time_var_name=time_var_name, time_var_type=time_var_type, generic_time=generic_time
-    
+
     compile_opt idl2
     on_error, 0
     errmsg = ''
-    
+
 
 ;---Check inputs.
     nfile = n_elements(files)
@@ -42,7 +42,7 @@ pro rbsp_read_emfisis, time, id=datatype, probe=probe, $
     endif
     if n_elements(out_vars) ne n_elements(in_vars) then out_vars = in_vars
 
-;---Default settings. 
+;---Default settings.
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','rbsp'])
     if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/rbsp'
     if n_elements(version) eq 0 then version = 'v[0-9.]{5}'
@@ -100,7 +100,7 @@ pro rbsp_read_emfisis, time, id=datatype, probe=probe, $
     if n_elements(time_var_name) ne 0 then myinfo.time_var_name = time_var_name
     if n_elements(time_var_type) ne 0 then myinfo.time_var_type = time_var_type
 
-    
+
 ;---Find files, read variables, and store them in memory.
     files = prepare_file(files=files, errmsg=errmsg, $
         file_times=file_times, index_file=index_file, time=time, $
@@ -112,7 +112,7 @@ pro rbsp_read_emfisis, time, id=datatype, probe=probe, $
         errmsg = handle_error('Error in finding files ...')
         return
     endif
-    
+
     if n_elements(time) eq 2 then timespan, time[0], time[1]-time[0], /second
     cdf2tplot, file=files, varformat=varformat, all=0, prefix='', suffix='', $
         tplotnames=tns, /convert_int1_to_int2
@@ -124,6 +124,8 @@ pro rbsp_read_emfisis, time, id=datatype, probe=probe, $
     endforeach
 
 ;   v1.6.2 is using a different time format from v1.6.1. So use spedas first.
+;    in_vars = *myinfo.ptr_in_vars
+;    out_vars = *myinfo.ptr_out_vars
 ;    read_and_store_var, files, time_info=time, errmsg=errmsg, $
 ;        in_vars=in_vars, out_vars=out_vars, generic_time=generic_time, _extra=myinfo
 ;    if errmsg ne '' then begin
@@ -137,4 +139,3 @@ rbsp_read_emfisis, /print_datatype
 utr0 = time_double(['2013-06-07/04:52','2013-06-07/05:02'])
 rbsp_read_emfisis, utr0, id='l3%magnetometer', probe='b', resolution='hires'
 end
- 
