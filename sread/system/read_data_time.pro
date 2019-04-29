@@ -48,6 +48,14 @@ pro read_data_time, files, vars, prefix=prefix, suffix=suffix, $
         endif else dat0 = scdfread(files[i], vars)
         for j=0, nvar-1 do begin
             ; works for all dims b/c cdf records on the 1st dim of array.
+            dims1 = size(*ptrs[j],/dimensions)
+            dims2 = size(*dat0[j].value,/dimensions)
+            case n_elements(dims1)-n_elements(dims2) of
+                1: *dat0[j].value = reform(*dat0[j].value,[1,dims2])
+                -1: *ptrs[j] = reform(*ptrs[j],[1,dims1])
+                0: ; do nothing.
+                else: message, 'Incompatible dimensions ...'
+            endcase
             *ptrs[j] = [*ptrs[j],*(dat0[j].value)]
             ptr_free, dat0[j].value  ; release pointers.
         endfor
