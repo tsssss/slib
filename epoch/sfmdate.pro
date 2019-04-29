@@ -100,11 +100,17 @@ function sfmdate, d0, f10
     fcs = strsplit(f1,per,/extract)
     nfc = n_elements(fcs)
 
-    ; get current time.
+    ; get current time to fill the default values.
     ut0 = systime(1)
     ep0 = 1000d*(ut0+var)
     ep0 = ep0-(ep0 mod 86400000d)   ; start of the day.
-    cdf_epoch, ep0, yr, mo, dy, hr, mi, sc, msc, /breakdown_epoch
+    cdf_epoch, ep0, yr, /breakdown_epoch
+    mo = 1.
+    dy = 1.
+    hr = 0.
+    mi = 0.
+    sc = 0.
+    msc = 0.
 
     for i = 0, nfc-1 do begin
         tfc = fcs[i]
@@ -207,6 +213,8 @@ d0 = '2015-11-01 01:00:00 CDT'
 f1 = '%Y-%m-%d %H:%M:%S %Z'
 d0 = 'Sun Mar  8 03:00:00 2015 CDT'
 f1 = '%a %b %e %H:%M:%S %Y UTC'
+d0 = '201409'
+f1 = '%Y%m'
 ;f1 = '%T %D'
 d1 = sfmdate(d0, f1)
 print, time_string(d1)
