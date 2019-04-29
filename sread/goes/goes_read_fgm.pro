@@ -30,7 +30,7 @@ pro goes_read_fgm, time, datatype, probe=probe, print_datatype=print_datatype, $
         {id: '512ms', $
         base_pattern: 'g'+probe+'_magneto_512ms_%Y%m%d_%Y%m%d.nc', $
         remote_pattern: join_path([rem_root,'new_full','%Y','%m','goes'+probe,'netcdf']), $
-        local_pattern: join_path([loc_root,'goes'+probe,'fgm','512ms','%Y','netcdf'])}]
+        local_pattern: join_path([loc_root,'goes'+probe,'fgm','512ms','%Y','%m','netcdf'])}]
 ; haven't tested yet.
 ;    type_dispatch = [type_dispatch, $
 ;        {id: '1min', $
