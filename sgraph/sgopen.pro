@@ -19,7 +19,7 @@
 ;-
 
 pro sgopen, id0, xsize = xsize, ysize = ysize, cm = cm, inch = inch, $
-    magnify = magc0, background = bgc0, _extra = extra
+    magnify = magc0, background = bgc0, xchsz=xchsz,ychsz=ychsz, _extra = extra
     
     compile_opt idl2
     
@@ -181,6 +181,10 @@ pro sgopen, id0, xsize = xsize, ysize = ysize, cm = cm, inch = inch, $
         window, mode.sgid, xsize = mode.area[0], ysize = mode.area[1]
         polyfill, [0,1,1,0,0], [0,0,1,1,0], /normal, color = !p.background
     endif
+    
+    xchsz = double(!d.x_ch_size)/!d.x_size
+    ychsz = double(!d.y_ch_size)/!d.y_size
+
 end
 
 fn = shomedir()+'/idl.png'
