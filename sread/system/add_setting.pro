@@ -32,6 +32,15 @@ pro add_setting, var, settings, smart=smart
             'data': begin
                 ; do nothing.
                 end
+            ; stack is less complicated than vector. The components are
+            ; just the same quantity from several sources.
+            'stack': begin
+                options, var, 'spec', 0                
+                ; use unit to init ytitle.
+                unit = get_setting(var, 'unit', exist)
+                if exist then options, var, 'ytitle', '('+unit+')'
+                options, var, 'ysubtitle', ''
+                end
             ; list is more complicate than vector. The components of a list
             ; are a second variable with certain unit, whereas a vector has
             ; several components, which are just labels.
