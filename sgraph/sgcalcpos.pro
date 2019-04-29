@@ -27,8 +27,7 @@
 ; Dependence: none.
 ; History:
 ;   2014-04-08, Sheng Tian, create.
-;-
-;+
+;   
 ; [xy]chsz. Output. The size of a nominal character in the normalized coordinate.
 ;-
 function sgcalcpos, nypanel, nxpanel, ypad=ypad0, xpad=xpad0, $

@@ -142,7 +142,7 @@ function scdfread, cdf0, vnames, recs0, rec_info=recs1, drec=drec, skt=skt, sile
         endif else begin
             cdf_varget, cdfid, vinfo.name, vals, /string, $
                 rec_start = rec0, rec_interval = drec, rec_count = nrec
-            vals = reform(vals)
+            ; vals = reform(vals), reform causes problem when concatenate data.
             ; permute dimensions.
             if nrec ne 1 and size(vals,/n_dimensions) gt 1 then $
                 vals = transpose(vals,shift(indgen(n_elements(vinfo.dims)+1),1))
