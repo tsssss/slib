@@ -11,8 +11,10 @@
 ;   be early enough that they are not updated remotely.
 ; files. A string or an array of full file names.
 ;-
-function find_data_file, time, patterns, index_file, $
+function find_data_file, time, patterns, index_file, errmsg=errmsg, $
     file_cadence=file_cadence, threshold=threshold, files=files, month=month
+    
+    errmsg = ''
     
     nfile = n_elements(files)
     if nfile eq 0 then begin
@@ -27,7 +29,7 @@ function find_data_file, time, patterns, index_file, $
         ; otherwise if the local index file is old, sync with remote.
         ; if remote index file does not exist, leave local index file non-exist.
         update_index_file, index_file, local_paths, remote_paths, $
-            threshold=threshold, times=times
+            threshold=threshold, times=times, errmsg=errmsg
         
         ; look up the local index file to find the highest version file.
         ; if local index file doesn't exist, basename would be ''.
