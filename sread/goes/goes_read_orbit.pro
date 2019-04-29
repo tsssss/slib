@@ -62,7 +62,7 @@ pro goes_read_orbit_internal, time, probe=probe, errmsg=errmsg, $
     nfile = n_elements(files)
     for i=0, nfile-1 do begin
         if file_test(files[i]) eq 0 then begin
-            date = times[0]
+            date = times[i]
             goes_gen_orbit_data, date, probe=probe, file=files[i]
         endif
     endfor
