@@ -16,7 +16,7 @@
 ; scurl uses curl in unix/linux, s_curl uses idl socket.
 ; the latter does not work for https links.
 
-pro scurl, remfn, locfn
+pro scurl, remfn, locfn, errmsg=errmsg
     
     console = -1
     printf, console, 'downloading '+remfn+' ...'
