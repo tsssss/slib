@@ -13,11 +13,11 @@ function get_var_data, var, at=time, raw=raw
     get_data, var, tmp, dat
     
     if keyword_set(time) ne 0 then begin
-        index = where(tmp eq time, count)
-        if count eq 0 then begin
-            dat = sinterpol(dat, tmp, time)
+        if n_elements(time) eq 1 then begin
+            index = where(tmp eq time[0], count)
+            if count eq 0 then dat = sinterpol(dat, tmp, time) else dat = dat[index,*,*,*,*,*,*,*]
         endif else begin
-            dat = dat[index,*,*,*,*,*,*,*]
+            dat = sinterpol(dat, tmp, time)
         endelse
     endif
     
