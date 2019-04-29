@@ -19,7 +19,7 @@
 ;   be early enough that they are not updated remotely.
 ;-
 pro update_index_file, index_file, local_paths, remote_paths, $
-    update_all=update_all, threshold=threshold, times=times
+    update_all=update_all, threshold=threshold, times=times, errmsg=errmsg
     
     nfile = n_elements(local_paths)
     if nfile eq 0 then message, 'No input paths ...'
@@ -47,30 +47,30 @@ pro update_index_file, index_file, local_paths, remote_paths, $
             return
         endif
         ; pick out the ones need sync.
-        local_paths = local_paths[idx]
-        remote_paths = remote_paths[idx]
+        uniq_local_paths = local_paths[idx]
+        uniq_remote_paths = remote_paths[idx]
         ; pick out unique paths.
-        all_paths = local_paths+remote_paths
+        all_paths = uniq_local_paths+uniq_remote_paths
         idx = uniq(all_paths)
-        local_paths = local_paths[idx]
-        remote_paths = remote_paths[idx]
+        uniq_local_paths = uniq_local_paths[idx]
+        uniq_remote_paths = uniq_remote_paths[idx]
     endif else begin
         print, 'Local index files are up to date ...'
         return
     endelse
     
-    nfile = n_elements(local_paths)
+    nfile = n_elements(uniq_local_paths)
     errmsgs = ['404 Not Found']
     ; download each index file, check for error message.
     ; if error message is found, the index file is not what we want, delete it.
     for i=0, nfile-1 do begin
-        print, 'Syncing index file '+index_file+' from '+remote_paths[i]+' to '+local_paths[i]+' ...'
-        update_index, index_file, local_paths[i], remote_paths[i]
+        print, 'Syncing index file '+index_file+' from '+uniq_remote_paths[i]+' to '+uniq_local_paths[i]+' ...'
+        update_index, index_file, uniq_local_paths[i], uniq_remote_paths[i], errmsg=errmsg
         foreach errmsg, errmsgs do begin
-            errmsg = lookup_index_file(errmsg, local_paths[i], index_file)
+            errmsg = lookup_index_file(errmsg, uniq_local_paths[i], index_file)
             if errmsg ne '' then begin
-                file_delete, local_paths[i], /recursive
-                message, 'Remote index file does not exist ...', /continue
+                file_delete, uniq_local_paths[i], /recursive
+                errmsg = handle_error('Remote index file does not exist ...')
                 break
             endif
         endforeach
