@@ -3,8 +3,7 @@
 ;-
 ;
 function join_path, paths
-    sep = path_sep()
-    return, strjoin(paths,'/')
+    return, strjoin(paths,path_sep())
 end
 
 print, join_path(['','Users','Sheng','Downloads'])
