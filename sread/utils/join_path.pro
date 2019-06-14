@@ -3,7 +3,9 @@
 ;-
 ;
 function join_path, paths
-    return, strjoin(paths,path_sep())
+    ; sep = path_sep()  ; In Windows, \ causes problem in downloading an URL.
+    sep = '/'   ; / is handled well in Windows now, so use it for all OS.
+    return, strjoin(paths,sep)
 end
 
 print, join_path(['','Users','Sheng','Downloads'])
