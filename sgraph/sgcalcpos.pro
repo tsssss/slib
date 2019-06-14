@@ -78,7 +78,7 @@ function sgcalcpos, nypanel, nxpanel, ypad=ypad0, xpad=xpad0, $
     tmg *= ychsz
     bmg *= ychsz
     ypad *= ychsz
-    xpad *= ychsz
+    xpad *= xchsz
 
 ;---Figure out the over-all position for the panels.
     if n_elements(region) eq 0 then region = [0d,0,1,1]
