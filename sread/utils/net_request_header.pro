@@ -35,7 +35,8 @@ function net_request_header, url0, status_code=status_code, timeout=timeout
     if strmid(url, 0,1, /reverse) eq '/' then url = strmid(url, 0,strlen(url)-1)
     
     ; the default value is somewhat long.
-    if n_elements(timeout) eq 0 then timeout = 2
+    ; I've tried 2 sec, doesn't work stably.
+    if n_elements(timeout) eq 0 then timeout = 10.
     
 
 ;---Set callback function to stop after reading header.
