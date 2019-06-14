@@ -14,6 +14,10 @@ function resolve_probe, probe
         'name','th', $
         'short_name', 'th', $
         'routine_name', 'themis')
+    missions.mms = dictionary($
+        'name','mms', $
+        'short_name','mms', $
+        'routine_name','mms')
 
     probe = strlowcase(probe)
     found_probe = 0
