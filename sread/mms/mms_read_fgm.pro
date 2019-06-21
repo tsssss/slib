@@ -41,7 +41,6 @@ pro mms_read_fgm, time, id=datatype, probe=probe, $
     if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/mms'
     if n_elements(version) eq 0 then version = 'v[0-9.]{6}'
     if n_elements(index_file) eq 0 then index_file = default_index_file()
-    mmsx = 'mms'+probe
     if n_elements(coord) eq 0 then coord = 'gsm'
 
     type_dispatch = hash()

@@ -1,10 +1,13 @@
 ;+
 ; Read quaternion to rotate from UVW to GSM.
 ;-
-pro rbsp_read_quaternion, utr0, probe
+pro rbsp_read_quaternion, utr0, probe=probe, errmsg=errmsg
+    
+    errmsg = ''
     
     ; read 'q_uvw2gsm'.
-    rbsp_read_spice, utr0, 'quaternion', probe
+    rbsp_read_spice, utr0, 'quaternion', probe=probe, errmsg=errmsg
+    if errmsg ne '' then return
     
     pre0 = 'rbsp'+probe+'_'
     var = pre0+'q_uvw2gsm'

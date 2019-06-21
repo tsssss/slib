@@ -137,5 +137,5 @@ end
 
 rbsp_read_emfisis, /print_datatype
 utr0 = time_double(['2013-06-07/04:52','2013-06-07/05:02'])
-rbsp_read_emfisis, utr0, id='l3%magnetometer', probe='b', resolution='hires'
+rbsp_read_emfisis, utr0, id='l3%magnetometer', probe='b', resolution='4sec'
 end

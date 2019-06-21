@@ -182,7 +182,7 @@ end
 
 
 ; Save the MLon image for a corresponding ASF data file. This is usually a file for one site, for one hour.
-pro themis_read_mlonimg_gen_file, time, site=site, height=height, filename=file, errmsg=errmsg, extra=_extra
+pro themis_read_mlonimg_gen_file, time, site=site, height=height, filename=file, errmsg=errmsg, _extra=extra
 
     errmsg = ''
 
@@ -193,7 +193,7 @@ pro themis_read_mlonimg_gen_file, time, site=site, height=height, filename=file,
 
     ; Read data to memory.
     ;time = time[0]+[0,9]   ; for tests.
-    themis_read_mlonimg_per_site, time, site=site, errmsg=errmsg, height=height, extra=_extra
+    themis_read_mlonimg_per_site, time, site=site, errmsg=errmsg, height=height, _extra=extra
     if errmsg ne '' then return
     pre0 = 'thg_'+site+'_asf_'
 
@@ -267,7 +267,7 @@ end
 pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
     site_infos=site_infos, merge_method=merge_method, $
     height=height, mlon_range=mlon_range, mlat_range=mlat_range, $
-    local_root=local_root, version=version, renew_file=renew_file, extra=_extra
+    local_root=local_root, version=version, renew_file=renew_file, _extra=extra
 
     compile_opt idl2
     on_error, 0
@@ -311,7 +311,7 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
         foreach file_time, file_times do begin
             file = apply_time_to_pattern(local_pattern, file_time)
             if keyword_set(renew_file) then if file_test(file) eq 1 then file_delete, file
-            if file_test(file) eq 0 then themis_read_mlonimg_gen_file, file_time+[0,cadence], site=site, filename=file, errmsg=errmsg, height=height, extra=_extra
+            if file_test(file) eq 0 then themis_read_mlonimg_gen_file, file_time+[0,cadence], site=site, filename=file, errmsg=errmsg, height=height, _extra=extra
             if file_test(file) eq 1 then files.add, file
         endforeach
 
