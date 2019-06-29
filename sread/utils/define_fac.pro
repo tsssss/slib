@@ -6,13 +6,19 @@
 ;   
 ; Save pre0_[b,w,o]hat_coord.
 ;-
-pro define_fac, bvar, rvar
+pro define_fac, bvar, rvar, time_var=time_var
 
     coord = get_setting(bvar, 'coord')
     if coord ne get_setting(rvar, 'coord') then $
         message, 'B and R are in different coord ...'
     
+
     get_data, bvar, times, bvec
+    if tnames(time_var) ne '' then begin
+        tmp = times
+        get_data, time_var, times
+        bvec = sinterpol(bvec,tmp, times)
+    endif
     get_data, rvar, tmp, rvec
     
     if n_elements(tmp) ne n_elements(times) then $

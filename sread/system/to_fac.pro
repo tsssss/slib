@@ -26,6 +26,6 @@ pro to_fac, var, to=var1
     add_setting, var1, info
     add_setting, var1, /smart, {$
         coord: 'FAC', $
-        coord_labels: ['b','w','o']}
+        coord_labels: ['||','west','outward']}
 
 end

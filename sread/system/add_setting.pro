@@ -71,11 +71,13 @@ pro add_setting, var, settings, smart=smart
             'spec': begin
                 options, var, 'spec', 1
                 options, var, 'no_interp', 1
+                options, var, 'ylog', 1
+                options, var, 'zlog', 1
                 
                 ; use unit to init ztitle.
                 unit = get_setting(var, 'unit', exist)
                 short_name = get_setting(var, 'short_name', exist)
-                if exist then options, var, 'ztitle', short_name+'('+unit+')'
+                if exist then options, var, 'ztitle', strtrim(short_name+' ('+unit+')',2)
                 end
             'vector': begin
                 options, var, 'spec', 0
