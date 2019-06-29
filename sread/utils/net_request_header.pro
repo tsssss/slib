@@ -36,7 +36,7 @@ function net_request_header, url0, status_code=status_code, timeout=timeout
     
     ; the default value is somewhat long.
     ; I've tried 2 sec, doesn't work stably.
-    if n_elements(timeout) eq 0 then timeout = 10.
+    if n_elements(timeout) eq 0 then timeout = 20.
     
 
 ;---Set callback function to stop after reading header.
