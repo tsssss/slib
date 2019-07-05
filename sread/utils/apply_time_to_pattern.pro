@@ -1,21 +1,25 @@
 ;+
-; Apply ut times to a string of pattern.
-; 
-; pattern. A string containing unix time format code.
-; times. An array of N times in ut time.
-; return. An array of N strings after times are substituted.
+; Apply times to a string containing the time format codes.
+;
+; pattern. A string containing the unix time format codes (%Y,%m,%d,etc).
+; times. An array [N], times in UT sec.
+; return. An array [N], strings with the times replaced.
 ;-
 function apply_time_to_pattern, pattern, times
-    
+    retval = ''
+
+    if n_elements(pattern) eq 0 then return, retval
+    if typename(pattern) ne strupcase('string') then return, retval
     ntime = n_elements(times)
+    if ntime eq 0 then return, pattern
+
+
     ; no pattern.
     if strpos(pattern,'%') eq -1 then return, replicate(pattern,ntime)
-    
+
     res = strarr(ntime)
-    for i=0, ntime-1 do begin
-        res[i] = stodate(times[i], pattern)
-    endfor
-    
+    for ii=0, ntime-1 do res[ii] = stodate(times[ii], pattern)
+
     return, res
 end
 
