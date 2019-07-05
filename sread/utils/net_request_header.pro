@@ -36,13 +36,13 @@ function net_request_header, url0, status_code=status_code, timeout=timeout
     
     ; the default value is somewhat long.
     ; I've tried 2 sec, doesn't work stably.
-    if n_elements(timeout) eq 0 then timeout = 20.
+    if n_elements(timeout) eq 0 then timeout = 5.
     
 
 ;---Set callback function to stop after reading header.
     oo = obj_new('IDLnetURL')
     oo->setproperty, callback_function='net_request_header_callback'
-    oo->setproperty, timeout=timeout
+    oo->setproperty, connect_timeout=timeout
     
     ; Read header until an error is caught.
     header = ''
@@ -52,12 +52,25 @@ function net_request_header, url0, status_code=status_code, timeout=timeout
     
 ;---Get the header and status code.
     oo->getproperty, response_header=header
+    oo->getproperty, response_code=status_code
     obj_destroy, oo
-    headers = strsplit(header, string(10b)+string(13b), /extract)
-    parts = stregex(headers[0],'http[s]?/[0-9.]{3} ([0-9]{3}) [a-z]+',/subexp,/extract,/fold_case)
-    status_code = (parts[0] ne '')? fix(parts[1]): 404
     
-    return, headers
+;    type = 'http'
+;    sep1 = '://'
+;    index = strpos(url, sep1)
+;    type = (index[0] eq -1)? 'http': strmid(url,0,index[0])
+;    case type of
+;        'http': begin
+;            header = strsplit(header, string(10b)+string(13b), /extract)
+;            parts = stregex(header[0],'http[s]?/[0-9.]{3} ([0-9]{3}) [a-z]+',/subexp,/extract,/fold_case)
+;            status_code = (parts[0] ne '')? fix(parts[1]): 404
+;            end
+;        'ftp': status_code = (header[0] eq '')? 404: 100
+;        else: status_code = 404
+;    endcase
+    
+    
+    return, header
 end
 
 
