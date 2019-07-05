@@ -27,7 +27,7 @@ function download_ftp_file_callback, status, progress, data
         *data.started = 1
         msg = string(' Total ','Perc%','Down.Speed','T.Spent',' T.Left ', format=format)
         lprmsg, msg
-        msg = string(data.fsize_string, $
+        msg = string(' ----- ', $
             string(0,format='(F5.1)'), $
             string(0,format='(F5.1)')+' kB/s', $
             string('00:00:00'), $
@@ -37,18 +37,20 @@ function download_ftp_file_callback, status, progress, data
     endif
 
     if duration ge tstep then begin
-        speed = (progress[2]-*data.current_size)/duration    ; kB/s.
+        fsize = progress[2]
+        speed = (fsize-*data.current_size)/duration    ; kB/s.
         units = ['B/s','kB/s','MB/s','GB/s','TB/s']
         foreach unit, units do if speed lt 1000 then break else speed *= 1e-3
-        percent = double(progress[2])/data.total_fsize
+        file_units = ['B','kB','MB','GB','TB']
+        foreach file_unit, file_units do if fsize lt 1000 then break else fsize *= 1e-3
+        percent = 0
         tspent = tnow-data.start_time
-        tleft = tspent/percent*(1-percent)
 
-        msg = string(data.fsize_string, $
+        msg = string(string(fsize,format='(F5.1)')+' '+file_unit, $
             string(percent*100,format='(F5.1)'), $
             string(speed,format='(F5.1)')+' '+unit, $
-            download_http_file_callback_time2string(tspent), $
-            download_http_file_callback_time2string(tleft), $
+            download_ftp_file_callback_time2string(tspent), $
+            '--:--:--', $
             format=format)
 
         lprmsg, msg
@@ -61,11 +63,6 @@ end
 
 pro download_ftp_file, local_file, remote_file, errmsg=errmsg
 
-    info = get_remote_info(remote_file)
-    fsize = info.size
-    units = ['B','kB','MB','GB','TB']
-    foreach unit, units do if fsize lt 1000 then break else fsize *= 1e-3
-
     locdir = file_dirname(local_file)
     if file_test(locdir,/directory) eq 0 then file_mkdir, locdir
 
@@ -73,8 +70,6 @@ pro download_ftp_file, local_file, remote_file, errmsg=errmsg
     oo->setproperty, ftp_connection_mode=0
     oo->setproperty, callback_function='download_ftp_file_callback', $
         callback_data={ $
-            total_fsize: info.size, $
-            fsize_string: string(fsize,format='(F5.1)')+' '+unit, $
             start_time: systime(/second), $
             current_time: ptr_new(systime(/second)), $
             current_size: ptr_new(0ull), $
@@ -83,14 +78,16 @@ pro download_ftp_file, local_file, remote_file, errmsg=errmsg
     file = oo->get(filename=local_file, url=remote_file)
     obj_destroy, oo
 
+    ;stouch, local_file, mtime=info.mtime
     lprmsg, 'Saved to '+local_file+' ...'
 
 end
 
 
-remote_file = 'http://themis.ssl.berkeley.edu/data/themis/tha/l2/efi/2014/tha_l2_efi_20140101_v01.cdf'
-remote_file = 'http://themis.ssl.berkeley.edu/data/rbsp/rbspb/l1/vb1/2015/rbspb_l1_vb1_20150309_v02.cdf'
-local_file = shomedir()+'/Downloads/'+file_basename(remote_file)
+remote_file = join_path(['ftp://swarm0555:othonwoo01@swarm-diss.eo.esa.int',$
+    'Level1b','Latest_baselines','MAGx_LR','Sat_C','SW_OPER_MAGC_LR_1B_20131126T000000_20131126T235959_0505.CDF.ZIP'])
+;remote_file = 'http://themis.ssl.berkeley.edu/data/rbsp/rbspb/l1/vb1/2015/rbspb_l1_vb1_20150309_v02.cdf'
+local_file = join_path([homedir(),'/Downloads','test',fgetbase(remote_file)])
 
 download_file, local_file, remote_file
 end

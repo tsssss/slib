@@ -92,14 +92,15 @@ pro download_http_file, local_file, remote_file, errmsg=errmsg
     file = oo->get(filename=local_file, url=remote_file)
     obj_destroy, oo
 
+    stouch, local_file, mtime=info.mtime
     lprmsg, 'Saved to '+local_file+' ...'
 
 end
 
 
-remote_file = 'https://themis.ssl.berkeley.edu/data/themis/tha/l2/efi/2014/tha_l2_efi_20140101_v01.cdf'
+remote_file = 'http://themis.ssl.berkeley.edu/data/themis/tha/l2/efi/2014/tha_l2_efi_20140101_v01.cdf'
 ;remote_file = 'http://themis.ssl.berkeley.edu/data/rbsp/rbspb/l1/vb1/2015/rbspb_l1_vb1_20150309_v02.cdf'
-local_file = join_path([homedir(),'Downloads',fget_base(remote_file)])
+local_file = join_path([homedir(),'Downloads',fgetbase(remote_file)])
 
 download_http_file, local_file, remote_file
 end

@@ -34,7 +34,10 @@ end
 
 remote_file = 'https://themis.ssl.berkeley.edu/data/themis/tha/l2/efi/2014/tha_l2_efi_20140101_v01.cdf'
 ;remote_file = 'http://themis.ssl.berkeley.edu/data/rbsp/rbspb/l1/vb1/2015/rbspb_l1_vb1_20150309_v02.cdf'
-local_file = join_path([homedir(),'Downloads',fget_base(remote_file)])
+;remote_file = 'http://themis.ssl.berkeley.edu/data/rbsp/rbspb/l1/vb1/2015/rbspb_l1_vb1_20150309_v02.cdf'
+remote_file = 'ftp://swarm-diss.eo.esa.int/Level1b/Latest_baselines/MAGx_LR/Sat_C/SW_OPER_MAGC_LR_1B_20131126T000000_20131126T235959_0505.CDF.ZIP'
+local_file = join_path([homedir(),'Downloads','test',fgetbase(remote_file)])
+;remote_file = 'https://swarm-diss.eo.esa.int/#swarm%2FLevel1b%2FLatest_baselines%2FMAGx_LR%2FSat_C%2FSW_OPER_MAGC_LR_1B_20131126T000000_20131126T235959_0505.CDF.ZIP'
 
 download_file, local_file, remote_file
 end
