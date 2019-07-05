@@ -34,7 +34,7 @@ function sdiskdir, disk, trailing_slash = trailing_slash, errmsg=errmsg
         'darwin': diskdir = strjoin(['','Volumes',disk], sep)
         'Win32': begin
             diskdir = ''
-            foreach letter, ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'] do begin
+            foreach letter, letters() do begin
                 spawn, 'vol '+letter+':', outputs, errmsg
                 if n_elements(outputs) eq 1 then continue   ; output is '' if no disk for the letter.
                 disk_name = strmid(outputs[0],strpos(outputs[0],'is')+3)
