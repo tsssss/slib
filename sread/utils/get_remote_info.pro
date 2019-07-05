@@ -7,6 +7,8 @@ function get_remote_info, url0, errmsg=errmsg
     
 ;---Read header.
     header = net_request_header(url0, status_code=status_code)
+    sep = string(10b)+string(13b)
+    header = strsplit(header, sep, /extract)
     
     if status_code eq 404 then begin
         errmsg = handle_error('URL not found ...')
