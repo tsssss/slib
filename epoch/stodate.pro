@@ -54,7 +54,10 @@ function stodate, ut0, f10
     
     var = 62167219200d  ; const for epeoch/unix time conversion.
     per = '%'
-    if strpos(f1,per) eq -1 then message, 'no valid format code ...'
+    if strpos(f1,per) eq -1 then begin
+        message, 'No valid format code ...', /continue
+        return, f10
+    endif
 
     ; vars.
     abs = ['Jan','Feb','Mar','Apr','May','Jun', $
@@ -132,7 +135,7 @@ function stodate, ut0, f10
             'Y': d1+= string(yr,format='(I04)')
             'z': d1+= stzinfo(ut0,/string)
             'Z': d1+= ((tzinfos.abbr)[where(tzinfos.dt eq stzinfo(ut0))])[0]
-            else: ; do nothing.
+            else: d1+= per+tfc  ; put code back if do not know its meaning.
         endcase
         d1+= suf
     endfor
