@@ -81,7 +81,7 @@ function prepare_file, files=files, errmsg=errmsg, $
     if ~keyword_set(skip_index) then begin
         loc_paths = strarr(nfile_time)
         for i=0, nfile_time-1 do loc_paths[i] = apply_time_to_pattern(local_pattern, file_times[i])
-        index = uniq(local_paths)
+        index = uniq(loc_paths)
         loc_paths = loc_paths[index]
         nloc_path = n_elements(loc_paths)
         index_ffns = strarr(nloc_path)
