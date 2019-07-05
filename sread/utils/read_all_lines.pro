@@ -14,7 +14,13 @@ function read_all_lines, txtfile, skip_header=nheader
     readf, lun, lines
     free_lun, lun
     
-    if n_elements(nheader) ne 0 then return, lines[nheader:*]
+    if n_elements(nheader) ne 0 then lines = lines[nheader:*]
+        
     return, lines
 
+end
+
+file = 'E:\data\swarm\swarmc\level1b\Current\MAGx_LR\2013\local_index.html'
+lines = read_all_lines(file)
+foreach line, lines do print, '"'+line+'"'
 end
