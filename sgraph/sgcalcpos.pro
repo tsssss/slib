@@ -1,21 +1,22 @@
 ;+
-; Type: function.
-; Purpose: Calculate panel positions in normal coordinate.
-; Parameters:
-;   nypanel, in, int, opt. # of panels in y direction. Default is 1.
-; Keywords:
-;   ypad, in, int, opt. Space b/w y-panels, in # of ycharsize. Default is 0.4.
-;   position, in, dlbarr[4], opt. In normal coord, set the area for panels.
-;   region, in, dblarr[4], opt. In normal coord, set area including margins.
-;   lmargin, in, int, opt. # of xcharsize, left margin. Default is 10.
-;   rmargin, in, int, opt. # of xcharsize, right margin. Default is 10.
-;   tmargin, in, int, opt. # of ycharsize, top margin. Default is 4.
-;   bmargin, in, int, opt. # of bcharsize, bottom margin. Default is 4.
-;   margins, in, int/intarr[2]/intarr[4], opt. # of charsize.
-;       intarr[4]:[l,b,r,t](in position sense), inarr[2]:[lr,tb], int:[lrtb].
-;   lpad, in, int, opt. Line skip in # of ycharsize. Default is 0.1.
-; Return:
-;   dblarr[4,n]. The position of panels.
+; Returns the panel positions in normal coordinate, in [4,nypanel] or [4,nxpanel,nypanel].
+;
+; nypanel. An integer sets the number of y-panels. Default is 1.
+; nxpanel. An integer sets the number of x-panels. Default is 1.
+; ypad=0.4. A number sets the pace b/w y-panels, in terms of y-charsize.
+; xpad=4. A number sets the pace b/w x-panels, in terms of x-charsize.
+; position=[]. An array of 4 elements. In normal coord, sets the area for panels, without margins.
+; region=[]. An array of 4 elements, In normal coord, sets area including margins.
+; lmargin=10, A number sets the left margin, in terms of x-charsize.
+; rmargin=5. A number sets the right margin, in terms of x-charsize.
+; tmargin=5. A number sets the top margin, in terms of y-charsize.
+; bmargin=5. A number sets the bottom margin, in terms of y-charsize.
+; margins=. An array of 1, 2, or 4 elements. [4]:[l,b,r,t]; [2]:[lr,tb]; [1]:[lrtb].
+; ypans=. A array of [nypanel], sets the ratio of y-panelsize. Default is all 1.
+; xpans=. A array of [nxpanel], sets the ratio of x-panelsize. Default is all 1.
+; xchsz=. Output. A number of the nominal x-charsize in the normal coord.
+; ychsz=. Output. A number of the nominal y-charsize in the normal coord.
+;
 ; Notes: In this code, "region" is the area contains margins and plotting area,
 ;   "positon" is the plotting area that excludes margins, it is also exactly
 ;   the boundary the y-panels.
@@ -24,11 +25,6 @@
 ;   i.e., we provide 2 ways to set margin. [lrtb]margin overwrite margins,
 ;   position overwrites [lrtb]margin.
 ;       Our panels stack in y-direction, so there is no nxpanel, xpad, etc.
-; Dependence: none.
-; History:
-;   2014-04-08, Sheng Tian, create.
-;   
-; [xy]chsz. Output. The size of a nominal character in the normalized coordinate.
 ;-
 function sgcalcpos, nypanel, nxpanel, ypad=ypad0, xpad=xpad0, $
     position=pos0, region=region, margins=margins, $
