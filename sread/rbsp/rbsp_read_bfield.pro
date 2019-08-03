@@ -1,10 +1,11 @@
 ;+
-; Read RBSP DC B field. Default is to read 'hires' data at 64 samples/sec.
+; Read RBSP DC B field. Default is to read '4sec' data.
 ; Save as rbspx_b_gsm.
 ;-
 pro rbsp_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg
 
     pre0 = 'rbsp'+probe+'_'
+    rgb = sgcolor(['red','green','blue'])
 
     resolution = (keyword_set(resolution))? strlowcase(resolution): '4sec'
     case resolution of
@@ -16,17 +17,8 @@ pro rbsp_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg
     ; read 'rbspx_b_gsm'
     rbsp_read_emfisis, utr0, id='l3%magnetometer', probe=probe, $
         resolution=resolution, coord='gsm', errmsg=errmsg
-    if errmsg ne '' then return
 
     bvar = pre0+'b_gsm'
-    add_setting, bvar, /smart, {$
-        display_type: 'vector', $
-        unit: 'nT', $
-        short_name: 'B', $
-        coord: 'GSM', $
-        coord_labels: ['x','y','z'], $
-        colors: [6,4,2]}
-
     get_data, bvar, times, bgsm
     if n_elements(utr0) eq 2 then begin
         index = lazy_where(times, utr0, count=count)
@@ -37,6 +29,14 @@ pro rbsp_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg
         endif
     endif
     uniform_time, bvar, dt
+    
+    add_setting, bvar, /smart, {$
+        display_type: 'vector', $
+        unit: 'nT', $
+        short_name: 'B', $
+        coord: 'GSM', $
+        coord_labels: ['x','y','z'], $
+        colors: rgb}
 
 end
 

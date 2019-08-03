@@ -8,7 +8,6 @@ pro lanl_read_kev_electron, time_range, probe=probe, errmsg=errmsg, energy=energ
     pre0 = probe+'_'
 
     ; read 'flux'
-    lanl_read_data, time_range, id='sopa_energy', probe=probe
     lanl_read_data, time_range, id='sopa', probe=probe
 
     var = 'e_flux'

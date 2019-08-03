@@ -3,94 +3,109 @@
 ;
 ; time. A time or a time range in ut time. Set time to find files
 ;   automatically, or set files to read data in them directly.
-; datatype. A string set which set of variable to read. Use
-;   print_datatype to see supported types.
-; probe. A string set the probe to read data for.
-; level. A string set the level of data, e.g., 'l1'.
-; variable. An array of variables to read. Users can omit this keyword
-;   unless want to fine tune the behaviour.
-; files. A string or an array of N full file names. Set this keyword
-;   will set files directly.
-; version. A string sets the version of data. Default behaviour is to read
-;   the highest version. Set this keyword to read specific version.
+; id=. A string sets the data type to read. Check supported ids by setting
+;   print_datatype.
+; print_datatype=. A boolean. Set to print all supported ids.
+; probe=. A string set the probe to read data for.
+; local_root=. A string to set the local root directory.
+; remote_root=. A string to set the remote root directory.
+; local_files=. A string or an array of N full file names. Set to fine
+;   tuning the files to read data from.
+; file_times=. An array of N times. Set to fine tuning the times of the files.
+; release=. A string to set the release. Default is 'rel04'.
 ;-
-pro rbsp_read_mageis, time, datatype, probe, level=level, $
+pro rbsp_read_mageis, time, id=datatype, probe=probe, $
     print_datatype=print_datatype, errmsg=errmsg, $
-    variable=vars, files=files, version=version, id=id
+    local_files=files, file_times=file_times, version=version, $
+    local_root=local_root, remote_root=remote_root, $
+    release=release
 
     compile_opt idl2
     on_error, 0
-    errmsg = 0
-    
+    errmsg = ''
 
-    nfile = n_elements(files)
-    if n_elements(time) eq 0 and nfile eq 0 then begin
-        message, 'no time or file is given ...', /continue
-        if not keyword_set(print_datatype) then return
-    endif
-    if keyword_set(print_datatype) then probe = 'x'
-    
-    loc_root = join_path([sdiskdir('Research'),'data','rbsp'])
-    rem_root = 'https://cdaweb.sci.gsfc.nasa.gov/pub/data/rbsp'
-    version = (n_elements(version) eq 0)? 'v[0-9.]{5}': version
+
+;---Check inputs.
+    sync_threshold = 86400d*120
+    if n_elements(probe) eq 0 then probe = 'x'
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','rbsp'])
+    if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/rbsp'
+    ;remote_root = 'https://cdaweb.sci.gsfc.nasa.gov/pub/data/rbsp'
+    if n_elements(version) eq 0 then version = 'v[0-9.]{5}'
+    if n_elements(release) eq 0 then release = 'rel04'  ; updated 2019-06.
+
+;---Init settings.
+    type_dispatch = hash()
     rbspx = 'rbsp'+probe
+    ; Level 3.
+    base_name = 'rbsp'+probe+'_'+release+'_ect-mageis-l3_%Y%m%d_'+version+'.cdf'
+    local_path = [local_root,rbspx,'mageis','%Y','l3',release]
+    remote_path = [remote_root,rbspx,'l3','ect','mageis','sectors',release,'%Y']
+    type_dispatch['l3%ion'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['Epoch','FPDU'], $
+                'time_var_name', 'Epoch', $
+                'time_var_type', 'epoch'), $
+            dictionary($
+                'in_vars', ['FPDU_Alpha','FPDU_Energy'], $
+                'generic_time', 1)))
+    type_dispatch['l3%electron'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['Epoch','FEDU'], $
+                'time_var_name', 'Epoch', $
+                'time_var_type', 'epoch'), $
+            dictionary($
+                'in_vars', ['FEDU_Alpha','FEDU_Energy'], $
+                'generic_time', 1)))
 
-    type_dispatch = []
-    type_dispatch = [type_dispatch, $
-        {id: 'l3%rel03', $
-        base_pattern: 'rbsp'+probe+'_rel03_ect-mageis-l3_%Y%m%d_'+version+'.cdf', $
-        remote_pattern: join_path([rem_root,rbspx,'l3','ect','mageis','sectors','rel03','%Y']), $
-        local_pattern: join_path([loc_root,rbspx,'mageis','%Y','l3','rel03']), $
-        variable: ptr_new(['Epoch','FEDU_Alpha','FEDU_Energy','FEDU']), $
-        time_var: 'Epoch', $
-        time_type: 'Epoch'}]
     if keyword_set(print_datatype) then begin
         print, 'Suported data type: '
-        ids = type_dispatch.id
+        ids = type_dispatch.keys()
         foreach id, ids do print, '  * '+id
         return
     endif
 
-    ; dispatch patterns.
-    if n_elements(id) eq 0 then id = strjoin([level,datatype],'%')
-    ids = type_dispatch.id
-    idx = where(ids eq id, cnt)
-    if cnt eq 0 then message, 'Do not support type '+id+' yet ...'
-    myinfo = type_dispatch[idx[0]]
-    
-    ; find files to be read.
-    file_cadence = 86400.
-    if nfile eq 0 then begin
-        update_t_threshold = 365.25d*86400  ; 1 year.
-        index_file = 'remote-index.html'
-        times = break_down_times(time, file_cadence)
-        patterns = [myinfo.base_pattern, myinfo.local_pattern, myinfo.remote_pattern]
-        files = find_data_file(time, patterns, index_file, $
-            file_cadence=file_cadence, threshold=update_t_threshold)
-    endif
 
-    ; no file is found.
-    if n_elements(files) eq 1 and files[0] eq '' then begin
-        errmsg = 1
+;---Dispatch patterns.
+    if n_elements(datatype) eq 0 then begin
+        errmsg = handle_error('No input datatype ...')
         return
     endif
+    if not type_dispatch.haskey(datatype) then begin
+        errmsg = handle_error('Do not support type '+datatype+' yet ...')
+        return
+    endif
+    request = type_dispatch[datatype]
 
-    ; read variables from file.
-    if n_elements(vars) eq 0 then vars = *myinfo.variable
-    times = make_time_range(time, file_cadence)
-    time_type = myinfo.time_type
-    time_var = myinfo.time_var
-    times = convert_time(times, from='unix', to=time_type)
-    read_data_time, files, vars, prefix='', time_var=time_var, times=times, /dum
-    idx = where(vars ne time_var)
-    foreach var, vars[idx] do treat_fillval, var
-    if time_type ne 'unix' then fix_time, vars, time_type
+;---Find files, read variables, and store them in memory.
+    files = prepare_files(request=request, errmsg=errmsg, local_files=files, $
+        file_times=file_times, time=time, nonexist_files=nonexist_files)
+
+;---Read data from files and save to memory.
+    read_files, time, files=files, request=request
+
 end
 
 
-rbsp_read_emfisis, /print_datatype
-utr0 = time_double(['2013-06-07/04:52','2013-06-07/05:02'])
-rbsp_read_emfisis, utr0, 'magnetometer', level='l3', 'b'
+rbsp_read_mageis, /print_datatype
+time = time_double(['2013-06-07/04:52','2013-06-07/05:02'])
+rbsp_read_mageis, time, id='l3', probe='b'
 end
- 
-

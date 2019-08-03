@@ -3,43 +3,32 @@
 ; resolution can be '1min', '5min'.
 ;-
 ;
-pro omni_read_index, utr0, resolution=resolution, errmsg=errmsg, index=index
+pro omni_read_index, time, resolution=resolution, errmsg=errmsg
 
     if n_elements(resolution) eq 0 then resolution = '1min'
-    if n_elements(index) eq 0 then index = ['ae','dst']
-    
-    indices = ['ae','dst']
-    vnames = ['AE_INDEX','SYM_H']
-    
-    nvar = n_elements(index)
-    if nvar eq 0 then begin
-        errmsg = 'No index selected ...'
-        return
-    endif
-    
-    vars = strarr(nvar)
-    for i=0, nvar-1 do vars[i] = vnames[where(indices eq index[i])]
 
-    omni_read, utr0, resolution, errmsg=errmsg, variable=['Epoch',vars]
+    omni_read, time, id='ae_dst', resolution=resolution, errmsg=errmsg
     if errmsg ne '' then return
-    
+
     case resolution of
         '1min': dt = 60d
         '5min': dt = 300d
     endcase
-    for i=0, nvar-1 do begin
-        tvar = index[i]
-        case tvar of
-            'ae': short_name = 'AE'
-            'dst': short_name = 'Dst'
+
+    foreach var, ['ae','dst'] do begin
+        case var of
+            'ae': shortname = 'AE'
+            'dst': shortname = 'Dst'
         endcase
-        rename_var, strlowcase(vars[i]), to=tvar
-        add_setting, tvar, /smart, {$
+        add_setting, var, /smart, {$
             display_type: 'scalar', $
             unit: 'nT', $
             short_name: short_name}
-            
-        uniform_time, tvar, dt
-    endfor
+        uniform_time, var, dt
+    endforeach
 
+end
+
+time = time_double(['2014-08-25','2014-09-05'])
+omni_read_index, time
 end

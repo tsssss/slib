@@ -4,26 +4,22 @@
 ;
 ; set pitch_angle to load data for a specific pitch angle, otherwise load all pitch angles.
 ;-
-pro rbsp_read_kev_electron, time_range, probe=probe, errmsg=errmsg, pitch_angle=pitch_angle, energy=energy
+pro rbsp_read_kev_electron, time, probe=probe, errmsg=errmsg, pitch_angle=pitch_angle, energy=energy
 
     pre0 = 'rbsp'+probe+'_'
 
     ; read 'rbspx_kev_ele_flux'
-    rbsp_read_mageis, time_range, 'rel03', probe, level='l3', errmsg=errmsg
+    rbsp_read_mageis, time, id='l3%electron', probe=probe, errmsg=errmsg
     if errmsg ne 0 then return
 
     var = pre0+'kev_e_flux'
-    get_data, 'FEDU_Energy', uts, dat
-    tmp = size(dat,/dimensions)
-    nenbin = tmp[1]
-    nrec = tmp[0]
-    enbins = fltarr(nenbin)
-    for i=0, nenbin-1 do if nrec ge 2 then enbins[i] = median(dat[*,i])
+    enbins = get_var_data('FEDU_Energy')
+    nenbin = n_elements(enbins)
     enidx = where(finite(enbins), nenbin)
+    enbins = enbins[enidx]
 
     get_data, 'FEDU', uts, dat
     dat = reform(dat[*,enidx,*])>1
-    enbins = enbins[enidx]
 
     ; apply energy range.
     if n_elements(energy) eq 0 then enidx = findgen(nenbin) else begin
@@ -51,7 +47,7 @@ pro rbsp_read_kev_electron, time_range, probe=probe, errmsg=errmsg, pitch_angle=
 
 
     ; filter pitch angle.
-    get_data, 'FEDU_Alpha', tmp, pabins
+    pabins = get_var_data('FEDU_Alpha')
     npabin = n_elements(pabins)
     if n_elements(pitch_angle) eq 0 then paidx = findgen(npabin) else begin
         case n_elements(pitch_angle) of
@@ -76,17 +72,25 @@ pro rbsp_read_kev_electron, time_range, probe=probe, errmsg=errmsg, pitch_angle=
     pabins = pabins[paidx]
     npabin = n_elements(pabins)
 
+    ; Average pitch angle if no pitch angle info is provided.
+    if n_elements(pitch_angle) eq 0 then begin
+        dat = total(dat,3,/nan)/npabin
+        npabin = 0
+    endif
+
     ; save data.
     if nenbin eq 1 and npabin eq 1 then begin
         store_data, var, uts, dat
         add_setting, var, /smart, {$
             display_type: 'scalar', $
+            ylog: 1, $
             unit: '#/cm!U2!N-s-sr-keV', $
             short_name: 'e!U-!N flux '+sgnum2str(sround(pabins))+'deg, '+sgnum2str(sround(enbins))+'keV'}
     endif else if nenbin eq 1 then begin    ; flux vs pitch angle at certain energy.
         store_data, var, uts, dat, pabins
         add_setting, var, /smart, {$
             display_type: 'list', $
+            ylog: 1, $
             unit: '#/cm!U2!N-s-sr-keV', $
             value_unit: 'deg', $
             short_name: 'e!U-!N flux '+sgnum2str(sround(enbins))+' keV'}
@@ -105,6 +109,7 @@ pro rbsp_read_kev_electron, time_range, probe=probe, errmsg=errmsg, pitch_angle=
         store_data, var, uts, dat
         add_setting, var, /smart, {$
             display_type: 'data', $
+            ylog: 1, $
             energy: enbins, $
             pitch_angle: pabins}
     endelse

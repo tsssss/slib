@@ -14,37 +14,38 @@
 ; remote_base_pattern=. A string for the pattern for the URL.
 ; remote_paths=. An array of patterns for the remote paths.
 ;-
-function construct_file, pattern, errmsg=errmsg, $
+function construct_file, pattern, $
     file_times=file_times, time=time, cadence=cadence, version=version, _extra=extra
 
     errmsg = ''
     retval = ''
-    
+
     if n_elements(pattern) eq 0 then return, retval
     if n_elements(cadence) eq 0 then cadence = 'day'
     if n_elements(file_times) eq 0 then begin
         if n_elements(time) eq 0 then file_times = break_down_times(time, cadence)
     endif
-    if n_elements(version) eq 0 then version = '.*'
-    
+
     type = strlowcase(typename(pattern))
-    if type eq 'dictionary' or type eq 'hash' then begin
-        foreach key, pattern.keys() do begin
-            pattern[key] = construct_file(pattern[key], $
-                errmsg=errmsg, file_times=file_times, version=version, _extra=extra)
-        endforeach
-        return, pattern
-    endif else if type eq 'list' then begin
-        foreach key, pattern, ii do pattern[ii] = construct_file(key, $
-            errmsg=errmsg, file_times=file_times, version=version, _extra=extra)
-    endif else if type ne 'string' then return, retval
+    if type ne 'string' then return, retval
+
+; Decided to not do smart things. The program should be logistically simple: only deal with string inputs and outputs.
+;    if type eq 'dictionary' or type eq 'hash' then begin
+;        foreach key, pattern.keys() do begin
+;            pattern[key] = construct_file(pattern[key], $
+;                errmsg=errmsg, file_times=file_times, version=version, _extra=extra)
+;        endforeach
+;        return, pattern
+;    endif else if type eq 'list' then begin
+;        foreach key, pattern, ii do pattern[ii] = construct_file(key, $
+;            errmsg=errmsg, file_times=file_times, version=version, _extra=extra)
+;    endif else if type ne 'string' then return, retval
 
 
 ;---Construct files from patterns (and file_times)
     files = pattern
-    if n_elements(file_times) ne 0 then $
-        files = apply_time_to_pattern(files, file_times)
-    files = apply_version_to_pattern(files, version)
+    if n_elements(file_times) ne 0 then files = apply_time_to_pattern(files, file_times)
+    if n_elements(version) ne 0 then files = apply_version_to_pattern(files, version)
 
     return, files
 

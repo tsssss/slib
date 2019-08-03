@@ -10,8 +10,6 @@ pro lanl_read_orbit, time_range, probe=probe, errmsg=errmsg
 
     ; read 'pre_r_geo'.
     lanl_read_data, time_range, id='orbit', probe=probe
-    ;lanl_read_data, time_range, id='orbit2', probe=probe
-    ;vars = ['r_geo','mlon','mlat','mlt','glat','glon']
 
     vars = 'r_geo'
     fillval = -1e31

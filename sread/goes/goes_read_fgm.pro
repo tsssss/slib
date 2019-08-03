@@ -1,76 +1,84 @@
 ;+
-; resolution. A string. Default is '512ms', can be '1min','5min','512ms'.
+; resolution. A string. Default is '512ms', can be '1m','5m','512ms'.
 ;-
 
-pro goes_read_fgm, time, datatype, probe=probe, print_datatype=print_datatype, $
-    variable=vars, files=files, level=level, version=version, id=id, errmsg=errmsg, $
+pro goes_read_fgm, time, id=datatype, probe=probe, $
+    print_datatype=print_datatype, errmsg=errmsg, $
+    local_files=files, file_times=file_test, version=version, $
+    local_root=local_root, remote_root=remote_root, $
     resolution=resolution, coordinate=coord
 
     compile_opt idl2
     on_error, 0
     errmsg = ''
 
-
-    nfile=n_elements(files)
-    if n_elements(time) eq 0 and nfile eq 0 and ~keyword_set(print_datatype) then begin
-        errmsg = handle_error('No time or file is given ...')
-        return
-    endif
-    if keyword_set(print_datatype) then probe = 'x'
-
+;---Check inputs.
+    sync_threshold = 1e7    ; sec of 4 months.
+    if n_elements(probe) eq 0 then probe = 'x'
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','goes'])
+    if n_elements(remote_root) eq 0 then remote_root = 'https://satdat.ngdc.noaa.gov/sem/goes/data'
+    if n_elements(version) eq 0 then version = ''
     if n_elements(resolution) eq 0 then resolution = '512ms'
     if n_elements(coord) eq 0 then coord = 'gsm'
-    loc_root = join_path([default_local_root(),'data','goes'])
-    rem_root = 'https://satdat.ngdc.noaa.gov/sem/goes/data'
-    version = ''    ; dummy parameter.
-    pre0 = 'g'+probe
 
-    type_dispatch = []
-    type_dispatch = [type_dispatch, $
-        {id: '512ms', $
-        base_pattern: 'g'+probe+'_magneto_512ms_%Y%m%d_%Y%m%d.nc', $
-        remote_pattern: join_path([rem_root,'new_full','%Y','%m','goes'+probe,'netcdf']), $
-        local_pattern: join_path([loc_root,'goes'+probe,'fgm','512ms','%Y','%m','netcdf'])}]
-; haven't tested yet.
-;    type_dispatch = [type_dispatch, $
-;        {id: '1min', $
-;        base_pattern: 'goes'+probe+'_magneto_1m_%Y%m01_%Y%m[0-9]{2}.nc', $
-;        remote_pattern: join_path([rem_root,'new_avg','%Y','%m']), $
-;        local_pattern: join_path([loc_root,'fgm','1min','%Y'])}]
-;    type_dispatch = [type_dispatch, $
-;        {id: '5min', $
-;        base_pattern: 'goes'+probe+'_magneto_5m_%Y%m01_%Y%m[0-9]{2}.nc', $
-;        remote_pattern: join_path([rem_root,'new_avg','%Y','%m']), $
-;        local_pattern: join_path([loc_root,'fgm','5min','%Y'])}]
+;---Init settings.
+    type_dispatch = hash()
+    ; Magnetic field data 512ms.
+    base_name = 'g'+probe+'_magneto_512ms_%Y%m%d_%Y%m%d.nc'
+    local_path = [local_root,'goes'+probe,'fgm','512ms','%Y','%m','netcdf']
+    remote_path = [remote_root,'new_full','%Y','%m','goes'+probe,'netcdf']
+    type_dispatch['512ms'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name))
+
+    ; Magnetic field data 1min or 5min.
+    foreach key, ['1m','5m'] do begin
+        base_name = 'g'+probe+'_magneto_'+key+'_%Y%m01_%Y%m[0-9]{2}.nc'
+        local_path = [local_root,'goes'+probe,'fgm','low_res','%Y','%m','netcdf']
+        remote_path = [remote_root,'new_avg','%Y','%m','goes'+probe,'netcdf']
+        type_dispatch[key] = dictionary($
+            'pattern', dictionary($
+                'local_file', join_path([local_path,base_name]), $
+                'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+                'remote_file', join_path([remote_path,base_name]), $
+                'remote_index_file', join_path([remote_path,''])), $
+            'sync_threshold', sync_threshold, $
+            'cadence', 'month', $
+            'extension', fgetext(base_name))
+    endforeach
+
     if keyword_set(print_datatype) then begin
         print, 'Suported data type: '
-        ids = type_dispatch.id
+        ids = type_dispatch.keys()
         foreach id, ids do print, '  * '+id
         return
     endif
 
-    ; dispatch patterns.
-    if n_elements(id) eq 0 then id = resolution
-    ids = type_dispatch.id
-    idx = where(ids eq id, cnt)
-    if cnt eq 0 then message, 'Do not support type '+id+' yet ...'
-    myinfo = type_dispatch[idx[0]]
 
-    ; find files to be read. download directly if local file does not exist.
-    file_cadence = 86400.
-    if nfile eq 0 then begin
-        index_file = 'remote-index.html'
-        times = break_down_times(time, file_cadence)
-        patterns = [myinfo.base_pattern, myinfo.local_pattern, myinfo.remote_pattern]
-        files = find_data_file(time, patterns, index_file, $
-            file_cadence=file_cadence)
-    endif
-
-    ; no file is found.
-    if n_elements(files) eq 1 and files[0] eq '' then begin
-        errmsg = handle_error('No file is found ...')
+;---Dispatch patterns.
+    if n_elements(datatype) eq 0 then begin
+        errmsg = handle_error('No input datatype ...')
         return
     endif
+    if not type_dispatch.haskey(datatype) then begin
+        errmsg = handle_error('Do not support type '+datatype+' yet ...')
+        return
+    endif
+    request = type_dispatch[datatype]
+
+;---Find files, read variables, and store them in memory.
+    files = prepare_files(request=request, errmsg=errmsg, local_files=files, $
+        file_times=file_times, time=time, nonexist_files=nonexist_files)
+
+    ; no file is found.
+    if n_elements(files) eq 0 then return
+
 
     ; read data to tplot.
     netcdf2tplot, files
@@ -118,7 +126,7 @@ end
 utr0 = time_double(['2014-08-28','2014-08-29'])
 probe = '13'
 pre0 = 'g'+probe+'_'
-goes_read_fgm, utr0, probe=probe
+goes_read_fgm, utr0, probe=probe, id='512ms'
 get_data, pre0+'b_gsm', uts, bgsm
 ets = stoepoch(uts, 'unix')
 bsm = sgsm2sm(bgsm, ets)

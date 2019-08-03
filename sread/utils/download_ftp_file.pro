@@ -78,7 +78,7 @@ pro download_ftp_file, local_file, remote_file, errmsg=errmsg
     file = oo->get(filename=local_file, url=remote_file)
     obj_destroy, oo
 
-    ;stouch, local_file, mtime=info.mtime
+    ;ftouch, local_file, mtime=info.mtime
     lprmsg, 'Saved to '+local_file+' ...'
 
 end

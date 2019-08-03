@@ -14,6 +14,8 @@ pro download_file, local_file, remote_file, errmsg=errmsg
         return
     endif
 
+    local_file = local_file[0]
+    remote_file = remote_file[0]
     lprmsg, 'Downloading '+remote_file+' ...'
 
     url_info = parse_url(remote_file)

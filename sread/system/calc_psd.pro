@@ -15,6 +15,8 @@ pro calc_psd, var, scales = scales, wavelet=wavelet, param=param
     if tnames(var) eq '' then message, 'Cannot find var: '+var+' ...'
     get_data, var, t_n, x_n
     if size(x_n, /n_dimensions) ne 1 then message, 'Data needs to be a scalar ...'
+    index = where(finite(x_n,/nan), count)
+    if count ne 0 then x_n[index] = 0
     unit = get_setting(var, 'unit', exist)
     if not exist then unit = ''
     short_name = get_setting(var, 'short_name', exist)

@@ -3,26 +3,22 @@
 ;
 ; time. A time or a time range in ut time. Set time to find files
 ;   automatically, or set files to read data in them directly.
-; datatype. A string set which set of variable to read. Use
-;   print_datatype to see supported types.
-; probe. A string set the probe to read data for.
-; level. A string set the level of data, e.g., 'l1'.
-; variable. An array of variables to read. Users can omit this keyword
-;   unless want to fine tune the behaviour.
-; files. A string or an array of N full file names. Set this keyword
-;   will set files directly.
-; version. A string sets the version of data. Default behaviour is to read
-;   the highest version. Set this keyword to read specific version.
-; resolution. A string. Default is '4sec', can be '1sec','4sec','hires'.
+; id=. A string sets the data type to read. Check supported ids by setting
+;   print_datatype.
+; print_datatype=. A boolean. Set to print all supported ids.
+; probe=. A string set the probe to read data for.
+; local_root=. A string to set the local root directory.
+; remote_root=. A string to set the remote root directory.
+; local_files=. A string or an array of N full file names. Set to fine
+;   tuning the files to read data from.
+; file_times=. An array of N times. Set to fine tuning the times of the files.
+; resolution=. A string for data resolution. Default is 4sec.
+; coordinate=. A string to set vector coordinate, 'gsm' by default.
 ;-
 pro rbsp_read_emfisis, time, id=datatype, probe=probe, $
-    resolution=resolution, coordinate=coord, $
     print_datatype=print_datatype, errmsg=errmsg, $
-    in_vars=in_vars, out_vars=out_vars, files=files, version=version, $
     local_root=local_root, remote_root=remote_root, $
-    sync_after=sync_after, file_times=file_times, index_file=index_file, skip_index=skip_index, $
-    sync_index=sync_index, sync_files=sync_files, stay_local=stay_loca, $
-    time_var_name=time_var_name, time_var_type=time_var_type, generic_time=generic_time
+    resolution=resolution, coordinate=coord
 
     compile_opt idl2
     on_error, 0
@@ -30,108 +26,108 @@ pro rbsp_read_emfisis, time, id=datatype, probe=probe, $
 
 
 ;---Check inputs.
-    nfile = n_elements(files)
-    if n_elements(time) eq 0 and nfile eq 0 and ~keyword_set(print_datatype) then begin
-        errmsg = handle_error('No time or file is given ...')
-        return
-    endif
-    if keyword_set(print_datatype) then probe = 'x'
-    if n_elements(probe) eq 0 then begin
-        errmsg = handle_error('No input probe ...')
-        return
-    endif
-    if n_elements(out_vars) ne n_elements(in_vars) then out_vars = in_vars
-
-;---Default settings.
+    sync_threshold = 86400d*120
+    if n_elements(probe) eq 0 then probe = 'x'
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','rbsp'])
     if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/rbsp'
     if n_elements(version) eq 0 then version = 'v[0-9.]{5}'
-    if n_elements(index_file) eq 0 then index_file = default_index_file()
-    rbspx = 'rbsp'+probe
     if n_elements(resolution) eq 0 then resolution = '4sec'
     if n_elements(coord) eq 0 then coord = 'gsm'
 
-    type_dispatch = []
+
+;---Init settings.
+    type_dispatch = hash()
+    rbspx = 'rbsp'+probe
     ; Level 2, B UVW.
-    type_dispatch = [type_dispatch, $
-        {id: 'l2%magnetometer', $
-        base_pattern: 'rbsp-'+probe+'_magnetometer_uvw_emfisis-l2_%Y%m%d_'+version+'.cdf', $
-        remote_paths: ptr_new([remote_root,rbspx,'l2','emfisis','magnetometer','uvw','%Y']), $
-        local_paths: ptr_new([local_root,rbspx,'emfisis','%Y','l2','magnetometer','uvw']), $
-        ptr_in_vars: ptr_new(['Mag']), $
-        ptr_out_vars: ptr_new([rbspx+'_b_uvw']), $
-        time_var_name: 'Epoch', $
-        time_var_type: 'tt2000', $
-        generic_time: 0, $
-        cadence: 'day', $
-        placeholder: 0b}]
+    base_name = 'rbsp-'+probe+'_magnetometer_uvw_emfisis-l2_%Y%m%d_'+version+'.cdf'
+    local_path = [local_root,rbspx,'emfisis','%Y','l2','magnetometer','uvw']
+    remote_path = [remote_root,rbspx,'l2','emfisis','magnetometer','uvw','%Y']
+    type_dispatch['l2%magnetometer'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['Mag'], $
+                'out_vars', [rbspx+'_b_uvw'], $
+                'time_var_name', 'Epoch', $
+                'time_var_type', 'tt2000')))
     ; Level 3, B in given coord.
-    type_dispatch = [type_dispatch, $
-        {id: 'l3%magnetometer', $
-        base_pattern: 'rbsp-'+probe+'_magnetometer_'+resolution+'-'+coord+'_emfisis-l3_%Y%m%d_'+version+'.cdf', $
-        remote_paths: ptr_new([remote_root,rbspx,'l3','emfisis','magnetometer',resolution,coord,'%Y']), $
-        local_paths: ptr_new([local_root,rbspx,'emfisis','%Y','l3','magnetometer',resolution,coord]), $
-        ptr_in_vars: ptr_new(['Mag']), $
-        ptr_out_vars: ptr_new([rbspx+'_b_'+coord]), $
-        time_var_name: 'Epoch', $
-        time_var_type: 'tt2000', $
-        generic_time: 0, $
-        cadence: 'day', $
-        placeholder: 0b}]
+    base_name = 'rbsp-'+probe+'_magnetometer_'+resolution+'-'+coord+'_emfisis-l3_%Y%m%d_'+version+'.cdf'
+    local_path = [local_root,rbspx,'emfisis','%Y','l3','magnetometer',resolution,coord]
+    remote_path = [remote_root,rbspx,'l3','emfisis','magnetometer',resolution,coord,'%Y']
+    type_dispatch['l3%magnetometer'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['Mag'], $
+                'out_vars', [rbspx+'_b_'+coord], $
+                'time_var_name', 'Epoch', $
+                'time_var_type', 'tt2000')))
+
     if keyword_set(print_datatype) then begin
         print, 'Suported data type: '
-        ids = type_dispatch.id
+        ids = type_dispatch.keys()
         foreach id, ids do print, '  * '+id
         return
     endif
+
 
 ;---Dispatch patterns.
     if n_elements(datatype) eq 0 then begin
         errmsg = handle_error('No input datatype ...')
         return
     endif
-    ids = type_dispatch.id
-    index = where(ids eq datatype, count)
-    if count eq 0 then begin
+    if not type_dispatch.haskey(datatype) then begin
         errmsg = handle_error('Do not support type '+datatype+' yet ...')
         return
     endif
-    myinfo = type_dispatch[index[0]]
-    if n_elements(time_var_name) ne 0 then myinfo.time_var_name = time_var_name
-    if n_elements(time_var_type) ne 0 then myinfo.time_var_type = time_var_type
-
+    request = type_dispatch[datatype]
 
 ;---Find files, read variables, and store them in memory.
-    files = prepare_file(files=files, errmsg=errmsg, $
-        file_times=file_times, index_file=index_file, time=time, $
-        stay_local=stay_local, sync_index=sync_index, $
-        sync_files=sync_files, sync_after=sync_time, $
-        skip_index=skip_index, $
-        _extra=myinfo)
-    if errmsg ne '' then begin
-        errmsg = handle_error('Error in finding files ...')
-        return
-    endif
+    files = prepare_files(request=request, errmsg=errmsg, local_files=files, $
+        file_times=file_times, time=time, nonexist_files=nonexist_files)
 
+;---Read data from files and save to memory.
+;   v1.6.2 is using a different time format from v1.6.1. So use spedas first.
     if n_elements(time) eq 2 then timespan, time[0], time[1]-time[0], /second
     cdf2tplot, file=files, varformat=varformat, all=0, prefix='', suffix='', $
         tplotnames=tns, /convert_int1_to_int2
-    in_vars = *myinfo.ptr_in_vars
-    out_vars = *myinfo.ptr_out_vars
+
+    all_invars = list()
+    all_outvars = list()
+    foreach var_list, request.var_list do begin
+        if ~var_list.haskey('in_vars') then continue
+        in_vars = var_list.in_vars
+        if n_elements(in_vars) eq 0 then continue
+        out_vars = var_list.haskey('out_vars')? var_list.out_vars: !null
+        if n_elements(out_vars) ne n_elements(in_vars) then out_vars = in_vars
+        all_invars.add, in_vars, /extract
+        all_outvars.add, out_vars, /extract
+    endforeach
+    in_vars = all_invars.toarray()
+    out_vars = all_outvars.toarray()
+
     foreach tn, tns do begin
         index = where(tn eq in_vars, count)
-        if count eq 0 then store_data, tn, /delete else rename_var, tn, to=out_vars[index]
+        if count eq 0 then begin
+            store_data, tn, /delete
+        endif else begin
+            rename_var, tn, to=out_vars[index]
+        endelse
     endforeach
-
-;   v1.6.2 is using a different time format from v1.6.1. So use spedas first.
-;    in_vars = *myinfo.ptr_in_vars
-;    out_vars = *myinfo.ptr_out_vars
-;    read_and_store_var, files, time_info=time, errmsg=errmsg, $
-;        in_vars=in_vars, out_vars=out_vars, generic_time=generic_time, _extra=myinfo
-;    if errmsg ne '' then begin
-;        errmsg = handle_error('Error in reading or storing data ...')
-;        return
-;    endif
 end
 
 

@@ -1,14 +1,17 @@
 ;+
 ; Read quaternion to rotate from UVW to GSM.
+; 
+; time. The time or time range in UT sec.
+; probe=. A string of 'a' or 'b'.
 ;-
-pro rbsp_read_quaternion, utr0, probe=probe, errmsg=errmsg
-    
+pro rbsp_read_quaternion, time, probe=probe, errmsg=errmsg
+
     errmsg = ''
-    
+
     ; read 'q_uvw2gsm'.
-    rbsp_read_spice, utr0, 'quaternion', probe=probe, errmsg=errmsg
+    rbsp_read_spice, time, id='quaternion', probe=probe, errmsg=errmsg
     if errmsg ne '' then return
-    
+
     pre0 = 'rbsp'+probe+'_'
     var = pre0+'q_uvw2gsm'
     rename_var, 'q_uvw2gsm', to=var

@@ -21,7 +21,7 @@ pro sync_file, local_files=local_files, remote_files=remote_files, sync_time=syn
         return
     endif
     if n_elements(remote_files) ne nfile then remote_files = strarr(nfile)
-    if n_elements(sync_time) eq 0 then sync_time = systime(1)
+    ;if n_elements(sync_time) eq 0 then sync_time = systime(1)
 
 ;---Gather all (unique) candidates of local files.
     files = hash()
@@ -38,12 +38,12 @@ pro sync_file, local_files=local_files, remote_files=remote_files, sync_time=syn
         dict['sync'] = ~file_test(file)
         if dict['sync'] eq 1 then continue
         ; File exists, thus do not sync by default.
-        if n_elements(mtime) ne 0 then stouch, file, mtime=mtime
+        if n_elements(mtime) ne 0 then ftouch, file, mtime=mtime
         finfo = file_info(file)
         dict[local_key+'_size'] = finfo.size
         dict[local_key+'_mtime'] = double(finfo.mtime)
         files[ii] = dict
-        ; However, sync if sync_time is set, mtime is newer.
+        ; However, sync if sync_time is set and mtime is newer.
         if n_elements(sync_time) eq 0 then continue
         if finfo.mtime le sync_time then continue
         dict['sync'] = 1
@@ -65,7 +65,7 @@ pro sync_file, local_files=local_files, remote_files=remote_files, sync_time=syn
         dict['errmsg'] = errmsg
         files[ii] = dict
         if file_test(file) eq 0 then continue
-        if n_elements(mtime) ne 0 then stouch, file, mtime=mtime
+        if n_elements(mtime) ne 0 then ftouch, file, mtime=mtime
     endforeach
 
 end
@@ -92,6 +92,6 @@ remotes.add, 'https://cdaweb.gsfc.nasa.gov/pub/data/themis/thg/l1/mag/idx/2005/S
 locals.add, join_path([homedir(),'Downloads','test','thg_l1_idx_20050101_v01_http.cdf'])
 remotes.add, 'https://cdaweb.gsfc.nasa.gov/pub/data/themis/thg/l1/mag/idx/2005/thg_l1_idx_20050101_v01.cdf'
 
-sync_file, local_files=locals, remote_files=remotes, mtime=time_double('2013-01-01'))
+sync_file, local_files=locals, remote_files=remotes, mtime=time_double('2013-01-01')
 
 end

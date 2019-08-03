@@ -10,7 +10,7 @@ pro rbsp_read_b1_field, utr0, probe=probe, prefix=pre0, datarate=dt
     timespan, utr0[0], utr0[1]-utr0[0], /second
     rbsp_load_efw_waveform, probe=probe, level='l1', trange=utr0, /calibrate, datatype='eb1'
     rbsp_load_efw_waveform, probe=probe, level='l1', trange=utr0, /calibrate, datatype='mscb1'
-    
+
     ; merge to system.
     evar = pre0+'eb1_uvw'
     rename_var, pre1+'efw_eb1', to=evar
@@ -54,5 +54,8 @@ pro rbsp_read_b1_field, utr0, probe=probe, prefix=pre0, datarate=dt
 end
 
 utr0 = time_double(['2013-06-10/05:57:20','2013-06-10/05:59:40']) ; a shorter time range for test purpose.
-rbsp_read_b1_field, utr0, probe='b'
+probe = 'b'
+
+
+rbsp_read_b1_field, utr0, probe=probe
 end

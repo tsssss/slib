@@ -1,15 +1,25 @@
 ;+
 ; Read RBSP HOPE data.
+;
+; time. A time or a time range in ut time. Set time to find files
+;   automatically, or set files to read data in them directly.
+; id=. A string sets the data type to read. Check supported ids by setting
+;   print_datatype.
+; print_datatype=. A boolean. Set to print all supported ids.
+; probe=. A string set the probe to read data for.
+; local_root=. A string to set the local root directory.
+; remote_root=. A string to set the remote root directory.
+; local_files=. A string or an array of N full file names. Set to fine
+;   tuning the files to read data from.
+; file_times=. An array of N times. Set to fine tuning the times of the files.
+; release=. A string to set the release. Default is 'rel04'.
 ;-
 
 pro rbsp_read_hope, time, id=datatype, probe=probe, $
-    release=release, $
     print_datatype=print_datatype, errmsg=errmsg, $
-    in_vars=in_vars, out_vars=out_vars, files=files, version=version, $
+    local_files=files, file_times=file_times, version=version, $
     local_root=local_root, remote_root=remote_root, $
-    sync_after=sync_after, file_times=file_times, index_file=index_file, skip_index=skip_index, $
-    sync_index=sync_index, sync_files=sync_files, stay_local=stay_loca, $
-    time_var_name=time_var_name, time_var_type=time_var_type, generic_time=generic_time
+    release=release
 
     compile_opt idl2
     on_error, 0
@@ -17,89 +27,124 @@ pro rbsp_read_hope, time, id=datatype, probe=probe, $
 
 
 ;---Check inputs.
-    nfile = n_elements(files)
-    if n_elements(time) eq 0 and nfile eq 0 and ~keyword_set(print_datatype) then begin
-        errmsg = handle_error('No time or file is given ...')
-        return
-    endif
-    if keyword_set(print_datatype) then probe = 'x'
-    if n_elements(probe) eq 0 then begin
-        errmsg = handle_error('No input probe ...')
-        return
-    endif
-    if n_elements(out_vars) ne n_elements(in_vars) then out_vars = in_vars
-
-
-;--Default settings.
+    sync_threshold = 86400d*120
+    if n_elements(probe) eq 0 then probe = 'x'
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','rbsp'])
     if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/rbsp'
     if n_elements(version) eq 0 then version = 'v[0-9.]{5}'
-    if n_elements(index_file) eq 0 then index_file = default_index_file()
     if n_elements(release) eq 0 then release = 'rel04'  ; updated 2019-06.
 
+
+;--Init settings.
     type_dispatch = hash()
     ; Level 3 data.
+    base_name = 'rbsp'+probe+'_'+release+'_ect-hope-pa-l3_%Y%m%d_'+version+'.cdf'
+    local_path = [local_root,'rbsp'+probe,'hope','level3','pa_'+release,'%Y']
+    remote_path = [remote_root,'rbsp'+probe,'l3','ect','hope','pitchangle',release,'%Y']
+    type_dispatch['l3%pa'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['Epoch_Ele_DELTA','HOPE_ENERGY_Ele','FEDU'], $
+                'out_vars', ['epoch_ele_delta','hope_energy_ele','fedu'], $
+                'time_var_name', 'Epoch_Ele', $
+                'time_var_type', 'Epoch'), $
+            dictionary($
+                'in_vars', ['Epoch_Ion_DELTA','HOPE_ENERGY_Ion','FPDU','FODU','FHEDU'], $
+                'out_vars', ['epoch_ion_delta','hope_energy_ion','fpdu','fodu','fhedu'], $
+                'time_var_name', 'Epoch_Ion', $
+                'time_var_type', 'Epoch'), $
+            dictionary($
+                'in_vars', ['PITCH_ANGLE'], $
+                'out_vars', ['pitch_angle'], $
+                'generic_time', 1)))
     type_dispatch['l3%pa%electron'] = dictionary($
-        'base_pattern', 'rbsp'+probe+'_'+release+'_ect-hope-pa-l3_%Y%m%d_'+version+'.cdf', $
-        'remote_paths', [remote_root,'rbsp'+probe,'l3','ect','hope','pitchangle',release,'%Y'], $
-        'local_paths', [local_root,'rbsp'+probe,'hope','level3','pa_'+release,'%Y'], $
-        'in_vars', ['Epoch_Ele_DELTA','HOPE_ENERGY_Ele','FEDU'], $
-        'out_vars', ['epoch_ele_delta','hope_energy_ele','fedu'], $
-        'time_var_name', 'Epoch_Ele', $
-        'time_var_type', 'Epoch', $
-        'generic_time', 0, $
-        'cadence', 'day')
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['Epoch_Ele_DELTA','HOPE_ENERGY_Ele','FEDU'], $
+                'out_vars', ['epoch_ele_delta','hope_energy_ele','fedu'], $
+                'time_var_name', 'Epoch_Ele', $
+                'time_var_type', 'Epoch'), $
+            dictionary($
+                'in_vars', ['PITCH_ANGLE'], $
+                'out_vars', ['pitch_angle'], $
+                'generic_time', 1)))
     type_dispatch['l3%pa%ion'] = dictionary($
-        'base_pattern', 'rbsp'+probe+'_'+release+'_ect-hope-pa-l3_%Y%m%d_'+version+'.cdf', $
-        'remote_paths', [remote_root,'rbsp'+probe,'l3','ect','hope','pitchangle',release,'%Y'], $
-        'local_paths', [local_root,'rbsp'+probe,'hope','level3','pa_'+release,'%Y'], $
-        'in_vars', ['Epoch_Ion_DELTA','HOPE_ENERGY_Ion','FPDU','FODU','FHEDU'], $
-        'out_vars', ['epoch_ion_delta','hope_energy_ion','fpdu','fodu','fhedu'], $
-        'time_var_name', 'Epoch_Ion', $
-        'time_var_type', 'Epoch', $
-        'generic_time', 0, $
-        'cadence', 'day')
-    type_dispatch['l3%pa%misc'] = dictionary($
-        'base_pattern', 'rbsp'+probe+'_'+release+'_ect-hope-pa-l3_%Y%m%d_'+version+'.cdf', $
-        'remote_paths', [remote_root,'rbsp'+probe,'l3','ect','hope','pitchangle',release,'%Y'], $
-        'local_paths', [local_root,'rbsp'+probe,'hope','level3','pa_'+release,'%Y'], $
-        'in_vars', ['PITCH_ANGLE'], $
-        'out_vars', ['pitch_angle'], $
-        'time_var_name', '', $
-        'time_var_type', '', $
-        'generic_time', 1, $
-        'cadence', 'day')
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['Epoch_Ion_DELTA','HOPE_ENERGY_Ion','FPDU','FODU','FHEDU'], $
+                'out_vars', ['epoch_ion_delta','hope_energy_ion','fpdu','fodu','fhedu'], $
+                'time_var_name', 'Epoch_Ion', $
+                'time_var_type', 'Epoch'), $
+            dictionary($
+                'in_vars', ['PITCH_ANGLE'], $
+                'out_vars', ['pitch_angle'], $
+                'generic_time', 1)))
     ; Level 2 data.
+    base_name = 'rbsp'+probe+'_'+release+'_ect-hope-sci-l2_%Y%m%d_'+version+'.cdf'
+    local_path = [local_root,'rbsp'+probe,'hope','level2','sectors_'+release,'%Y']
+    remote_path = [remote_root,'rbsp'+probe,'l2','ect','hope','sectors',release,'%Y']
     type_dispatch['l2%electron'] = dictionary($
-        'base_pattern', 'rbsp'+probe+'_'+release+'_ect-hope-sci-l2_%Y%m%d_'+version+'.cdf', $
-        'remote_paths', [remote_root,'rbsp'+probe,'l2','ect','hope','sectors',release,'%Y'], $
-        'local_paths', [local_root,'rbsp'+probe,'hope','level2','sectors_'+release,'%Y'], $
-        'in_vars', ['Epoch_Ele_DELTA','HOPE_ENERGY_Ele','FEDU'], $
-        'out_vars', ['epoch_ele_delta','hope_energy_ele','fedu'], $
-        'time_var_name', 'Epoch_Ele', $
-        'time_var_type', 'Epoch', $
-        'generic_time', 0, $
-        'cadence', 'day')
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['Epoch_Ele_DELTA','HOPE_ENERGY_Ele','FEDU'], $
+                'out_vars', ['epoch_ele_delta','hope_energy_ele','fedu'], $
+                'time_var_name', 'Epoch_Ele', $
+                'time_var_type', 'Epoch'), $
+            dictionary($
+                'in_vars', ['Sector_Collapse_Cntr','Energy_Collapsed','Epoch'], $
+                'out_vars', ['sector_collapse_cntr','energy_collapsed','epoch'], $
+                'generic_time', 1)))
     type_dispatch['l2%ion'] = dictionary($
-        'base_pattern', 'rbsp'+probe+'_'+release+'_ect-hope-sci-l2_%Y%m%d_'+version+'.cdf', $
-        'remote_paths', [remote_root,'rbsp'+probe,'l2','ect','hope','sectors',release,'%Y'], $
-        'local_paths', [local_root,'rbsp'+probe,'hope','level2','sectors_'+release,'%Y'], $
-        'in_vars', ['Epoch_Ion_DELTA','HOPE_ENERGY_Ion','FPDU','FODU','FHEDU'], $
-        'out_vars', ['epoch_ion_delta','hope_energy_ion','fpdu','fodu','fhedu'], $
-        'time_var_name', 'Epoch_Ion', $
-        'time_var_type', 'Epoch', $
-        'generic_time', 0, $
-        'cadence', 'day')
-    type_dispatch['l2%misc'] = dictionary($
-        'base_pattern', 'rbsp'+probe+'_'+release+'_ect-hope-sci-l2_%Y%m%d_'+version+'.cdf', $
-        'remote_paths', [remote_root,'rbsp'+probe,'l2','ect','hope','sectors',release,'%Y'], $
-        'local_paths', [local_root,'rbsp'+probe,'hope','level2','sectors_'+release,'%Y'], $
-        'in_vars', ['Sector_Collapse_Cntr','Energy_Collapsed','Epoch'], $
-        'out_vars', ['sector_collapse_cntr','energy_collapsed','epoch'], $
-        'time_var_name', '', $
-        'time_var_type', '', $
-        'generic_time', 1, $
-        'cadence', 'day')
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['Epoch_Ion_DELTA','HOPE_ENERGY_Ion','FPDU','FODU','FHEDU'], $
+                'out_vars', ['epoch_ion_delta','hope_energy_ion','fpdu','fodu','fhedu'], $
+                'time_var_name', 'Epoch_Ele', $
+                'time_var_type', 'Epoch'), $
+            dictionary($
+                'in_vars', ['Sector_Collapse_Cntr','Energy_Collapsed','Epoch'], $
+                'out_vars', ['sector_collapse_cntr','energy_collapsed','epoch'], $
+                'generic_time', 1)))
 
     if keyword_set(print_datatype) then begin
         print, 'Suported data type: '
@@ -118,38 +163,19 @@ pro rbsp_read_hope, time, id=datatype, probe=probe, $
         errmsg = handle_error('Do not support type '+datatype+' yet ...')
         return
     endif
-    myinfo = (type_dispatch[datatype]).tostruct()
-    if n_elements(time_var_name) ne 0 then myinfo.time_var_name = time_var_name
-    if n_elements(time_var_type) ne 0 then myinfo.time_var_type = time_var_type
+    request = type_dispatch[datatype]
 
 ;---Find files, read variables, and store them in memory.
-    files = prepare_file(files=files, errmsg=errmsg, $
-        file_times=file_times, index_file=index_file, time=time, $
-        stay_local=stay_local, sync_index=sync_index, $
-        sync_files=sync_files, sync_after=sync_time, $
-        skip_index=skip_index, $
-        _extra=myinfo)
-    if errmsg ne '' then begin
-        errmsg = handle_error('Error in finding files ...')
-        return
-    endif
+    files = prepare_files(request=request, errmsg=errmsg, local_files=files, $
+        file_times=file_times, time=time, nonexist_files=nonexist_files)
 
-    in_vars = myinfo.in_vars
-    out_vars = myinfo.out_vars
-    read_and_store_var, files, time_info=time, errmsg=errmsg, $
-        in_vars=in_vars, out_vars=out_vars, generic_time=generic_time, _extra=myinfo
-    if errmsg ne '' then begin
-        errmsg = handle_error('Error in reading or storing data ...')
-        return
-    endif
-
+;---Read data from files and save to memory.
+    read_files, time, files=files, request=request
 
 end
 
 
 time = time_double(['2013-03-14/00:00','2013-03-14/00:10'])
 probe = 'a'
-;rbsp_read_hope, time, id='l2%rel03%ion', probe=probe
 rbsp_read_hope, time, id='l2%electron', probe=probe
-rbsp_read_hope, time, id='l2%misc', probe=probe
 end

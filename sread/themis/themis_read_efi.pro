@@ -3,98 +3,88 @@
 ;
 ; time. A time or a time range in ut time. Set time to find files
 ;   automatically, or set files to read data in them directly.
-; datatype. A string set which set of variable to read. Use
-;   print_datatype to see supported types.
-; probe. A string set the probe to read data for.
-; level. A string set the level of data, e.g., 'l1'.
-; variable. An array of variables to read. Users can omit this keyword
-;   unless want to fine tune the behaviour.
-; files. A string or an array of N full file names. Set this keyword
-;   will set files directly.
-; version. A string sets the version of data. Default behaviour is to read
-;   the highest version. Set this keyword to read specific version.
+; id=. A string sets the data type to read. Check supported ids by setting
+;   print_datatype.
+; print_datatype=. A boolean. Set to print all supported ids.
+; probe=. A string set the probe to read data for.
+; local_root=. A string to set the local root directory.
+; remote_root=. A string to set the remote root directory.
+; local_files=. A string or an array of N full file names. Set to fine
+;   tuning the files to read data from.
+; file_times=. An array of N times. Set to fine tuning the times of the files.
 ;-
 
-pro themis_read_efi, time, datatype, probe, level=level, $
+pro themis_read_efi, time, id=datatype, probe, $
     print_datatype=print_datatype, errmsg=errmsg, $
-    variable=vars, files=files, version=version, id=id
+    local_files=files, file_times=file_times, version=version, $
+    local_root=local_root, remote_root=remote_root
 
     compile_opt idl2
     on_error, 0
     errmsg = ''
-    
 
-    nfile = n_elements(files)
-    if n_elements(time) eq 0 and nfile eq 0 then begin
-        message, 'no time or file is given ...', /continue
-        if not keyword_set(print_datatype) then return
-    endif
-    if keyword_set(print_datatype) then probe = 'x'
+;---Check inputs.
+    sync_threshold = 86400d*120
+    if n_elements(probe) eq 0 then probe = 'x'
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','themis'])
+    if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.sci.gsfc.nasa.gov/pub/data/themis'
+    if n_elements(version) eq 0 then version = 'v[0-9]{2}'
 
-    loc_root = join_path([sdiskdir('Research'),'data','themis'])
-    rem_root = 'https://cdaweb.sci.gsfc.nasa.gov/pub/data/themis'
-    version = (n_elements(version) eq 0)? 'v[0-9]{2}': version
+;---Init settings.
+    type_dispatch = hash()
     thx = 'th'+probe
+    ; Level 2.
+    base_name = thx+'_l2_efi_%Y%m%d_'+version+'.cdf'
+    local_path = [local_root,thx,'l2','efi','%Y']
+    remote_path = [remote_root,thx,'l2','efi','%Y']
+    ; efs, 3sec resolution.
+    ; eff, 1/8 sec resolution.
+    foreach key, ['efs','eff'] do begin
+        type_dispatch['l2%'+key] = dictionary($
+            'pattern', dictionary($
+                'local_file', join_path([local_path,base_name]), $
+                'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+                'remote_file', join_path([remote_path,base_name]), $
+                'remote_index_file', join_path([remote_path,''])), $
+            'sync_threshold', sync_threshold, $
+            'cadence', 'day', $
+            'extension', fgetext(base_name), $
+            'var_list', list($
+                dictionary($
+                    'in_vars', [key+'_dot0_gsm'], $
+                    'time_var_name', key+'_dot0_time', $
+                    'time_var_type', 'unix')))
+    endforeach
 
-    type_dispatch = []
-    type_dispatch = [type_dispatch, $
-        {id: 'l2%efs', $
-        base_pattern: thx+'_l2_efi_%Y%m%d_'+version+'.cdf', $
-        remote_pattern: join_path([rem_root,thx,'l2','efi','%Y']), $
-        local_pattern: join_path([loc_root,thx,'l2','efi','%Y']), $
-        variable: ptr_new(['efs_dot0_time','efs_dot0_gsm']), $
-        time_var: 'efs_dot0_time', $
-        time_type: 'unix'}]
-    type_dispatch = [type_dispatch, $
-        {id: 'l2%eff', $
-        base_pattern: thx+'_l2_efi_%Y%m%d_'+version+'.cdf', $
-        remote_pattern: join_path([rem_root,thx,'l2','efi','%Y']), $
-        local_pattern: join_path([loc_root,thx,'l2','efi','%Y']), $
-        variable: ptr_new(['eff_dot0_time','eff_dot0_gsm']), $
-        time_var: 'eff_dot0_time', $
-        time_type: 'unix'}]
     if keyword_set(print_datatype) then begin
         print, 'Suported data type: '
-        ids = type_dispatch.id
+        ids = type_dispatch.keys()
         foreach id, ids do print, '  * '+id
         return
     endif
-    
-    ; dispatch patterns.
-    if n_elements(id) eq 0 then id = strjoin([level,datatype],'%')
-    ids = type_dispatch.id
-    idx = where(ids eq id, cnt)
-    if cnt eq 0 then message, 'Do not support type '+id+' yet ...'
-    myinfo = type_dispatch[idx[0]]
-    
-    ; find files to be read.
-    file_cadence = 86400.
-    if nfile eq 0 then begin
-        update_t_threshold = 365.25d*86400  ; 1 year.
-        index_file = 'remote-index.html'
-        times = break_down_times(time, file_cadence)
-        patterns = [myinfo.base_pattern, myinfo.local_pattern, myinfo.remote_pattern]
-        files = find_data_file(time, patterns, index_file, $
-            file_cadence=file_cadence, threshold=update_t_threshold)
-    endif
 
-    ; no file is found.
-    if n_elements(files) eq 1 and files[0] eq '' then begin
-        errmsg = handle_error('No file is found ...')
+
+;---Dispatch patterns.
+    if n_elements(datatype) eq 0 then begin
+        errmsg = handle_error('No input datatype ...')
         return
     endif
+    if not type_dispatch.haskey(datatype) then begin
+        errmsg = handle_error('Do not support type '+datatype+' yet ...')
+        return
+    endif
+    request = type_dispatch[datatype]
 
-    ; read variables from file.
-    if n_elements(vars) eq 0 then vars = *myinfo.variable
-    times = make_time_range(time, file_cadence)
-    time_type = myinfo.time_type
-    time_var = myinfo.time_var
-    times = convert_time(times, from='unix', to=time_type)
-    read_data_time, files, vars, prefix=thx+'_', time_var=time_var, times=times
-    if time_type ne 'unix' then fix_time, vars, time_type
+;---Find files, read variables, and store them in memory.
+    files = prepare_files(request=request, errmsg=errmsg, local_files=files, $
+        file_times=file_times, time=time, nonexist_files=nonexist_files)
+
+;---Read data from files and save to memory.
+    read_files, time, files=files, request=request
+
 end
 
 themis_read_efi, /print_datatype
-utr0 = time_double(['2013-10-30/23:00','2013-10-31/06:00'])
-themis_read_efi, utr0, 'efs', level='l2', 'd'
+time = time_double(['2013-10-30/23:00','2013-10-31/06:00'])
+themis_read_efi, time, id='l2%efs', probe='d'
 end

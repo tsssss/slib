@@ -3,9 +3,11 @@
 ;
 ; finfos. A list of structure, each element is the return value of file_info.
 ; filename=. A string of html file for exporting the index file.
+; delete_empty_folder=. A boolean, set to remove empty folder.
 ;-
 
-pro gen_index_file_per_file, the_file, extension=extension
+pro gen_index_file_per_file, the_file, extension=extension, $
+    delete_empty_folder=delete_empty_folder
 
     path = fgetpath(the_file)
     base = fgetbase(the_file)
@@ -19,10 +21,15 @@ pro gen_index_file_per_file, the_file, extension=extension
     finfos = list()
     foreach file, files do begin
         ; Do not include the index file itself.
+        if file eq '' then continue
         if file eq the_file then continue
         finfos.add, file_info(file)
     endforeach
     nfile = finfos.count()
+    if nfile eq 0 then begin
+        if keyword_set(delete_empty_folder) then file_delete, fgetpath(the_file), /allow_nonexistent
+        return
+    endif
 
 ;---Construct the body.
     tab = '  '
@@ -62,7 +69,7 @@ pro gen_index_file_per_file, the_file, extension=extension
 end
 
 
-pro gen_index_file, files, extension=extension, sync_time=sync_time, mtime=mtime
+pro gen_index_file, files, extension=extension, sync_time=sync_time, mtime=mtime, delete_empty_folder=delete_empty_folder
 
     errmsg = ''
 
@@ -73,33 +80,11 @@ pro gen_index_file, files, extension=extension, sync_time=sync_time, mtime=mtime
     endif
 
 ;---Gather all (unique) candidates of local files.
-    uniq_files = list()
-    foreach file, files do begin
-        if uniq_files.where(file) ne !null then continue
-        uniq_files.add, file
-    endforeach
-
-
-;---Check which files need to be synced.
-    nfile = uniq_files.count()
-    sync_flags = bytarr(nfile)
+    uniq_files = unique(files)
     foreach file, uniq_files, ii do begin
-        sync_flags[ii] = ~file_test(file)
-        if sync_flags[ii] eq 1 then continue
-        ; File exists, thus do not sync by default.
-        if n_elements(mtime) ne 0 then stouch, file, mtime=mtime
-        finfo = file_info(file)
-        ; However, sync if sync_time is set, mtime is newer.
-        if n_elements(sync_time) eq 0 then continue
-        if finfo.mtime le sync_time then continue
-        sync_flags[ii] = 1
-    endforeach
-
-    foreach file, uniq_files, ii do begin
-        if sync_flags[ii] eq 0 then continue
-        gen_index_file_per_file, file, extension=extension
+        gen_index_file_per_file, file, extension=extension, delete_empty_folder=delete_empty_folder
         if file_test(file) eq 0 then continue
-        if n_elements(mtime) ne 0 then stouch, file, mtime=mtime
+        if n_elements(mtime) ne 0 then ftouch, file, mtime=mtime
     endforeach
 
 end

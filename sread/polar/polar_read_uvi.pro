@@ -18,69 +18,71 @@
 ;-
 ;
 
-pro polar_read_uvi, time, datatype, print_datatype=print_datatype, $
-    variable=vars, files=files, level=level, version=version, id=id, errmsg=errmsg
-    
+pro polar_read_uvi, time, id=datatype, $
+    print_datatype=print_datatype, errmsg=errmsg, $
+    local_files=files, file_times=file_times, version=version, $
+    local_root=local_root, remote_root=remote_root
+
     compile_opt idl2
     on_error, 0
-    errmsg = 0
-    
-    nfile = n_elements(files)
-    if n_elements(time) eq 0 and nfile eq 0 then begin
-        message, 'no time or file is given ...', /continue
-        if not keyword_set(print_datatype) then return
-    endif
+    errmsg = ''
 
-    loc_root = join_path([sdiskdir('Research'),'data','polar','uvi'])
-    rem_root = 'https://cdaweb.sci.gsfc.nasa.gov/pub/data/polar/uvi'
-    version = (n_elements(version) eq 0)? 'v[0-9]{2}': version
-    
-    type_dispatch = []
-    type_dispatch = [type_dispatch, $
-        {id: 'l1', $
-        base_pattern: 'po_level1_uvi_%Y%m%d_'+version+'.cdf', $
-        remote_pattern: join_path([rem_root,'uvi_level1','%Y']), $
-        local_pattern: join_path([loc_root,'uvi_level1','%Y']), $
-        variable: ['EPOCH','INT_IMAGE','FILTER','FRAMERATE','SYSTEM'], $
-        time_var: 'EPOCH', $
-        time_type: 'epoch'}]
+;---Check inputs.
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','polar','uvi'])
+    if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.sci.gsfc.nasa.gov/pub/data/polar/uvi'
+    if n_elements(version) eq 0 then version = 'v[0-9]{2}'
+
+;---Init settings.
+    type_dispatch = hash()
+    index_file = 'SHA1SUM'
+    ; Level 1 data.
+    base_name = 'po_level1_uvi_%Y%m%d_'+version+'.cdf'
+    local_path = [local_root,'uvi_level1','%Y']
+    remote_path = [remote_root,'uvi_level1','%Y']
+    valid_range = ['1996-03-20','2008-02-11']
+    type_dispatch['l1'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,index_file]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,index_file])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['INT_IMAGE','FILTER','FRAMERATE','SYSTEM'], $
+                'time_var_name', 'EPOCH', $
+                'time_var_type', 'epoch')))
+
     if keyword_set(print_datatype) then begin
         print, 'Suported data type: '
-        ids = type_dispatch.id
-        foreach tid, ids do print, '  * '+tid
+        ids = type_dispatch.keys()
+        foreach id, ids do print, '  * '+id
         return
     endif
 
-    ; dispatch patterns.
-    if n_elements(id) eq 0 then id = strjoin([datatype],'%')
-    ids = type_dispatch.id
-    idx = where(ids eq id, cnt)
-    if cnt eq 0 then message, 'Do not support type '+id+' yet ...'
-    myinfo = type_dispatch[idx[0]]
 
-    ; find files to be read.
-    file_cadence = 86400.
-    if nfile eq 0 then begin
-        update_t_threshold = 365.25d*86400  ; 1 year.
-        index_file = 'SHA1SUM'
-        times = break_down_times(time, file_cadence)
-        patterns = [myinfo.base_pattern, myinfo.local_pattern, myinfo.remote_pattern]
-        files = find_data_file(time, patterns, index_file, $
-            file_cadence=file_cadence, threshold=update_t_threshold)
-    endif
-    
-    ; no file is found.
-    if n_elements(files) eq 1 and files[0] eq '' then begin
-        errmsg = 1
+;---Dispatch patterns.
+    if n_elements(datatype) eq 0 then begin
+        errmsg = handle_error('No input datatype ...')
         return
     endif
+    if not type_dispatch.haskey(datatype) then begin
+        errmsg = handle_error('Do not support type '+datatype+' yet ...')
+        return
+    endif
+    request = type_dispatch[datatype]
 
-    ; read variables from file.
-    if n_elements(vars) eq 0 then vars = myinfo.variable
-    times = make_time_range(time, file_cadence)
-    time_type = myinfo.time_type
-    time_var = myinfo.time_var
-    times = convert_time(times, from='unix', to=time_type)
-    read_data_time, files, vars, prefix='', time_var=time_var, times=times, /dum
-    if time_type ne 'unix' then fix_time, vars, time_type
+;---Find files, read variables, and store them in memory.
+    files = prepare_files(request=request, errmsg=errmsg, local_files=files, $
+        file_times=file_times, time=time, nonexist_files=nonexist_files)
+
+;---Read data from files and save to memory.
+    read_files, time, files=files, request=request, errmsg=errmsg
+
+end
+
+time = time_double(['1997-05-01/20:22','1997-05-01/20:25'])
+polar_read_uvi, time, id='l1'
 end

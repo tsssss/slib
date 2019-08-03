@@ -4,7 +4,7 @@
 ; Read Themis B field in GSM. Default is 3 sec.
 ;+
 ;
-pro themis_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg, _extra=ex
+pro themis_read_bfield, time, probe=probe, resolution=resolution, errmsg=errmsg, _extra=ex
 
     pre0 = 'th'+probe+'_'
 
@@ -18,9 +18,9 @@ pro themis_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg,
     endcase
 
     ; read 'thx_fgs_gsm'
-    themis_read_fgm, utr0, type, level='l2', probe=probe, errmsg=errmsg, _extra=ex
+    themis_read_fgm, time, id='l2%'+type, probe=probe, errmsg=errmsg, _extra=ex
     if errmsg ne '' then return
-    
+
     var = pre0+'b_gsm'
     rename_var, pre0+type+'_gsm', to=var
     add_setting, var, /smart, {$
@@ -35,6 +35,6 @@ pro themis_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg,
 end
 
 
-utr0 = time_double(['2013-10-30/23:00','2013-10-31/06:00'])
-themis_read_bfield, utr0, 'd'
+time = time_double(['2013-10-30/23:00','2013-10-31/06:00'])
+themis_read_bfield, time, 'd'
 end
