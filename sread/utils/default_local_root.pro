@@ -18,12 +18,12 @@ function default_local_root, disk
     if file_test(disk,/directory) eq 1 then return, disk
     
     ; it may be just the name of the disk, find its full path.
-    dir = sdiskdir(disk)
+    dir = diskdir(disk)
     if file_test(dir,/directory) eq 1 then return, dir
     
     ; in any case, return home directory.
     lprmsg, 'Use the home directory as the root directory ...'
-    return, shomedir()
+    return, homedir()
 
 end
 

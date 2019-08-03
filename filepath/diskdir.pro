@@ -21,7 +21,10 @@ function diskdir, disk, trailing_slash = trailing_slash, errmsg=errmsg
         'Win32': begin
             spawn, '%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\powershell.exe -Command Get-WmiObject Win32_LogicalDisk', outputs
             idx = where(stregex(outputs, disk) ne -1, cnt)  ; hitted disk info.
-            if cnt eq 0 then message, 'no such disk: '+disk+' ...'
+            if cnt eq 0 then begin
+                errmsg = handle_error('No such disk: '+disk+' ...')
+                return, retval
+            endif
             if cnt gt 1 then message, 'more than 1 disk found ...', /continue
             idx1 = idx[0]               ; use the first disk info.
             idx = where(outputs eq '')  ; find disk info blocks.
