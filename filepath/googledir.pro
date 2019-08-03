@@ -16,7 +16,7 @@ function googledir, errmsg=errmsg
         end
     endcase
 
-    the_dir = join_path([disk_dir(google_name),'My Drive'])
+    the_dir = join_path([diskdir(google_name),'My Drive'])
     return, the_dir
 
 end

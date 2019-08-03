@@ -28,7 +28,7 @@ function diskdir, disk, trailing_slash = trailing_slash, errmsg=errmsg
             tmp = (where(idx ge idx1))[0]
             outputs = outputs[idx[tmp-1]:idx[tmp]]    ; locate the block.
             idx = where(stregex(outputs, 'DeviceID') ne -1)
-            diskdir = strmid(strtrim(outputs[idx],2),1,/reverse_offset)
+            diskdir = strupcase(strmid(strtrim(outputs[idx],2),1,/reverse_offset))
             end
         else: begin
             errmsg = handle_error('Unkown OS ...')
