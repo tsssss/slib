@@ -16,7 +16,7 @@
 pro scdfskt, cdf0, skeleton, filename = fn
     compile_opt idl2
     on_error, 0
-
+    
 
     ; get cdf id.
     if size(cdf0, /type) eq 7 then begin
@@ -88,7 +88,10 @@ pro scdfskt, cdf0, skeleton, filename = fn
                 for jj = 0, maxentrys do begin
                     if not cdf_attexists(cdfid, attname0, jj) then continue
                     cdf_attget, cdfid, attname0, jj, tvalue
-                    value = (n_elements(value) eq 0)? tvalue: [value,tvalue]
+                    ; Forcing string to avoid type conversion error. This is ok for gatt.
+                    ; Eventually, this is easy to solve using dictionary.
+                    ; But this is a minor issue, so I'll just leave it here. -Sheng
+                    value = (n_elements(value) eq 0)? string(tvalue): [value,string(tvalue)]
                 endfor
                 if n_elements(gatts) eq 0 then begin
                     gatts = create_struct(attname, {name:attname0, value:value})
@@ -105,6 +108,7 @@ pro scdfskt, cdf0, skeleton, filename = fn
         vattnames0 = attnames[attids]
         vattnames  = idl_validname(vattnames0, /convert_all)
     endif
+
 
 ;---variables.
     nvar = nrvar+nzvar
@@ -225,6 +229,5 @@ pro scdfskt, cdf0, skeleton, filename = fn
 
     ; output.
     if n_params() eq 1 then scdfsktlpr, skeleton, fn
-
 
 end
