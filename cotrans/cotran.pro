@@ -48,7 +48,7 @@ function cotran, vec0, time, msg, errmsg=errmsg, _extra=ex
         'gei': return, gse2gei(vec1,time)
         'geo': return, gei2geo(gse2gei(vec1,time),time)
         'mag': return, geo2mag(gei2geo(gse2gei(vec1,time),time),time)
-        'mgse': return, gse2mgse(vee1,time,_extra=ex)
+        'mgse': return, gse2mgse(vec1,time,_extra=ex)
         else: begin
             errmsg = handle_error('Unknown output coord: '+coords[1]+' ...')
             return, retval
