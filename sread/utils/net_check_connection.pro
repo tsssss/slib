@@ -42,7 +42,7 @@ function net_check_connection, server, timeout=timeout, errmsg=errmsg
         oo->getproperty, response_code=status_code
     endif else begin
         header = net_request_header(server, status_code=status_code, timeout=timeout)
-        if header[0] eq '' then status_code = 404
+        ;if header[0] eq '' then status_code = 404
     endelse
     obj_destroy, oo
 
