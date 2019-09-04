@@ -15,33 +15,41 @@
 function read_data, files, var0, rec_info=ranges, errmsg=errmsg, $
     no_merge=no_merge, data=data, $
     _extra=ex
+    
+    retval = ptr_new(!null)
+    catch, error
+    if error ne 0 then begin
+        errmsg = handle_error(!error_state.msg)
+        catch, /cancel
+        return, retval
+    endif
 
 ;---Treat files.
     nfile = n_elements(files)
     if nfile eq 0 then begin
         errmsg = handle_error('No input file ...')
-        return, !null
+        return, retval
     endif
     flags = bytarr(nfile)
     for i=0, nfile-1 do flags[i] = file_test(files[i])
     index = where(flags eq 1, nfile)
     if nfile eq 0 then begin
         errmsg = handle_error('Input file does not exist ...')
-        return, !null
+        return, retval
     endif
     files = files[index]
     
     result = stregex(files[0], '\.([^.]+)$', /extract, /subexpr)
     if result[0] eq '' then begin
         errmsg = handle_error('Invalid file extension ...')
-        return, !null
+        return, retval
     endif
     extension = result[1]
     
 ;---Treat variable.
     if n_elements(var0) ne 1 then begin
         errmsg = handle_error('This program needs only one var as input ...')
-        return, !null
+        return, retval
     endif
     var = var0[0]
     
@@ -65,7 +73,7 @@ function read_data, files, var0, rec_info=ranges, errmsg=errmsg, $
             'netcdf': dat = snetcdfread(files[i], var, rec_info=rec_info, _extra=ex)
             else: begin
                 errmsg = handle_error('Does not support '+extension+' yet ...')
-                return, !null
+                return, retval
                 end
         endcase
         ptr_dat[i] = dat.value
