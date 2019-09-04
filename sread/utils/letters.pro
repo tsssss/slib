@@ -24,6 +24,7 @@ function letters, letter_range, errmsg=errmsg
         1: ranges = list(0,letter_range[0])
         2: ranges = list(letter_range,/extract)
     endcase
+    if size(ranges[1],/type) ne 7 then ranges[1] -= 1   ; letters(n): [0,n-1]
 
     foreach range, ranges, ii do begin
         if size(range,/type) eq 7 then begin
