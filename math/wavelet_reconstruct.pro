@@ -2,10 +2,11 @@
 ; Filter based on the cwt_info.
 ;
 ; cwt_info. Calculated in calc_psd.
-; filter. The frequency range.
+; filter=. The frequency range.
+; index=. The frequency index.
 ;-
 
-function wavelet_reconstruct, cwt_info, filter=filter
+function wavelet_reconstruct, cwt_info, filter=filter, index=freq_index
 
     retval = !null
     if n_elements(cwt_info) eq 0 then return, retval
@@ -20,19 +21,20 @@ function wavelet_reconstruct, cwt_info, filter=filter
     f_j = 1d/(s_j*s2t)
     rw_nj = real_part(cwt_info.w_nj)
 
-    if n_elements(filter) eq 2 then begin
-        index = lazy_where(f_j, filter, count=count)
-        if count ne 0 then begin
-            s_j = s_j[index]
-            f_j = f_j[index]
-            rw_nj = rw_nj[*,index]
-        endif
-    endif
+    if n_elements(filter) eq 2 then index = lazy_where(f_j, filter)
+    if n_elements(freq_index) ne 0 then index = freq_index
+    
+    count = n_elements(index)
+    if count eq 0 then return, retval
+    
+    s_j = s_j[index]
+    f_j = f_j[index]
+    rw_nj = rw_nj[*,index]
 
     nj = n_elements(s_j)
     x_n = dblarr(cwt_info.n)
     for ii=0, nj-1 do x_n += rw_nj[*,ii]/sqrt(s_j[ii])
-    coef = dj*sqrt(dt)/(cdelta*psi0)
+    coef = abs(dj*sqrt(dt)/(cdelta*psi0))
     x_n *= coef
 
     return, x_n
