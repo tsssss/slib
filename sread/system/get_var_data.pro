@@ -2,13 +2,15 @@
 ; Return data for a variable.
 ; 
 ; var. A string for tplot name.
-; at. Set it to load the data at the given time.
+; at=times. Set it to load the data at the given time or times.
+; in=time_range. Set it to load the data at the given time range.
 ; raw. A boolean. By default, the program shrinks unnecessary dimensions. Set raw to preserve all dimensions.
 ;-
 ;
-function get_var_data, var, at=time, raw=raw
+function get_var_data, var, in=time_range, at=time, raw=raw
 
-    if tnames(var) eq '' then return, !null
+    retval = !null
+    if tnames(var) eq '' then return, retval
     
     get_data, var, tmp, dat
     
@@ -19,6 +21,12 @@ function get_var_data, var, at=time, raw=raw
         endif else begin
             dat = sinterpol(dat, tmp, time)
         endelse
+    endif
+    
+    if n_elements(time_range) eq 2 then begin
+        index = lazy_where(tmp, time_range, count=count)
+        if count eq 0 then return, retval
+        dat = dat[index,*,*,*,*,*,*,*]
     endif
     
     if keyword_set(raw) then return, dat
