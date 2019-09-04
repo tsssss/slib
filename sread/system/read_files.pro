@@ -128,7 +128,7 @@ pro read_files, time, files=files, request=request, errmsg=errmsg
                 endfor
                 ; Deal with when files connect, skip the first record of the next file.
                 for i=1, nfile-1 do begin
-                    rec_infos[i,*] -= nrecs[i-1]
+                    rec_infos[i:*,*] -= nrecs[i-1]
                     if time_ranges[i-1,1] eq time_ranges[i,0] then rec_infos[i,1] += 1
                 endfor
             endelse
@@ -140,9 +140,13 @@ pro read_files, time, files=files, request=request, errmsg=errmsg
     ;---Read data.
         lprmsg, 'Reading data ...'
         ptr_dats = ptrarr(ndep_var)
+        var_flag = bytarr(ndep_var)
         for i=0, ndep_var-1 do begin
             ptr_dats[i] = read_data(files, dep_vars[i], rec_info=rec_infos, errmsg=errmsg)
-            if errmsg ne '' then lprmsg, 'Variable: '+dep_vars[i]+' does not exist in files ...'
+            if errmsg ne '' then begin
+                lprmsg, 'Variable: '+dep_vars[i]+' does not exist in files ...'
+                var_flag[i] = 1
+            endif
         endfor
 
 
@@ -150,6 +154,7 @@ pro read_files, time, files=files, request=request, errmsg=errmsg
         lprmsg, 'Storing data to memory ...'
         if n_elements(times) eq 0 then times = 0
         for i=0, ndep_var-1 do begin
+            if var_flag[i] eq 1 then continue   ; skip vars do not exist in file.
             store_data, out_vars[i], times, temporary(*ptr_dats[i])
             ptr_free, ptr_dats[i]
         endfor
