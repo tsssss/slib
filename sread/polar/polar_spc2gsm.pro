@@ -1,17 +1,17 @@
 ;+
-; Rotate a 3D vector in UVW to GSM.
+; Rotate a 3D vector in SPC to GSM.
 ;-
-pro rbsp_uvw2gsm, ivar, ovar, quaternion=qvar, probe=probe
+pro polar_spc2gsm, ivar, ovar, quaternion=qvar, probe=probe
 
     if n_elements(ovar) eq 0 then ovar = ivar+'_gsm'
     get_data, ivar, times, ivec
 
     pre0 = get_prefix(ivar)
-    if n_elements(qvar) eq 0 then qvar = pre0+'q_uvw2gsm'
+    if n_elements(qvar) eq 0 then qvar = pre0+'q_spc2gsm'
 
-    if n_elements(probe) eq 0 then probe = strmid(pre0, 1,1, /reverse)
+    probe = ''
     time_range = minmax(times)
-    if check_if_update(qvar, time_range) then rbsp_read_quaternion, time_range, probe=probe
+    if check_if_update(qvar, time_range) then polar_read_quaternion, time_range, probe=probe
 
     get_data, qvar, uts, quvw2gsm
     if n_elements(uts) ne n_elements(times) then quvw2gsm = qslerp(quvw2gsm, uts, times)

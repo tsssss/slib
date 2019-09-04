@@ -21,12 +21,28 @@ pro polar_read_ssc, time, id=datatype, $
 
 ;---Init settings.
     type_dispatch = hash()
+    ; data are problemetic from 1996-02-28 to 1996-03-01.
+    valid_range = ['1996-03-01','2008-06-15']
+    ; Combined orbit.
+    base_name = 'po_or_def_%Y%m%d_v.*.cdf'
+    local_path = [default_local_root(),'sdata','polar','orbit','%Y']
+    type_dispatch['or'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['pos_gse','mlt','ilat','mlat'], $
+                'out_vars', 'po_'+['pos_gse','mlt','ilat','mlat'], $
+                'time_var_name', 'Epoch', $
+                'time_var_type', 'epoch')))
     index_file = 'SHA1SUM'
     ; Predicted orbit.
     base_name = 'po_or_pre_%Y%m%d_'+version+'.cdf'
     local_path = [local_root,'pre_or','%Y']
     remote_path = [remote_root,'pre_or','%Y']
-    valid_range = ['1996-02-27','2008-06-15']
     type_dispatch['or_pre'] = dictionary($
         'pattern', dictionary($
             'local_file', join_path([local_path,base_name]), $

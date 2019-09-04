@@ -52,6 +52,7 @@ pro themis_read_ssc, time, id=datatype, probe=probe, $
         'var_list', list($
             dictionary($
                 'in_vars', ['XYZ_'+strupcase(coord)], $
+                'out_vars', [thx+'_r_gsm'], $
                 'time_var_name', 'Epoch', $
                 'time_var_type', 'epoch')))
 

@@ -11,7 +11,6 @@ pro themis_read_orbit, time, probe=probe, errmsg=errmsg, _extra=ex
     themis_read_ssc, time, id='pos', probe=probe, errmsg=errmsg, _extra=ex
 
     var = pre0+'r_gsm'
-    rename_var, 'xyz_gsm', to=var
     add_setting, var, /smart, {$
         display_type: 'vector', $
         unit: 'Re', $
