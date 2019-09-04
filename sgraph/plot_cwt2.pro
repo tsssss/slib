@@ -1,8 +1,8 @@
 ;+
-; Plot as contour.
+; Plot as image.
 ;-
 
-pro plot_cwt, cwt_info, position=pos, colorbar_position=cbpos, ct=ct, $
+pro plot_cwt2, cwt_info, position=pos, colorbar_position=cbpos, ct=ct, $
     xtitle=xtitle, xrange=xrange, xlog=xlog, xticks=xticks, xminor=xminor, xtickv=xtickv, $
     ytitle=ytitle, yrange=yrange, ylog=ylog, $
     ztitle=ztitle, zrange=zrange, zlog=zlog, zticks=zticks, $
