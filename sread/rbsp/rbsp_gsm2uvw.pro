@@ -21,7 +21,7 @@ pro rbsp_gsm2uvw, ivar, ovar, quaternion=qvar, probe=probe
     mgsm2uvw = temporary(muvw2gsm)
 
     ovec = rotate_vector(ivec, mgsm2uvw)
-    store_data, ovar, uts, ovec
+    store_data, ovar, times, ovec
     colors = get_setting(ivar, 'colors', exist)
     if ~exist then colors = sgcolor(['red','green','blue'])
     unit = get_setting(ivar, 'unit', exist)
