@@ -18,10 +18,6 @@ pro cdf_save_one_setting, key, val, cdfid=cdfid, varname=varname
     global_scope = ~n_elements(varname)
     ; Do nothing if scope is v but var does not exist.
     if ~global_scope then if ~cdf_has_var(varname, filename=cdfid) then return
-    if global_scope and n_elements(val) ne 1 then begin
-        errmsg = handle_error('Global attribute can only hold scalar value ...')
-        return
-    endif
 
     ; String is special.
     if size(val,/type) eq 7 then foreach tmp, val, ii do if val[ii] eq '' then val[ii] = ' '
@@ -32,7 +28,7 @@ pro cdf_save_one_setting, key, val, cdfid=cdfid, varname=varname
         endif else begin
             entry = cdf_attnum(cdfid, key)
         endelse
-        cdf_attput, cdfid, key, entry, val
+        foreach tval, val, ii do cdf_attput, cdfid, key, ii, tval
     endif else begin
         if ~cdf_attexists(cdfid, key) then begin
             tmp = cdf_attcreate(cdfid, key, variable_scope=1)
@@ -59,7 +55,7 @@ pro cdf_save_setting, dict, vals, filename=cdf0, varname=varname
             cdfid = cdf_create(file)
         endif else cdfid = cdf_open(file)
     endif else cdfid = cdf0
-    
+
 
     if n_params() eq 1 then begin
         foreach key, dict.keys() do cdf_save_one_setting, key, dict[key], cdfid=cdfid, varname=varname

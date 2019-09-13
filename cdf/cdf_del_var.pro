@@ -1,8 +1,7 @@
 ;+
-; Delete one variable in a on file.
+; Delete one variable in a one file.
 ;-
 pro cdf_del_var, var, filename=cdf0, errmsg=errmsg
-
 
     errmsg = ''
 
@@ -28,32 +27,13 @@ pro cdf_del_var, var, filename=cdf0, errmsg=errmsg
     endelse
 
     ; Check if var exist.
-    if ~cdf_has_var(var, filename=cdfid) then begin
-        errmsg = handle_error('File does not have var: '+var+' ...')
+    if ~cdf_has_var(the_var, filename=cdfid, iszvar=iszvar) then begin
+        errmsg = handle_error('File does not have var: '+the_var+' ...')
         return
     endif
 
     ; Loop through variables in the file.
-    cdfinq = cdf_inquire(cdfid)
-    nzvar = cdfinq.nzvars
-    for ii=0, nzvar-1 do begin
-        varinq = cdf_varinq(cdfid, ii, zvariable=1)
-        if varinq.name eq the_var then begin
-            cdf_vardelete, cdfid, the_var, zvariable=1
-            if input_is_file then cdf_close, cdfid
-            return
-        endif
-    endfor
-
-    nrvar = cdfinq.nvars
-    for ii=0, nrvar-1 do begin
-        varinq = cdf_varinq(cdfid, ii, zvariable=0)
-        if varinq.name eq the_var then begin
-            cdf_vardelete, cdfid, the_var, zvariable=1
-            if input_is_file then cdf_close, cdfid
-            return
-        endif
-    endfor
-
+    cdf_vardelete, cdfid, the_var, zvariable=iszvar
+    if input_is_file then cdf_close, cdfid
 
 end

@@ -7,8 +7,8 @@ function cdf_read_setting, var, filename=cdf0, errmsg=errmsg
     retval = dictionary()
 
     ; Check if return vatt or gatt.
-    read_vatt = n_elements(var) gt 0
-    if read_vatt then return, cdf_read_var_att(var, filename=cdf0, errmsg=errmsg)
+    vatt_mode = n_elements(var) gt 0
+    if vatt_mode then return, cdf_read_var_att(var, filename=cdf0, errmsg=errmsg)
 
 
     ; Check if given file is a cdf_id or filename.
