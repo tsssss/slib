@@ -90,6 +90,12 @@ pro add_setting, var, settings, smart=smart
                 unit = get_setting(var, 'unit', exist)
                 if exist then options, var, 'ytitle', '('+unit+')'
                 options, var, 'ysubtitle', ''
+                
+                ; assume rgb.
+                colors = get_setting(var, 'colors', exist)
+                if ~exist and n_elements(clabels) eq 3 then begin
+                    options, var, 'colors', sgcolor(['red','green','blue'])
+                endif
                 end
             'scalar': begin
                 options, var, 'spec', 0

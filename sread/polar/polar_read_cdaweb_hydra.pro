@@ -13,7 +13,7 @@
 ; file_times=. An array of N times. Set to fine tuning the times of the files.
 ;-
 
-pro polar_read_cdaweb_hydra, time, id= datatype, probe=probe, $
+pro polar_read_cdaweb_hydra, time, id=datatype, probe=probe, $
     print_datatype=print_datatype, errmsg=errmsg, $
     local_files=files, file_times=file_times, version=version, $
     local_root=local_root, remote_root=remote_root
@@ -26,7 +26,7 @@ pro polar_read_cdaweb_hydra, time, id= datatype, probe=probe, $
 ;---Check inputs.
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','polar','hydra'])
     if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/polar/hydra'
-    if n_elements(version) eq 0 then version = 'v[0-9]{2}'
+    if n_elements(version) eq 0 then version = '.*'
 
 
 ;---Init settings.

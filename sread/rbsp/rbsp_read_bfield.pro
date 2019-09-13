@@ -5,7 +5,6 @@
 pro rbsp_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg
 
     pre0 = 'rbsp'+probe+'_'
-    rgb = sgcolor(['red','green','blue'])
 
     resolution = (keyword_set(resolution))? strlowcase(resolution): '4sec'
     case resolution of
@@ -20,6 +19,11 @@ pro rbsp_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg
 
     bvar = pre0+'b_gsm'
     get_data, bvar, times, bgsm
+    index = where(bgsm lt -99999, count)
+        if count ne 0 then begin
+        bgsm[index] = !values.f_nan
+        store_data, var, times, bgsm
+    endif
     if n_elements(utr0) eq 2 then begin
         index = lazy_where(times, utr0, count=count)
         if count ne 0 then begin
@@ -35,8 +39,7 @@ pro rbsp_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg
         unit: 'nT', $
         short_name: 'B', $
         coord: 'GSM', $
-        coord_labels: ['x','y','z'], $
-        colors: rgb}
+        coord_labels: ['x','y','z']}
 
 end
 

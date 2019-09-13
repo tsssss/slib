@@ -23,18 +23,23 @@ pro themis_read_bfield, time, probe=probe, resolution=resolution, errmsg=errmsg,
 
     var = pre0+'b_gsm'
     rename_var, pre0+type+'_gsm', to=var
+    get_data, var, times, bgsm
+    index = where(snorm(bgsm) ge 1e4, count)
+    if count ne 0 then begin
+        bgsm[index,*] = !values.f_nan
+        store_data, var, times, bgsm
+    endif
     add_setting, var, /smart, {$
         display_type: 'vector', $
         unit: 'nT', $
         short_name: 'B', $
         coord: 'GSM', $
-        coord_labels: ['x','y','z'], $
-        colors: [6,4,2]}
+        coord_labels: ['x','y','z']}
 
     uniform_time, var, dt
 end
 
 
 time = time_double(['2013-10-30/23:00','2013-10-31/06:00'])
-themis_read_bfield, time, 'd'
+themis_read_bfield, time, probe='a'
 end

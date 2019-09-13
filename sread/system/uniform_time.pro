@@ -11,6 +11,7 @@ pro uniform_time, var, dt
     get_data, var, times
     ntime = n_elements(times)
     if ntime eq 0 then return
+    if times[0] eq 0 then return
     
     if n_elements(dt) eq 0 then dt = sdatarate(times)
     dtime = times[1:ntime-1]-times[0:ntime-2]

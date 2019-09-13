@@ -54,8 +54,8 @@ pro themis_read_fgm, time, id=datatype, probe=probe, $
             'extension', fgetext(base_name), $
             'var_list', list($
                 dictionary($
-                    'in_vars', [key+'_'+coord], $
-                    'time_var_name', key+'_time', $
+                    'in_vars', thx+'_'+[key+'_'+coord], $
+                    'time_var_name', thx+'_'+key+'_time', $
                     'time_var_type', 'unix')))
     endforeach
 
