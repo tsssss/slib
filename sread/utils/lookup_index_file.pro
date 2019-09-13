@@ -31,6 +31,8 @@ function lookup_index_file, files, index_file, silent=silent
         endif
         the_files = the_files[index]
         base_name = (count eq 1)? the_files[0]: (the_files[sort(the_files)])[-1]
+        index = strpos(base_name, '">')
+        if index[0] ne -1 then base_name = strmid(base_name,0,index)    ; sometime there are duplicated file names in one line, which causes problem.
         ofiles[ii] = join_path([fgetpath(file),base_name])
     endforeach
 
