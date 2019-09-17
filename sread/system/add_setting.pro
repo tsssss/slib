@@ -113,6 +113,7 @@ pro add_setting, var, settings, smart=smart
             'image': begin
                 ; Placeholder, do nothing.
                 end
+            else: ; Do nothing.
         endcase
     endif
 
