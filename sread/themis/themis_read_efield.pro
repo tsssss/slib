@@ -2,7 +2,7 @@
 ; Read Themis DC E field. Default is to read 'survey' data at 3 samples/sec.
 ;-
 ;
-pro themis_read_efield, time, probe=probe, resolution=resolution
+pro themis_read_efield, time, probe=probe, resolution=resolution, coord=coord
 
     pre0 = 'th'+probe+'_'
     rgb = sgcolor(['red','green','blue'])
@@ -18,17 +18,18 @@ pro themis_read_efield, time, probe=probe, resolution=resolution
             type = 'eff'
             end
     endcase
+    if n_elements(coord) eq 0 then coord = 'gsm'
 
     ; read 'rbspx_edot0_gsm'
-    themis_read_efi, time, id='l2%'+type, probe=probe
+    themis_read_efi, time, id='l2%'+type, probe=probe, coord=coord
 
-    var = pre0+'edot0_gsm'
-    rename_var, pre0+type+'_dot0_gsm', to=var
+    var = pre0+'edot0_'+coord
+    rename_var, pre0+type+'_dot0_'+coord, to=var
     add_setting, var, /smart, {$
         display_type: 'vector', $
         unit: 'mV/m', $
         short_name: 'Edot0', $
-        coord: 'GSM', $
+        coord: strupcase(coord), $
         coord_labels: ['x','y','z'], $
         colors: rgb}
 

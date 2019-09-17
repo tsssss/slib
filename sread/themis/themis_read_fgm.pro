@@ -37,6 +37,7 @@ pro themis_read_fgm, time, id=datatype, probe=probe, $
     type_dispatch = hash()
     thx = 'th'+probe
     ; Level 2.
+    valid_range = ['2007-02-23']    ; the start date applies to tha-the.
     base_name = thx+'_l2_fgm_%Y%m%d_'+version+'.cdf'
     local_path = [local_root,thx,'l2','fgm','%Y']
     remote_path = [remote_root,thx,'l2','fgm','%Y']
@@ -49,9 +50,10 @@ pro themis_read_fgm, time, id=datatype, probe=probe, $
                 'local_index_file', join_path([local_path,default_index_file(/sync)]), $
                 'remote_file', join_path([remote_path,base_name]), $
                 'remote_index_file', join_path([remote_path,''])), $
+            'valid_range', time_double(valid_range), $
             'sync_threshold', sync_threshold, $
             'cadence', 'day', $
-            'extension', fgetext(base_name), $
+            'extension', 'cdf', $
             'var_list', list($
                 dictionary($
                     'in_vars', thx+'_'+[key+'_'+coord], $

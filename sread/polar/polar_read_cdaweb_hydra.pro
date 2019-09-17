@@ -66,6 +66,36 @@ pro polar_read_cdaweb_hydra, time, id=datatype, probe=probe, $
                 'out_vars', 'po_'+['ion_n'], $
                 'time_var_name', 'EPOCH', $
                 'time_var_type', 'epoch')))
+    type_dispatch['ion_temp_para'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', 'cdf', $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['TPARL_ION'], $
+                'out_vars', 'po_'+['ion_t_para'], $
+                'time_var_name', 'EPOCH', $
+                'time_var_type', 'epoch')))
+    type_dispatch['ion_temp_perp'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', 'cdf', $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['TPERP_ION'], $
+                'out_vars', 'po_'+['ion_t_perp'], $
+                'time_var_name', 'EPOCH', $
+                'time_var_type', 'epoch')))
     ; Ele moment data.
     valid_range = ['1996-03-20','2008-03-31']
     base_name = 'po_k0_hyd_%Y%m%d_'+version+'.cdf'
@@ -86,6 +116,22 @@ pro polar_read_cdaweb_hydra, time, id=datatype, probe=probe, $
                 'out_vars', 'po_'+['ele_n'], $
                 'time_var_name', 'Epoch', $
                 'time_var_type', 'epoch')))
+    type_dispatch['ele_temp'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', 'cdf', $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['ELE_MEAN_ENERGY'], $
+                'out_vars', 'po_'+['ele_t'], $
+                'time_var_name', 'Epoch', $
+                'time_var_type', 'epoch')))
+
 
     if keyword_set(print_datatype) then begin
         print, 'Suported data type: '

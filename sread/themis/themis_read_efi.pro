@@ -14,10 +14,11 @@
 ; file_times=. An array of N times. Set to fine tuning the times of the files.
 ;-
 
-pro themis_read_efi, time, id=datatype, probe, $
+pro themis_read_efi, time, id=datatype, probe=probe, $
     print_datatype=print_datatype, errmsg=errmsg, $
     local_files=files, file_times=file_times, version=version, $
-    local_root=local_root, remote_root=remote_root
+    local_root=local_root, remote_root=remote_root, $
+    coordinate=coord
 
     compile_opt idl2
     on_error, 0
@@ -29,6 +30,7 @@ pro themis_read_efi, time, id=datatype, probe, $
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','themis'])
     if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.sci.gsfc.nasa.gov/pub/data/themis'
     if n_elements(version) eq 0 then version = 'v[0-9]{2}'
+    if n_elements(coord) eq 0 then coord = 'gsm'
 
 ;---Init settings.
     type_dispatch = hash()
@@ -51,8 +53,8 @@ pro themis_read_efi, time, id=datatype, probe, $
             'extension', fgetext(base_name), $
             'var_list', list($
                 dictionary($
-                    'in_vars', [key+'_dot0_gsm'], $
-                    'time_var_name', key+'_dot0_time', $
+                    'in_vars', thx+'_'+key+'_dot0_'+coord, $
+                    'time_var_name', thx+'_'+key+'_dot0_time', $
                     'time_var_type', 'unix')))
     endforeach
 

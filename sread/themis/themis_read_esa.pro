@@ -41,6 +41,51 @@ pro themis_read_esa, time, id=datatype, probe=probe, $
                 'out_vars', thx+'_ele_n', $
                 'time_var_name', thx+'_peer_time', $
                 'time_var_type', 'unix')))
+    type_dispatch['l2%ele_t'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', 'cdf', $
+        'var_list', list($
+            dictionary($
+                'in_vars', thx+'_peer_avgtemp', $
+                'out_vars', thx+'_ele_t', $
+                'time_var_name', thx+'_peer_time', $
+                'time_var_type', 'unix')))
+    type_dispatch['l2%ion_t'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', 'cdf', $
+        'var_list', list($
+            dictionary($
+                'in_vars', thx+'_peir_avgtemp', $
+                'out_vars', thx+'_ion_t', $
+                'time_var_name', thx+'_peir_time', $
+                'time_var_type', 'unix')))
+    type_dispatch['l2%ion_u_gsm'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', 'cdf', $
+        'var_list', list($
+            dictionary($
+                'in_vars', thx+'_peir_velocity_gsm', $
+                'out_vars', thx+'_u_gsm', $
+                'time_var_name', thx+'_peir_time', $
+                'time_var_type', 'unix')))
 
     if keyword_set(print_datatype) then begin
         print, 'Suported data type: '
