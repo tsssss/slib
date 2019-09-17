@@ -78,6 +78,7 @@ pro cdf_print_skeleton, skeleton, filename=out_file
             printf, lun, str_enter
             ; variable attribute.
             vatt = var.setting
+            if n_elements(vatt) eq 0 then continue
             foreach key, vatt.keys() do begin
                 printf, lun, key, string(vatt[key]), $
                     format = '(T6, A, T40, A)'

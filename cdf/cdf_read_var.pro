@@ -1,7 +1,8 @@
 ;+
 ; Read and return one variable from one file.
+; range=. A record range, e.g., [0,100].
 ;-
-function cdf_read_var, var, filename=cdf0, errmsg=errmsg
+function cdf_read_var, var, range=range, filename=cdf0, errmsg=errmsg
 
     errmsg = ''
     retval = !null
@@ -27,71 +28,51 @@ function cdf_read_var, var, filename=cdf0, errmsg=errmsg
         cdfid = cdf0
     endelse
 
-    ; Loop through variables in the file.
-    cdfinq = cdf_inquire(cdfid)
-    nzvar = cdfinq.nzvars
-    vinfo = dictionary()
-    for ii=0, nzvar-1 do begin
-        varinq = cdf_varinq(cdfid, ii, zvariable=1)
-        if varinq.name eq the_var then begin
-            vinfo['name'] = the_var
-            vinfo['iszvar'] = 1
-            vinfo['dims'] = varinq.dim
-            vinfo['dimvary'] = varinq.dimvar
-            vinfo['recvary'] = varinq.recvar eq 'VARY'
-            break
-        endif
-    endfor
-
-    nrvar = cdfinq.nvars
-    for ii=0, nrvar-1 do begin
-        varinq = cdf_varinq(cdfid, ii, zvariable=0)
-        if varinq.name eq the_var then begin
-            vinfo['name'] = the_var
-            vinfo['iszvar'] = 0
-            vinfo['dims'] = varinq.dim
-            vinfo['dimvary'] = varinq.dimvar
-            vinfo['recvary'] = varinq.recvar eq 'VARY'
-            break
-        endif
-    endfor
-
-    if ~vinfo.haskey('name') then begin
+    ; Check if given var is in the file.
+    if ~cdf_has_var(the_var, filename=cdfid, iszvar=iszvar) then begin
         errmsg = handle_error(cdfid=cdfid, 'File does not has var: '+the_var+' ...')
         return, retval
     endif
 
 
 ;---Load the_var.
-    cdf_control, cdfid, variable=vinfo.name, get_var_info=varinfo
-    nrec = varinfo.maxrec+1
+    cdf_control, cdfid, variable=the_var, get_var_info=varinfo
+    varinq = cdf_varinq(cdfid, the_var, zvariable=iszvar)
+    nrec = varinfo.maxrec
+    if nrec le 0 then begin
+        errmsg = handle_error(cdfid=cdfid, 'No record ...')
+        return, retval
+    endif
+    if n_elements(range) ne 2 then range = [0,nrec]
+    rec_min = min(range)
+    nrec = max(range)-rec_min+1
 
-    shrink = total(vinfo.dimvary eq 0) gt 0
-    if vinfo.dims[0] eq 0 then shrink = 0  ; scalar element.
+    shrink = total(varinq.dimvar eq 0) gt 0
+    if varinq.dim[0] eq 0 then shrink = 0  ; scalar element.
     ; read variable.
     if shrink then begin
-        cdf_varget, cdfid, vinfo.name, tval, /string, rec_start = 0
-        tmp = [nrec,vinfo.dims]
-        vals = make_array(type=size(tval,/type), tmp[where([1,vinfo.dimvary] eq 1)])
-        for jj = 0, nrec-1 do begin
-            cdf_varget, cdfid, vinfo.name, tval, /string, rec_start=jj
-            vals[j,*,*,*,*,*,*,*] = srmdim(tval, vinfo.dimvary)
+        cdf_varget, cdfid, the_var, tval, /string, rec_start=rec_min
+        tmp = [nrec,varinq.dim]
+        vals = make_array(type=size(tval,/type), tmp[where([1,varinq.dimvar] eq 1)])
+        for jj=rec_min, nrec-1 do begin
+            cdf_varget, cdfid, the_var, tval, /string, rec_start=jj
+            vals[j,*,*,*,*,*,*,*] = srmdim(tval, varinq.dimvar)
         endfor
     endif else begin
-        cdf_varget, cdfid, vinfo.name, vals, /string, rec_start=0, rec_count=nrec
+        cdf_varget, cdfid, the_var, vals, /string, rec_start=rec_min, rec_count=nrec
         ; vals = reform(vals), reform causes problem when concatenate data.
         ; permute dimensions.
         if nrec ne 1 and size(vals,/n_dimensions) gt 1 then $
-            vals = transpose(vals,shift(indgen(n_elements(vinfo.dims)+1),1))
+            vals = transpose(vals,shift(indgen(n_elements(varinq.dim)+1),1))
     endelse
+    
     if input_is_file then cdf_close, cdfid
-
     return, vals
 
 
 end
 
-var = 'the_bmod_t89'
-fn = '/Volumes/GoogleDrive/My Drive/works/works/global_efield/data/cdf_data/the_bin_ready_data_v01.cdf'
+var = 'tha_efs_dot0_time'
+fn = '/Users/shengtian/Downloads/tha_l2_efi_20110101_v01.cdf'
 data = cdf_read_var(var, filename=fn, errmsg=errmsg)
 end

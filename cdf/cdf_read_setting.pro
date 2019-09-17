@@ -4,7 +4,7 @@
 function cdf_read_setting, var, filename=cdf0, errmsg=errmsg
 
     errmsg = ''
-    retval = dictionary()
+    retval = hash()
 
     ; Check if return vatt or gatt.
     vatt_mode = n_elements(var) gt 0
