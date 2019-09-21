@@ -3,7 +3,7 @@
 ; Save data to tplot.
 ; range=. The range of dep_0
 ;-
-pro cdf_load_var, var, range=range, depend=time_var, filename=cdf0, errmsg=errmsg
+pro cdf_load_var, var, range=range, filename=cdf0, errmsg=errmsg
 
     errmsg = ''
 
@@ -29,42 +29,112 @@ pro cdf_load_var, var, range=range, depend=time_var, filename=cdf0, errmsg=errms
     endelse
 
     ; Loop through variables in the file.
-    if ~cdf_has_var(the_var, filename=cdfid, iszvar=iszvar) then begin
-        errmsg = handle_error(cdfid=cdfid, 'File does not have var: '+the_var+' ...')
+    cdfinq = cdf_inquire(cdfid)
+    nzvar = cdfinq.nzvars
+    vinfo = dictionary()
+    for ii=0, nzvar-1 do begin
+        varinq = cdf_varinq(cdfid, ii, zvariable=1)
+        if varinq.name eq the_var then begin
+            vinfo['name'] = the_var
+            vinfo['iszvar'] = 1
+            vinfo['dims'] = varinq.dim
+            vinfo['dimvary'] = varinq.dimvar
+            vinfo['recvary'] = varinq.recvar eq 'VARY'
+            break
+        endif
+    endfor
+
+    nrvar = cdfinq.nvars
+    for ii=0, nrvar-1 do begin
+        varinq = cdf_varinq(cdfid, ii, zvariable=0)
+        if varinq.name eq the_var then begin
+            vinfo['name'] = the_var
+            vinfo['iszvar'] = 0
+            vinfo['dims'] = varinq.dim
+            vinfo['dimvary'] = varinq.dimvar
+            vinfo['recvary'] = varinq.recvar eq 'VARY'
+            break
+        endif
+    endfor
+
+    if ~vinfo.haskey('name') then begin
+        errmsg = handle_error(cdfid=cdfid, 'File does not has var: '+the_var+' ...')
         return
     endif
 
 
-;---Get vatts and check if depend_0 exists.
-    vatt = cdf_read_setting(the_var, filename=cdfid)
-    
-    
-    if n_elements(time_var) eq 0 then begin
-        no_time = 0
-        keys = vatt.keys()
-        nkey = n_elements(keys)
-        if nkey gt 0 then begin
-            the_key = 'depend_0'    ; dict key is case insensitive.
-            if vatt.haskey(the_key) then time_var = vatt[the_key]
-        endif
+;---Get vatts.
+    vatt = dictionary()
+    cdf_control, cdfid, get_numattrs=natt
+    natt = total(natt)
+    for ii=0, natt-1 do begin
+        cdf_attinq, cdfid, ii, attname, scope, foo
+        if strmid(scope,0,1) eq 'G' then continue
+        if ~cdf_attexists(cdfid, attname, the_var) then continue
+        cdf_attget, cdfid, attname, the_var, value
+        vatt[attname] = value
+    endfor
+
+;---Load time_var if possible.
+    no_time = 0
+    keys = vatt.keys()
+    nkey = n_elements(keys)
+    if nkey eq 0 then begin
+        message, 'No vatt ...', /continue
+        no_time = 1
     endif
-    if n_elements(time_var) eq 1 then times = cdf_read_var(time_var, filename=cdfid, errmsg=errmsg)
+    index = where(strlowcase(keys) eq 'depend_0', count)
+    if count eq 0 then begin
+        message, 'No depend_0 ...', /continue
+        no_time = 1
+    endif
+    if no_time then times = 0 else begin
+        time_var = vatt[keys[index[0]]]
+        times = cdf_read_var(time_var, filename=cdfid, errmsg=errmsg)
+        if errmsg ne '' then times = !null
+    endelse
+
 
 
 ;---Load the_var.
+    cdf_control, cdfid, variable=vinfo.name, get_var_info=varinfo
+
     ; Figure out the record range.
+    rec_range = [0,varinfo.maxrec]
     if n_elements(range) eq 2 then begin
         if n_elements(times) ne 0 then begin
             index = where(times ge range[0] and times le range[1], count)
             if count eq 0 then begin
-                errmsg = handle_error(cdfid=cdfid, 'Invalid range on time ...')
+                errmsg = handle_error('Invalid range on time ...')
                 return
             endif
             rec_range = index[[0,count-1]]
             times = times[index]
         endif
-    endif else rec_range = !null
-    vals = cdf_read_var(the_var, range=rec_range, filename=cdfid)
+    endif
+    rec_min = min(rec_range)
+    rec_max = max(rec_range)
+    nrec = rec_max-rec_min+1
+
+    shrink = total(vinfo.dimvary eq 0) gt 0
+    if vinfo.dims[0] eq 0 then shrink = 0  ; scalar element.
+    ; read variable.
+    if shrink then begin
+        cdf_varget, cdfid, vinfo.name, tval, /string, rec_start=rec_min
+        tmp = [nrec,vinfo.dims]
+        vals = make_array(type=size(tval,/type), tmp[where([1,vinfo.dimvary] eq 1)])
+        for jj=rec_min, nrec-1 do begin
+            cdf_varget, cdfid, vinfo.name, tval, /string, rec_start=jj
+            vals[j,*,*,*,*,*,*,*] = srmdim(tval, vinfo.dimvary)
+        endfor
+    endif else begin
+        cdf_varget, cdfid, vinfo.name, vals, /string, rec_start=rec_min, rec_count=nrec
+        ; vals = reform(vals), reform causes problem when concatenate data.
+        ; permute dimensions.
+        if nrec ne 1 and size(vals,/n_dimensions) gt 1 then $
+            vals = transpose(vals,shift(indgen(n_elements(vinfo.dims)+1),1))
+    endelse
+    if input_is_file then cdf_close, cdfid
 
 
 ;---Save to tplot.
@@ -77,9 +147,7 @@ pro cdf_load_var, var, range=range, depend=time_var, filename=cdf0, errmsg=errms
 
 end
 
-var = 'tha_efs_dot0_gse'
-dep_var = 'tha_efs_dot0_time'
+var = 'the_bmod_t89'
 fn = '/Users/shengtian/Downloads/tha_l2_efi_20110101_v01.cdf'
-time = time_double(['2011-01-01/01:00','2011-01-01/02:00'])
-cdf_load_var, var, depend=dep_var, range=time, filename=fn, errmsg=errmsg
+cdf_load_var, var, filename=fn, errmsg=errmsg
 end
