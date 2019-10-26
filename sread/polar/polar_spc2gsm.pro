@@ -5,6 +5,9 @@ pro polar_spc2gsm, ivar, ovar, quaternion=qvar, probe=probe
 
     if n_elements(ovar) eq 0 then ovar = ivar+'_gsm'
     get_data, ivar, times, ivec
+    index = uniq(times,sort(times)) ; ensure monotonic time, otherwise qslerp won't work.
+    times = times[index]
+    ivec = ivec[index,*]
 
     pre0 = get_prefix(ivar)
     if n_elements(qvar) eq 0 then qvar = pre0+'q_spc2gsm'

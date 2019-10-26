@@ -9,7 +9,7 @@ pro goes_read_fgm, time, id=datatype, probe=probe, $
     resolution=resolution, coordinate=coord
 
     compile_opt idl2
-    on_error, 0
+    on_error, 2
     errmsg = ''
 
 ;---Check inputs.
@@ -26,7 +26,7 @@ pro goes_read_fgm, time, id=datatype, probe=probe, $
     ; Magnetic field data 512ms.
     base_name = 'g'+probe+'_magneto_512ms_%Y%m%d_%Y%m%d.nc'
     local_path = [local_root,'goes'+probe,'fgm','512ms','%Y','%m','netcdf']
-    remote_path = [remote_root,'new_full','%Y','%m','goes'+probe,'netcdf']
+    remote_path = [remote_root,'full','%Y','%m','goes'+probe,'netcdf']
     type_dispatch['512ms'] = dictionary($
         'pattern', dictionary($
             'local_file', join_path([local_path,base_name]), $
@@ -41,7 +41,7 @@ pro goes_read_fgm, time, id=datatype, probe=probe, $
     foreach key, ['1m','5m'] do begin
         base_name = 'g'+probe+'_magneto_'+key+'_%Y%m01_%Y%m[0-9]{2}.nc'
         local_path = [local_root,'goes'+probe,'fgm','low_res','%Y','%m','netcdf']
-        remote_path = [remote_root,'new_avg','%Y','%m','goes'+probe,'netcdf']
+        remote_path = [remote_root,'avg','%Y','%m','goes'+probe,'netcdf']
         type_dispatch[key] = dictionary($
             'pattern', dictionary($
                 'local_file', join_path([local_path,base_name]), $

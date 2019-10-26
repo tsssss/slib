@@ -9,6 +9,12 @@
 ;
 pro goes_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg, _extra=ex
 
+    catch, err
+    if err ne 0 then begin
+        errmsg = handle_error('Something is wrong ...')
+        return
+    endif
+
     if n_elements(probe) eq 0 then begin
         errmsg = handle_error('No input probe ...')
         return
@@ -22,7 +28,7 @@ pro goes_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg, _
     endcase
     
     ; read 'gxx_b_gsm'
-    goes_read_fgm, utr0, probe=probe, coord='gsm', resolution=resolution, errmsg=errmsg, _extra=ex
+    goes_read_fgm, utr0, probe=probe, coord='gsm', id=resolution, errmsg=errmsg, _extra=ex
     if errmsg ne '' then return
     
     pre0 = 'g'+probe+'_'
@@ -33,14 +39,13 @@ pro goes_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg, _
         unit: 'nT', $
         short_name: 'B', $
         coord: 'GSM', $
-        coord_labels: ['x','y','z'], $
-        colors: [6,4,2]}
+        coord_labels: ['x','y','z']}
         
     uniform_time, bvar, dt
 
 end
 
-time = time_double(['2014-08-28/04:00','2014-08-28/11:00'])
+time = time_double(['2014-08-28/09:30','2014-08-28/11:00'])
 probe = '13'
 goes_read_bfield, time, probe=probe
 end

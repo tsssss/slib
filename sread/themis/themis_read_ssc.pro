@@ -37,6 +37,7 @@ pro themis_read_ssc, time, id=datatype, probe=probe, $
     type_dispatch = hash()
     thx = 'th'+probe
     ; position, 1 min resolution.
+    valid_range = ['2007-03-01']
     base_name = thx+'_or_ssc_%Y%m01_'+version+'.cdf'
     local_path = [local_root,thx,'ssc','%Y']
     remote_path = [remote_root,thx,'ssc','%Y']
@@ -47,6 +48,7 @@ pro themis_read_ssc, time, id=datatype, probe=probe, $
             'remote_file', join_path([remote_path,base_name]), $
             'remote_index_file', join_path([remote_path,''])), $
         'sync_threshold', sync_threshold, $
+        'valid_range', time_double(valid_range), $
         'cadence', 'month', $
         'extension', fgetext(base_name), $
         'var_list', list($

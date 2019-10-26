@@ -8,7 +8,7 @@ pro rbsp_read_efield, time_range, probe=probe, resolution=resolution, errmsg=err
     errmsg = ''
     pre0 = 'rbsp'+probe+'_'
 
-    resolution = (keyword_set(resolution))? strlowcase(resolution): 'hires'
+    resolution = (keyword_set(resolution))? strlowcase(resolution): 'survey'
     case resolution of
         'hires': dt = 1d/16
         'survey': dt = 11d
@@ -28,7 +28,7 @@ pro rbsp_read_efield, time_range, probe=probe, resolution=resolution, errmsg=err
     rbsp_read_quaternion, time_range, probe=probe
 
     ; read 'rbspx_e_gsm'
-    evar = pre0+'e0_gsm'
+    evar = pre0+'e_gsm'
     if resolution eq 'survey' then begin
         rbsp_read_efw, time_range, id='l3%efw', probe=probe, errmsg=errmsg
         if errmsg ne '' then return
@@ -109,7 +109,7 @@ pro rbsp_read_efield, time_range, probe=probe, resolution=resolution, errmsg=err
 
 end
 
-time_range = time_double(['2014-08-28/09:00','2014-08-28/11:50'])
+time_range = time_double(['2014-08-28','2014-08-29'])
 rbsp_read_efield, time_range, probe='b'
 rbsp_read_efield, time_range, probe='b', resolution='survey'
 end

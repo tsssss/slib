@@ -14,7 +14,8 @@ pro mms_read_bfield, time, probe=probe, resolution=resolution, errmsg=errmsg
         end
         else: message, 'Unknown resolution: '+resolution+' ...'
     endcase
-    mms_read_fgm, time, id=id, probe=probe
+    mms_read_fgm, time, id=id, probe=probe, errmsg=errmsg
+    if errmsg ne '' then return
 
     pre0 = 'mms'+probe+'_'
     bvar = pre0+'b_gsm'

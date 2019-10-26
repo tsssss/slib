@@ -58,6 +58,10 @@ pro themis_read_fgm, time, id=datatype, probe=probe, $
                 dictionary($
                     'in_vars', thx+'_'+[key+'_'+coord], $
                     'time_var_name', thx+'_'+key+'_time', $
+                    'time_var_type', 'unix'), $
+                dictionary($
+                    'in_vars', thx+'_fgm_'+key+'_quality', $
+                    'time_var_name', thx+'_'+key+'_time', $
                     'time_var_type', 'unix')))
     endforeach
 
@@ -85,7 +89,7 @@ pro themis_read_fgm, time, id=datatype, probe=probe, $
         file_times=file_times, time=time, nonexist_files=nonexist_files)
 
 ;---Read data from files and save to memory.
-    read_files, time, files=files, request=request
+    read_files, time, files=files, request=request, errmsg=errmsg
 
 end
 
