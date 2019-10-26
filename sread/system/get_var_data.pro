@@ -17,9 +17,9 @@ function get_var_data, var, in=time_range, at=time, raw=raw
     if keyword_set(time) ne 0 then begin
         if n_elements(time) eq 1 then begin
             index = where(tmp eq time[0], count)
-            if count eq 0 then dat = sinterpol(dat, tmp, time) else dat = dat[index,*,*,*,*,*,*,*]
+            if count eq 0 then dat = sinterpol(dat, tmp, time, /nan) else dat = dat[index,*,*,*,*,*,*,*]
         endif else begin
-            dat = sinterpol(dat, tmp, time)
+            dat = sinterpol(dat, tmp, time, /nan)
         endelse
     endif
     

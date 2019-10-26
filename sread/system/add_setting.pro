@@ -9,6 +9,7 @@
 pro add_setting, var, settings, smart=smart
     
     if tnames(var) eq '' then return
+    if n_elements(settings) eq 0 then return
     
     keys = strlowcase(tag_names(settings))
     for i=0, n_elements(keys)-1 do options, var, keys[i], settings.(i)

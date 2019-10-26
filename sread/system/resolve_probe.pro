@@ -27,6 +27,11 @@ function resolve_probe, probe
         'prefix_name', 'mms', $
         'short_name','mms', $
         'routine_name','mms')
+    missions.cluster = dictionary($
+        'name','c', $
+        'prefix_name', 'c', $
+        'short_name','c', $
+        'routine_name','cluster')
 
     probe = strlowcase(probe)
     found_probe = 0
@@ -43,6 +48,7 @@ function resolve_probe, probe
         the_probe = strmid(probe,strlen(name))
         mission['probe'] = the_probe
         mission['prefix'] = mission.prefix_name+the_probe+'_'
+        mission['short_name'] = mission.short_name+the_probe
     endif else mission = !null
 
     return, mission

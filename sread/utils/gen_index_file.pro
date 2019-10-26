@@ -27,7 +27,7 @@ pro gen_index_file_per_file, the_file, extension=extension, $
     endforeach
     nfile = finfos.count()
     if nfile eq 0 then begin
-        if keyword_set(delete_empty_folder) then file_delete, fgetpath(the_file), /allow_nonexistent
+        if keyword_set(delete_empty_folder) then file_delete, the_file, /allow_nonexistent
         return
     endif
 

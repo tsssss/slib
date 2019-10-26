@@ -1,5 +1,6 @@
 ;+
 ; Subtrace two variables and save the result to a given name.
+; to=. Save the result to var3.
 ;-
 pro sys_subtract, var1, var2, to=var3, settings=settings
 
