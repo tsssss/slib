@@ -35,6 +35,19 @@ pro polar_read_ebv, time, id=datatype, $
                 'out_vars', ['po_e_spc'], $
                 'time_var_name', 'ut_e', $
                 'time_var_type', 'unix')))
+    type_dispatch['quaternion'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file()])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', 'q_spc2gsm', $
+                'out_vars', 'po_q_spc2gsm', $
+                'time_var_name', 'ut_cotran', $
+                'time_var_type', 'unix')))
     ; Survey B field.
     type_dispatch['b_spc'] = dictionary($
         'pattern', dictionary($

@@ -6,6 +6,7 @@
 ;
 pro themis_read_bfield, time, probe=probe, resolution=resolution, errmsg=errmsg, _extra=ex
 
+    errmsg = ''
     pre0 = 'th'+probe+'_'
 
     resolution = (keyword_set(resolution))? strlowcase(resolution): '3sec'
@@ -22,19 +23,56 @@ pro themis_read_bfield, time, probe=probe, resolution=resolution, errmsg=errmsg,
     if errmsg ne '' then return
 
     var = pre0+'b_gsm'
+    flag_var = pre0+'fgm_'+type+'_quality'
     rename_var, pre0+type+'_gsm', to=var
+    uniform_time, var, dt
+    uniform_time, flag_var, dt
+    
+    get_data, var, times, bgsm
+    index = where(snorm(bgsm) ge 1e4, count)
+    if count ne 0 then begin
+        bgsm[index,*] = !values.f_nan
+        store_data, var, times, bgsm
+    endif
+    
+    ; Flags for bad data.
+    pad = 120.  ; sec.
+    flag_time = time_double('2007-01-14')
+
+    get_data, flag_var, times, flags
+    ntime = n_elements(times)
+    all_flags = bytarr(ntime)+1
+    
+    index = where(times lt flag_time and flags gt 1, count)
+    if count ne 0 then all_flags[index] = 0
+    index = where(times le flag_time and flags gt 0, count)
+    if count ne 0 then all_flags[index] = 0
+    
+    
+    index = where(all_flags eq 0, count)
+    if count ne 0 then begin
+        bad_times = time_to_range(times[index], time_step=dt)
+        bad_times[*,0] -= pad
+        bad_times[*,1] += pad
+        nbad_time = n_elements(bad_times)/2
+        for ii=0, nbad_time-1 do bgsm[lazy_where(times,'[]',reform(bad_times[ii,*])),*] = !values.f_nan
+        store_data, var, times, bgsm
+    endif
+
     add_setting, var, /smart, {$
         display_type: 'vector', $
         unit: 'nT', $
         short_name: 'B', $
         coord: 'GSM', $
-        coord_labels: ['x','y','z'], $
-        colors: [6,4,2]}
+        coord_labels: ['x','y','z']}
 
     uniform_time, var, dt
 end
 
 
 time = time_double(['2013-10-30/23:00','2013-10-31/06:00'])
-themis_read_bfield, time, 'd'
+time = time_double(['2014-08-28','2014-08-29'])
+time = time_double(['2013-08-26/20:41','2013-08-29/04:26'])
+;time = time_double(['2008-01-12','2008-01-15'])
+themis_read_bfield, time, probe='a', errmsg=errmsg
 end

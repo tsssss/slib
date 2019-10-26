@@ -1,6 +1,6 @@
 ;+
 ; Read quaternion to rotate from UVW to GSM.
-; 
+;
 ; time. The time or time range in UT sec.
 ; probe=. A string of 'a' or 'b'.
 ;-
@@ -21,7 +21,7 @@ pro rbsp_read_quaternion, time, probe=probe, errmsg=errmsg
         short_name: 'Q', $
         coord: 'UVW2GSM', $
         coord_labels: ['a','b','c','d'], $
-        colors: [6,4,2,0]}
+        colors: sgcolor(['red','green','blue','black'])}
     add_setting, var, settings, /smart
 
 end

@@ -17,8 +17,8 @@ pro omni_read_index, time, resolution=resolution, errmsg=errmsg
 
     foreach var, ['ae','dst'] do begin
         case var of
-            'ae': shortname = 'AE'
-            'dst': shortname = 'Dst'
+            'ae': short_name = 'AE'
+            'dst': short_name = 'Dst'
         endcase
         add_setting, var, /smart, {$
             display_type: 'scalar', $

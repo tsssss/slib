@@ -8,7 +8,7 @@ pro scdfwrite, cdf0, vname, skt=skt, value=val, errmsg=errmsg, $
     _extra=extra
 
     compile_opt idl2
-    
+
     catch, error
     if error ne 0 then begin
         catch, /cancel
@@ -19,7 +19,7 @@ pro scdfwrite, cdf0, vname, skt=skt, value=val, errmsg=errmsg, $
 
     ; get cdf id.
     if size(cdf0, /type) eq 7 then begin
-        if ~file_test(cdf0) then begin  ; creat the file.
+        if ~file_test(cdf0) then begin  ; create the file.
             message, 'file ' + cdf0 + ' does not exist ...', /continue
             odir = file_dirname(cdf0)
             if file_test(odir,/directory) eq 0 then file_mkdir, odir
@@ -32,7 +32,7 @@ pro scdfwrite, cdf0, vname, skt=skt, value=val, errmsg=errmsg, $
 
     ; read skeleton.
     if n_elements(skt) eq 0 then scdfskt, cdfid, skt
-    
+
     ; global attributions.
     ngatt = skt.header.ngatt
     if ngatt gt 0 then gatts = tag_names(skt.att)
@@ -50,7 +50,7 @@ pro scdfwrite, cdf0, vname, skt=skt, value=val, errmsg=errmsg, $
             cdf_attput, cdfid, gattnames[i], gentry, gattinfo.(i)
         endfor
     endif
-    
+
     if n_elements(vname) eq 0 then begin
         if keyword_set(compress) then $
             cdf_compression, cdfid, set_gzip_level=compress
@@ -66,14 +66,14 @@ pro scdfwrite, cdf0, vname, skt=skt, value=val, errmsg=errmsg, $
         idx = where(ovnames eq vname, cnt)
         if cnt eq 0 then newvar = 1 else newvar = 0
     endelse
-    
+
     if newvar eq 0 and keyword_set(reset) then begin
         newvar = 1
         for i = 0, novar-1 do if skt.var.(i).name eq vname then break
         vattinfo0 = skt.var.(i).att
         cdf_vardelete, cdfid, vname, zvariable = skt.var.(i).iszvar
     endif
-    
+
     if newvar eq 1 then begin
         ; deal with cdf_type.
         vtype = keyword_set(cdftype)? cdftype: scdffmidltype(size(val[0],/type))
@@ -93,7 +93,7 @@ pro scdfwrite, cdf0, vname, skt=skt, value=val, errmsg=errmsg, $
     if keyword_set(compress) then $
         cdf_compression, cdfid, set_var_gzip_level=compress, variable=varid, /zvariable
     cdf_varput, cdfid, vname, val
-    
+
     ; variable attributions.
     nvatt = skt.header.nvatt
     if nvatt gt 0 then vatts = skt.vatt
@@ -110,7 +110,7 @@ pro scdfwrite, cdf0, vname, skt=skt, value=val, errmsg=errmsg, $
             cdf_attput, cdfid, vattnames[i], vname, vattinfo.(i)
         endfor
     endif
-        
+
     cdf_close, cdfid
 
 end

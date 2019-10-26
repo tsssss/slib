@@ -141,7 +141,7 @@ function prepare_files, request=request, errmsg=errmsg, $
         request['files'] = files
         ; To this point, if there is no file information, then nothing can be done.
         if n_elements(files) eq 0 then begin
-            lprmsg, '    No file is in the valid range ...'
+            errmsg = handle_error('    No file is in the valid range ...')
             return, retval
         endif
     endif

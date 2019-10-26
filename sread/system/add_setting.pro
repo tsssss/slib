@@ -9,6 +9,7 @@
 pro add_setting, var, settings, smart=smart
     
     if tnames(var) eq '' then return
+    if n_elements(settings) eq 0 then return
     
     keys = strlowcase(tag_names(settings))
     for i=0, n_elements(keys)-1 do options, var, keys[i], settings.(i)
@@ -90,6 +91,12 @@ pro add_setting, var, settings, smart=smart
                 unit = get_setting(var, 'unit', exist)
                 if exist then options, var, 'ytitle', '('+unit+')'
                 options, var, 'ysubtitle', ''
+                
+                ; assume rgb.
+                colors = get_setting(var, 'colors', exist)
+                if ~exist and n_elements(clabels) eq 3 then begin
+                    options, var, 'colors', sgcolor(['red','green','blue'])
+                endif
                 end
             'scalar': begin
                 options, var, 'spec', 0
@@ -107,6 +114,7 @@ pro add_setting, var, settings, smart=smart
             'image': begin
                 ; Placeholder, do nothing.
                 end
+            else: ; Do nothing.
         endcase
     endif
 

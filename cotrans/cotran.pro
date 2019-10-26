@@ -6,16 +6,13 @@
 ; times. An array of UT sec, in [n].
 ; msg. A string in the format of 'gsm2gse', where 2 separates the
 ;   input and output coordinates.
+; print_coord=. A boolean to return all supported coords.
 ;-
-function cotran, vec0, time, msg, errmsg=errmsg, _extra=ex
+function cotran, vec0, time, msg, errmsg=errmsg, print_coord=print_coord, _extra=ex
     compile_opt idl2 & on_error, 2
 
     errmsg = ''
     retval = !null
-    if n_elements(msg) eq 0 then begin
-        errmsg = handle_error('No input message ...')
-        return, retval
-    endif
 
     ; Call existing functions.
     native_functions = [$
@@ -23,7 +20,21 @@ function cotran, vec0, time, msg, errmsg=errmsg, _extra=ex
         'gei2gse','gse2gei', $
         'geo2mag','mag2geo', $
         'gse2gsm','gsm2gse', $
-        'gsm2sm','sm2gsm']
+        'gsm2sm','sm2gsm', $
+        'mgse2gse','gse2mgse']
+        
+    supported_coord = strsplit(native_functions,'2',/extract)
+    supported_coord = supported_coord.toarray()
+    supported_coord = supported_coord[*]
+    supported_coord = suniq(supported_coord)
+    if keyword_set(print_coord) then return, supported_coord
+    
+    
+    if n_elements(msg) eq 0 then begin
+        errmsg = handle_error('No input message ...')
+        return, retval
+    endif
+    
     index = where(native_functions eq msg, count)
     if count ne 0 then return, call_function(msg, vec0, time)
 

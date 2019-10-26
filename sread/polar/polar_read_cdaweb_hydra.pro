@@ -13,7 +13,7 @@
 ; file_times=. An array of N times. Set to fine tuning the times of the files.
 ;-
 
-pro polar_read_cdaweb_hydra, time, id= datatype, probe=probe, $
+pro polar_read_cdaweb_hydra, time, id=datatype, probe=probe, $
     print_datatype=print_datatype, errmsg=errmsg, $
     local_files=files, file_times=file_times, version=version, $
     local_root=local_root, remote_root=remote_root
@@ -26,7 +26,7 @@ pro polar_read_cdaweb_hydra, time, id= datatype, probe=probe, $
 ;---Check inputs.
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','polar','hydra'])
     if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/polar/hydra'
-    if n_elements(version) eq 0 then version = 'v[0-9]{2}'
+    if n_elements(version) eq 0 then version = '.*'
 
 
 ;---Init settings.
@@ -66,6 +66,36 @@ pro polar_read_cdaweb_hydra, time, id= datatype, probe=probe, $
                 'out_vars', 'po_'+['ion_n'], $
                 'time_var_name', 'EPOCH', $
                 'time_var_type', 'epoch')))
+    type_dispatch['ion_temp_para'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', 'cdf', $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['TPARL_ION'], $
+                'out_vars', 'po_'+['ion_t_para'], $
+                'time_var_name', 'EPOCH', $
+                'time_var_type', 'epoch')))
+    type_dispatch['ion_temp_perp'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', 'cdf', $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['TPERP_ION'], $
+                'out_vars', 'po_'+['ion_t_perp'], $
+                'time_var_name', 'EPOCH', $
+                'time_var_type', 'epoch')))
     ; Ele moment data.
     valid_range = ['1996-03-20','2008-03-31']
     base_name = 'po_k0_hyd_%Y%m%d_'+version+'.cdf'
@@ -86,6 +116,22 @@ pro polar_read_cdaweb_hydra, time, id= datatype, probe=probe, $
                 'out_vars', 'po_'+['ele_n'], $
                 'time_var_name', 'Epoch', $
                 'time_var_type', 'epoch')))
+    type_dispatch['ele_temp'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', 'cdf', $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['ELE_MEAN_ENERGY'], $
+                'out_vars', 'po_'+['ele_t'], $
+                'time_var_name', 'Epoch', $
+                'time_var_type', 'epoch')))
+
 
     if keyword_set(print_datatype) then begin
         print, 'Suported data type: '

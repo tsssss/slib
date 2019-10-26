@@ -138,8 +138,7 @@ pro read_geopack_info, r_var, errmsg=errmsg, $
         unit: 'nT', $
         short_name: 'T89 B', $
         coord: 'GSM', $
-        coord_labels: ['x','y','z'], $
-        colors: [6,4,2]}
+        coord_labels: ['x','y','z']}
 
     fpt_var = pre0+'fpt_gsm'+suf0
     store_data, fpt_var, times, fgsm
@@ -148,8 +147,7 @@ pro read_geopack_info, r_var, errmsg=errmsg, $
         unit: get_setting(r_var, 'unit'), $
         short_name: 'F', $
         coord: 'GSM', $
-        coord_labels: ['x','y','z'], $
-        colors: [6,4,2]}
+        coord_labels: ['x','y','z']}
 
     fmlat_var = pre0+'fmlat'+suf0
     store_data, fmlat_var, times, fmlat

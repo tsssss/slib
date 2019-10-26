@@ -69,7 +69,7 @@ pro goes_gen_orbit_data, date, probe=probe, file=file, errmsg=errmsg
 
 end
 
-utr0 = time_double(['2012-01-01','2017-01-01'])
+utr0 = time_double(['2012-01-01','2018-01-01'])
 secofday = 86400d
 days = smkarthm(utr0[0],utr0[1],secofday,'dx')
 probes = ['13','14','15']

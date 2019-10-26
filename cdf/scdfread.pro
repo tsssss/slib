@@ -142,10 +142,11 @@ function scdfread, cdf0, vnames, recs0, rec_info=recs1, drec=drec, skt=skt, sile
         endif else begin
             cdf_varget, cdfid, vinfo.name, vals, /string, $
                 rec_start = rec0, rec_interval = drec, rec_count = nrec
-            ; vals = reform(vals), reform causes problem when concatenate data.
             ; permute dimensions.
             if nrec ne 1 and size(vals,/n_dimensions) gt 1 then $
                 vals = transpose(vals,shift(indgen(n_elements(vinfo.dims)+1),1))
+            ; vals = reform(vals), reform causes problem when concatenate data.
+            if nrec eq 1 and n_elements(vals) ne 1 then vals = reform(vals, [1,size(vals,/dimensions)])
         endelse
         tvar = {name: vinfo.name, value: ptr_new(vals), nrec:long64(nrec)}
         vars = (n_elements(vars) eq 0)? tvar: [vars, tvar]

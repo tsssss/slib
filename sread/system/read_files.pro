@@ -123,7 +123,8 @@ pro read_files, time, files=files, request=request, errmsg=errmsg
                     rec_infos[i,*] = index[0]+[0,count]
                     if count eq 0 then begin
                         errmsg = handle_error('No data found in for given time_info ...')
-                        return
+                        return  ; return is a rather strong reaction, maybe change to continue is better.
+                        ;continue
                     endif
                 endfor
                 ; Deal with when files connect, skip the first record of the next file.

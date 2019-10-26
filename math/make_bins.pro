@@ -30,7 +30,7 @@ function make_bins, dat0, step, inner=inner
     if range1[0] eq range1[1] then return, [range1[0]]
     
     nbin = round((range1[1]-range1[0])/step0)   ; round b/c it may be 1.999.
-    bins = range1[0] + findgen(nbin+1)*step0
+    bins = range1[0] + dindgen(nbin+1)*step0
     
     return, bins
 end

@@ -41,12 +41,14 @@ pro mms_read_fgm, time, id=datatype, probe=probe, $
     base_name = 'mms'+probe+'_fgm_srvy_l2_%Y%m%d_'+version+'.cdf'
     local_path = [local_root,'mms'+probe,'fgm','srvy','l2','%Y','%m']
     remote_path = [remote_root,'mms'+probe,'fgm','srvy','l2','%Y','%m']
+    valid_range = ['2015-09-01']
     type_dispatch['l2%survey'] = dictionary($
         'pattern', dictionary($
             'local_file', join_path([local_path,base_name]), $
-            'local_index_file', join_path([local_path,default_index_file(,/sync)]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
             'remote_file', join_path([remote_path,base_name]), $
             'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
         'sync_threshold', 0, $
         'cadence', 'day', $
         'extension', fgetext(base_name), $
@@ -66,6 +68,7 @@ pro mms_read_fgm, time, id=datatype, probe=probe, $
             'local_index_file', join_path([local_path,default_index_file()]), $
             'remote_file', join_path([remote_path,base_name]), $
             'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
         'sync_threshold', 0, $
         'cadence', 'day', $
         'extension', fgetext(base_name), $

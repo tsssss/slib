@@ -12,7 +12,8 @@ pro mms_read_orbit, time, probe=probe, errmsg=errmsg
 
     ; Use the r_gsm in fgm data.
     id = 'l2%orbit'
-    mms_read_fgm, time, id=id, probe=probe
+    mms_read_fgm, time, id=id, probe=probe, errmsg=errmsg
+    if errmsg ne '' then return
 
     pre0 = 'mms'+probe+'_'
     rvar = pre0+'r_gsm'
