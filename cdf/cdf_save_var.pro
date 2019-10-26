@@ -1,5 +1,6 @@
 ;+
 ; Save data to one variable in one file. Save settings if provided.
+; Will delete the input data from memory.
 ;
 ; varname. A string of the var name.
 ; value=. The data to be saved.
@@ -47,11 +48,11 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=v_settings, $
 
 ;---Save data. Needs to know cdf_type, numelem, dimensions
     vals = temporary(data)
-
+    
     ; Delete existing var b/c dimension/rec/settings could be inconsistent.
     has_data = n_elements(vals)
-    has_var = cdf_has_var(the_var, filename=cdf0)
-    if has_var then cdf_del_var, the_var, filename=cdf0
+    has_var = cdf_has_var(the_var, filename=cdfid)
+    if has_var then cdf_del_var, the_var, filename=cdfid
 
     ; Get the cdf_type.
     var_type = keyword_set(cdf_type)? cdf_type: scdffmidltype(size(vals[0],/type))

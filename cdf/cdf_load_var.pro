@@ -2,8 +2,9 @@
 ; Load one variable from one file, load all recs and depend_0.
 ; Save data to tplot.
 ; range=. The range of dep_0
+; time_var=. A string sets the time_var.
 ;-
-pro cdf_load_var, var, range=range, filename=cdf0, errmsg=errmsg
+pro cdf_load_var, var, range=range, time_var=time_var, filename=cdf0, errmsg=errmsg
 
     errmsg = ''
 
@@ -58,7 +59,8 @@ pro cdf_load_var, var, range=range, filename=cdf0, errmsg=errmsg
     endfor
 
     if ~vinfo.haskey('name') then begin
-        errmsg = handle_error(cdfid=cdfid, 'File does not has var: '+the_var+' ...')
+        errmsg = handle_error('File does not has var: '+the_var+' ...')
+        if input_is_file then cdf_close, cdfid
         return
     endif
 
@@ -88,8 +90,10 @@ pro cdf_load_var, var, range=range, filename=cdf0, errmsg=errmsg
         message, 'No depend_0 ...', /continue
         no_time = 1
     endif
+    ; Let time_var to overwrite the smart search.
+    if no_time then if keyword_set(time_var) then no_time = 0
     if no_time then times = 0 else begin
-        time_var = vatt[keys[index[0]]]
+        if ~keyword_set(time_var) then time_var = vatt[keys[index[0]]]
         times = cdf_read_var(time_var, filename=cdfid, errmsg=errmsg)
         if errmsg ne '' then times = !null
     endelse
@@ -106,6 +110,7 @@ pro cdf_load_var, var, range=range, filename=cdf0, errmsg=errmsg
             index = where(times ge range[0] and times le range[1], count)
             if count eq 0 then begin
                 errmsg = handle_error('Invalid range on time ...')
+                if input_is_file then cdf_close, cdfid
                 return
             endif
             rec_range = index[[0,count-1]]
@@ -125,7 +130,7 @@ pro cdf_load_var, var, range=range, filename=cdf0, errmsg=errmsg
         vals = make_array(type=size(tval,/type), tmp[where([1,vinfo.dimvary] eq 1)])
         for jj=rec_min, nrec-1 do begin
             cdf_varget, cdfid, vinfo.name, tval, /string, rec_start=jj
-            vals[j,*,*,*,*,*,*,*] = srmdim(tval, vinfo.dimvary)
+            vals[jj,*,*,*,*,*,*,*] = srmdim(tval, vinfo.dimvary)
         endfor
     endif else begin
         cdf_varget, cdfid, vinfo.name, vals, /string, rec_start=rec_min, rec_count=nrec
