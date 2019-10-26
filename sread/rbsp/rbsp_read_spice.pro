@@ -34,7 +34,7 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, $
 ;---Init settings.
     type_dispatch = hash()
     ; By 2019-08-24, spice kernal only available before 2019-07-04.
-    valid_range = ['2012-09-05','2019-07-04']   ; RBSP-B is done by 2019-07-19, -A is done by 2019-09?
+    valid_range = ['2012-09-05','2019-07-04']   ; RBSP-B is done by 2019-07-16, -A is done by 2019-09-01?.
     rbspx = 'rbsp'+probe
     base_name = rbspx+'_spice_products_%Y_%m%d_'+version+'.cdf'
     local_path = [local_root,rbspx,'spice_product','%Y']
