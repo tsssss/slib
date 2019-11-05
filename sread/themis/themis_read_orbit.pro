@@ -16,8 +16,7 @@ pro themis_read_orbit, time, probe=probe, errmsg=errmsg, _extra=ex
         unit: 'Re', $
         short_name: 'R', $
         coord: 'GSM', $
-        coord_labels: ['x','y','z'], $
-        colors: sgcolor(['red','green','blue'])}
+        coord_labels: constant('xyz')}
 
     uniform_time, var, dt
 

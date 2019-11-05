@@ -51,7 +51,7 @@ function cdf_read_skeleton, cdf0
     skeleton['setting'] = cdf_read_setting(filename=cdfid)
 
 ;---Variables.
-    vars = hash()
+    vars = orderedhash()
     for ii=0, nrvar-1 do begin
         ; variable info.
         varinq = cdf_varinq(cdfid, ii)

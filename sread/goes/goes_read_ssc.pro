@@ -1,5 +1,5 @@
 ;+
-; Read Themis SSC data.
+; Read GOES SSC data.
 ;
 ; time. A time or a time range in ut time. Set time to find files
 ;   automatically, or set files to read data in them directly.
@@ -15,7 +15,7 @@
 ; coordinate=. A string to set vector coordinate, 'gsm' by default.
 ;-
 
-pro themis_read_ssc, time, id=datatype, probe=probe, $
+pro goes_read_ssc, time, id=datatype, probe=probe, $
     print_datatype=print_datatype, errmsg=errmsg, $
     local_files=files, file_times=file_times, version=version, $
     local_root=local_root, remote_root=remote_root, $
@@ -28,19 +28,19 @@ pro themis_read_ssc, time, id=datatype, probe=probe, $
 ;---Check inputs.
     sync_threshold = 86400d*120
     if n_elements(probe) eq 0 then probe = 'x'
-    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','themis'])
-    if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.sci.gsfc.nasa.gov/pub/data/themis'
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','goes'])
+    if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/goes'
     if n_elements(version) eq 0 then version = 'v[0-9]{2}'
     if n_elements(coord) eq 0 then coord = 'gsm'
 
 ;---Init settings.
     type_dispatch = hash()
-    thx = 'th'+probe
-    ; position, 1 min resolution.
-    valid_range = ['2007-03-01']
-    base_name = thx+'_or_ssc_%Y%m01_'+version+'.cdf'
-    local_path = [local_root,thx,'ssc','%Y']
-    remote_path = [remote_root,thx,'ssc','%Y']
+    goesx = 'goes'+probe
+    gx = 'g'+probe
+    ; position.
+    base_name = goesx+'_ephemeris_ssc_%Y0101_v01.cdf'
+    local_path = [local_root,goesx,'orbit','%Y']
+    remote_path = [remote_root,goesx,'orbit','%Y']
     type_dispatch['pos'] = dictionary($
         'pattern', dictionary($
             'local_file', join_path([local_path,base_name]), $
@@ -48,13 +48,12 @@ pro themis_read_ssc, time, id=datatype, probe=probe, $
             'remote_file', join_path([remote_path,base_name]), $
             'remote_index_file', join_path([remote_path,''])), $
         'sync_threshold', sync_threshold, $
-        'valid_range', time_double(valid_range), $
-        'cadence', 'month', $
+        'cadence', 'year', $
         'extension', fgetext(base_name), $
         'var_list', list($
             dictionary($
                 'in_vars', ['XYZ_'+strupcase(coord)], $
-                'out_vars', [thx+'_r_'+coord], $
+                'out_vars', [gx+'_r_'+coord], $
                 'time_var_name', 'Epoch', $
                 'time_var_type', 'epoch')))
 
@@ -83,11 +82,5 @@ pro themis_read_ssc, time, id=datatype, probe=probe, $
 
 ;---Read data from files and save to memory.
     read_files, time, files=files, request=request
-
-end
-
-themis_read_ssc, /print_datatype
-time = time_double(['2013-10-30/23:00','2013-10-31/06:00'])
-themis_read_ssc, time, id='pos', probe='d'
 
 end

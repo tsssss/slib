@@ -1,5 +1,8 @@
 ;+
 ; Extend a string or an array of string to a given length.
+; 
+; str_in. A string or an array of string to be extended.
+; length=. A number sets the target length.
 ;-
 
 function extend_string, str_in, length=length
