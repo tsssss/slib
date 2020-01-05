@@ -31,7 +31,7 @@ function tex2str, input
         'perp': output = '!9'+string(94b)+'!X'
         'parallel': output = '||'
         'deg': output = '!9'+string(176b)+'!X'
-        'times': output = '!9'+string(120b)+'!X'
+        'times': output = '!9'+string(180b)+'!X'
         'sim': output = '!9'+string(126b)+'!X'
         'int': output = '!9'+string(242b)+'!X'
         'pm': output = '!9'+string(177b)+'!X'

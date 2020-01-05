@@ -35,8 +35,8 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, $
     type_dispatch = hash()
     ; By 2019-08-24, spice kernal only available before 2019-07-04.
     case probe of
-        'a': valid_range = ['2012-09-05','2019-10-14']    ; A is still ongoing.
-        'b': valid_range = ['2012-09-05','2019-07-16']    ; B is all done, no data after 2019-07-16.
+        'a': valid_range = ['2012-09-05','2019-10-15']    ; A is all done, no data from 2019-10-15.
+        'b': valid_range = ['2012-09-05','2019-07-17']    ; B is all done, no data from 2019-07-17.
     endcase
     rbspx = 'rbsp'+probe
     base_name = rbspx+'_spice_products_%Y_%m%d_'+version+'.cdf'

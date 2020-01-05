@@ -4,7 +4,7 @@
 ; b_var=.
 ;-
 
-pro rbsp_calc_emodel, time, r_var=r_var, b_var=b_var, probe=probe, spin_axis=sa_mode
+pro rbsp_calc_emodel, time, r_var=r_var, b_var=b_var, probe=probe, spin_axis=sa_mode, errmsg=errmsg
 
     xyz = ['x','y','z']
     rgb = sgcolor(['red','green','blue'])
@@ -38,8 +38,12 @@ pro rbsp_calc_emodel, time, r_var=r_var, b_var=b_var, probe=probe, spin_axis=sa_
 
 ;---Get B GSM.
     if n_elements(b_var) eq 0 then b_var = pre0+'b_gsm'
-    if tnames(b_var) eq '' then rbsp_read_bfield, time, probe=probe, resolution='4sec'
+    if tnames(b_var) eq '' then rbsp_read_bfield, time, probe=probe, resolution='4sec', errmsg=errmsg
     b_gsm = get_var_data(b_var, at=times)
+    if n_elements(b_gsm) ne ntime*3 then begin
+        errmsg = handle_error('Invalid B field data ...')
+        return
+    endif
 
 ;---Calculat E = vxB. This v is v_sc, already -v in the plasma frame.
     evxb_gsm = scross(v_gsm,b_gsm)*1e-3   ; convert to mV/m.

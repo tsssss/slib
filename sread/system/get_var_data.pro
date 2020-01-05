@@ -8,12 +8,12 @@
 ; times=. An array of times as output.
 ;-
 ;
-function get_var_data, var, in=time_range, at=time, raw=raw, times=times
+function get_var_data, var, in=time_range, at=time, raw=raw, times=times, limits=lim
 
     retval = !null
     if tnames(var) eq '' then return, retval
     
-    get_data, var, times, dat
+    get_data, var, times, dat, limits=lim
     
     if keyword_set(time) ne 0 then begin
         if n_elements(time) eq 1 then begin

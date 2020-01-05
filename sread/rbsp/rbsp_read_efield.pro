@@ -65,6 +65,10 @@ pro rbsp_read_efield, time_range, probe=probe, resolution=resolution, errmsg=err
         spin_rate = 12d                 ; sec.
 
         dat = sread_rbsp_efw_l2(time_range, probes=probe, type='vsvy')
+        if size(dat,/type) ne 8 then begin
+            errmsg = handle_error('No Vsvy data ...')
+            return
+        endif
         tuts = sfmepoch(dat.epoch, 'unix')
         vsvy = sinterpol(dat.vsvy, tuts, times)
 
