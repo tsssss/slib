@@ -89,6 +89,20 @@ pro rbsp_read_efw, time, id=datatype, probe=probe, $
                 'in_vars', ['vsvy'], $
                 'time_var_name', 'epoch', $
                 'time_var_type', 'epoch16')))
+    type_dispatch['l2%vsvy-highres2'] = dictionary($
+        'pattern', dictionary($
+        'local_file', join_path([local_path,base_name]), $
+        'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+        'remote_file', join_path([remote_path,base_name]), $
+        'remote_index_file', join_path([remote_path,''])), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['vsvy'], $
+                'time_var_name', 'epoch_v', $
+                'time_var_type', 'epoch16')))
     base_name = rbspx+'_efw-l2_e-spinfit-mgse_%Y%m%d_'+version+'.cdf'
     local_path = [local_root,rbspx,'efw','l2','e-spinfit-mgse','%Y']
     remote_path = [remote_root,rbspx,'l2','efw','e-spinfit-mgse','%Y']
