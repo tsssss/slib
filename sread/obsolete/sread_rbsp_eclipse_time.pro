@@ -65,7 +65,11 @@ function sread_rbsp_eclipse_time, tr0, probes = probe0, filename = fn0, $
     
 end
 
-utr = time_double('2013-03-05')
-utr = time_double(['2012-09-25','2012-09-26'])
-tmp = sread_rbsp_eclipse_time(utr, probes = 'b')
+;utr = time_double('2013-03-05')
+;utr = time_double(['2012-09-25','2012-09-26'])
+;tmp = sread_rbsp_eclipse_time(utr, probes = 'b')
+foreach probe, ['a','b'] do begin
+    time_range = rbsp_info('efw_l2_data_range', probe=probe)
+    tmp = sread_rbsp_eclipse_time(time_range, probe=probe)
+endforeach
 end

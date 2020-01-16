@@ -39,7 +39,7 @@ pro rbsp_read_spice_gen_file, time, probe=probe, filename=file, errmsg=errmsg
 
     ; load spice kernels for all times.
     defsysv,'!rbsp_spice', exists=flag
-    if flag eq 0 then rbsp_load_spice_kernels, /all
+    if flag eq 0 then rbsp_load_spice_kernel
 
     date = time[0]-(time[0] mod secofday)
     utr = date+[0,secofday]
