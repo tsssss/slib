@@ -5,11 +5,11 @@
 ;   c0, in, strarr/intarr, req. Input color(s), string for true color, 
 ;       int for index color.
 ; Keywords:
-;   ct, in, int, opt. The color table number, set if color is in int.
+;   ct=, in, int, opt. The color table number, set if color is in int.
 ;   file, in, string, opt. Set the file name of color table files, then ct is
 ;       the color table id in that file.
-;   triplet, in, boolean, opt. Set to return [n,3] color in rrggbb.
-;   names, in, boolean, opt. Set to return all colors IDL knows.
+;   triplet=, in, boolean, opt. Set to return [n,3] color in rrggbb.
+;   names=, in, boolean, opt. Set to return all colors IDL knows.
 ; Return: bytarr[n,3]/tripletarr[n]. Color in true color regime, 
 ;   in [n,3] by default, in [n] if triplet is set.
 ; Notes: none.

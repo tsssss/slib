@@ -2,6 +2,8 @@
 ; Calculate E_vxb and E_corr.
 ; r_var=.
 ; b_var=.
+; probe=.
+; spin_axis='e0'. No other mode yet.
 ;-
 
 pro rbsp_calc_emodel, time, r_var=r_var, b_var=b_var, probe=probe, spin_axis=sa_mode, errmsg=errmsg

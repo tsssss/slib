@@ -6,6 +6,12 @@ function rbsp_info, key, probe=the_probe
 
     probe = (n_elements(the_probe) ne 0)? strmid(the_probe,0,1,/reverse): 'a'
     
+    spice_data_range = !null
+    case probe of
+        'a': spice_data_range = time_double(['2012-09-05','2019-10-15'])
+        'b': spice_data_range = time_double(['2012-09-05','2019-07-17'])
+    endcase
+    
     ; https://cdaweb.gsfc.nasa.gov/pub/data/rbsp/rbspa/l3/emfisis/
     emfisis_l3_data_range = !null
     case probe of
@@ -29,6 +35,7 @@ function rbsp_info, key, probe=the_probe
     endcase
     
     info = dictionary($
+        'spice_data_range', spice_data_range, $
         'emfisis_l3_data_range', emfisis_l3_data_range, $
         'efw_l3_data_range', efw_l3_data_range, $
         'efw_l2_data_range', efw_l2_data_range, $        
