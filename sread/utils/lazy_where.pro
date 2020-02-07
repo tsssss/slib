@@ -25,6 +25,7 @@ function lazy_where, data, relation, range, count=count, _extra=ex
         'le': return, where(data le val[0], count, _extra=ex)
         'lt': return, where(data lt val[0], count, _extra=ex)
         '[)': return, where(data ge val[0] and data lt val[1], count, _extra=ex)
+        '(]': return, where(data gt val[0] and data le val[1], count, _extra=ex)
         '[]': return, where(data ge val[0] and data le val[1], count, _extra=ex)
         '()': return, where(data gt val[0] and data lt val[1], count, _extra=ex)
         '][': return, where(data le val[0] or data ge val[1], count, _extra=ex)

@@ -138,7 +138,15 @@ pro rbsp_read_eclipse_flag, time, id=datatype, probe=probe, $
 
 ;---Check inputs.
     sync_threshold = 0
-    if n_elements(probe) eq 0 then probe = 'x'
+    if n_elements(probe) eq 0 then begin
+        errmsg = handle_error('no probe ...')
+        return
+    endif
+    index = where(probe eq ['a','b'])
+    if index[0] eq -1 then begin
+        errmsg = handle_error('invalid probe ...')
+        return
+    endif
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'sdata','rbsp'])
     if n_elements(version) eq 0 then version = 'v01'
 

@@ -2,7 +2,7 @@
 ; Rename a variable.
 ; 
 ; old_name. A string of old name.
-; new_name. A string of new name.
+; to=new_name. A string of new name.
 ;-
 pro rename_var, old_name, to=new_name
 

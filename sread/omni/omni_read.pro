@@ -46,6 +46,10 @@ pro omni_read, time, id=datatype, $
     types['sw'] = dictionary($
         'in_vars', ['BX_GSE','BY_GSM','BZ_GSM','Vx','Vy','Vz','proton_density','T','Pressure'], $
         'out_vars',['bx_gsm','by_gsm','bz_gsm','vx_gse','vy_gse','vz_gse','n','t','p'])
+    types['pdyn'] = dictionary($
+        'in_vars', ['Pressure'], $  ; Yes, this is dynamic pressure.
+        'out_vars',['p'])
+
 
     foreach key, types.keys() do begin
         type_dispatch[key] = dictionary($
