@@ -11,6 +11,7 @@
 function get_var_data, var, in=time_range, at=time, raw=raw, times=times, limits=lim
 
     retval = !null
+    if n_elements(var) ne 1 then message, 'Invalid input var ...'   ; want to stop instead of return.
     if tnames(var) eq '' then return, retval
     
     get_data, var, times, dat, limits=lim

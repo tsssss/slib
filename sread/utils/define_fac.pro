@@ -3,26 +3,30 @@
 ;   b is along background B field;
 ;   w is along rxb, westward if r is the position.
 ;   o is along bxw, outward if r is the position.
-;   
 ; Save pre0_[b,w,o]hat_coord.
+; 
+; bvar.
+; rvar.
+; time_var=. The tplot var that provides the times. 
 ;-
 pro define_fac, bvar, rvar, time_var=time_var
 
+    if n_elements(bvar) eq 0 then message, 'No bvar ...'
+    if n_elements(rvar) eq 0 then message, 'No rvar ...'
+    if tnames(bvar) eq '' then message, 'Invalid bvar ...'
+    if tnames(rvar) eq '' then message, 'Invalid rvar ...'
+    
     coord = get_setting(bvar, 'coord')
     if coord ne get_setting(rvar, 'coord') then $
         message, 'B and R are in different coord ...'
     
-
-    get_data, bvar, times, bvec
-    if tnames(time_var) ne '' then begin
-        tmp = times
-        get_data, time_var, times
-        bvec = sinterpol(bvec,tmp, times)
-    endif
-    get_data, rvar, tmp, rvec
     
-    if n_elements(tmp) ne n_elements(times) then $
-        rvec = sinterpol(rvec,tmp, times)
+    if n_elements(time_var) eq 0 then time_var = bvar
+    get_data, time_var, times
+    
+    
+    bvec = get_var_data(bvar, at=times)
+    rvec = get_var_data(rvar, at=times)
 
     rhat = sunitvec(rvec)
     bhat = sunitvec(bvec)
