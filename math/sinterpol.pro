@@ -40,7 +40,7 @@ function sinterpol, data, oldabs, newabs, _extra = extra
   
   ; scalar array.
   if oldndims eq 1 then $
-    return, interpol(oldyy, oldxx, newxx, _extra = extra)
+    return, interpol(oldyy, oldxx, newxx, /nan, _extra = extra)
   
   ; vector array.
   old_dims = size(data,/dimensions)
@@ -52,7 +52,7 @@ function sinterpol, data, oldabs, newabs, _extra = extra
   new_dim1 = [new_dims[0],ncomp]
   new_data = dblarr(new_dim1)
   for ii=0, ncomp-1 do begin
-    new_data[*,ii] = interpol(old_data[*,ii], oldxx, newxx, _extra=extra)
+    new_data[*,ii] = interpol(old_data[*,ii], oldxx, newxx, /nan, _extra=extra)
   endfor
   new_data = reform(new_data, new_dims)
   return, new_data
