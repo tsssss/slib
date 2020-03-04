@@ -51,5 +51,9 @@ function cdf_has_var, var, filename=cdf0, iszvar=iszvar, errmsg=errmsg
             return, 1
         endif
     endfor
+    
+    iszvar = 0
+    if input_is_file then cdf_close, cdfid
+    return, 0
 
 end

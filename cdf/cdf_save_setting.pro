@@ -12,7 +12,7 @@
 
 pro cdf_save_one_setting, key, val, cdfid=cdfid, varname=varname
 
-    on_error, 2     ; return to caller.
+    on_error, 0     ; stop here.
 
     ; Determine scope: g or v.
     global_scope = ~n_elements(varname)
@@ -65,7 +65,8 @@ pro cdf_save_setting, dict, vals, filename=cdf0, varname=varname
             cdf_save_one_setting, keys[0], vals, cdfid=cdfid, varname=varname
         endif else begin
             if n_elements(keys) ne n_elements(vals) then begin
-                errmsg = handle_error(cdfid=cdfid, 'Inconsistent key and value ...')
+                if input_is_file then cdf_close, cdfid
+                errmsg = handle_error('Inconsistent key and value ...')
                 return
             endif
             foreach key, keys, ii do cdf_save_one_setting, key, vals[ii], cdfid=cdfid, varname=varname
@@ -73,7 +74,6 @@ pro cdf_save_setting, dict, vals, filename=cdf0, varname=varname
     endelse
 
     if input_is_file then cdf_close, cdfid
-
 
 end
 
