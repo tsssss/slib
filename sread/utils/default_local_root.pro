@@ -6,12 +6,13 @@
 function default_local_root, disk
 
     if n_elements(disk) eq 0 then begin
-        case susrhost() of
-            'Sheng@rMBP-3.local': disk = 'Research'
-            'shengtian@m472e.space.umn.edu': disk = 'Research'
-            'Sheng Tian@DESKTOP-2N7I6Q7': disk = 'Research'
-            else: disk = 'xxx'  ; means to cause an error.
-        endcase
+;        case susrhost() of
+;            'Sheng@rMBP-3.local': disk = 'Research'
+;            'shengtian@m472e.space.umn.edu': disk = 'Research'
+;            'Sheng Tian@DESKTOP-2N7I6Q7': disk = 'Research'
+;            else: disk = 'xxx'  ; means to cause an error.
+;        endcase
+        disk = 'Research'
     endif
     
     ; if disk exists, use it.

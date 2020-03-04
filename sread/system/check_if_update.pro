@@ -9,7 +9,8 @@ function check_if_update, var, time_range
     if tnames(var) eq '' then return, 1
     if n_elements(time_range) ne 2 then return, 0
     get_data, var, times
-    index = lazy_where(times, time_range, count=count)
-    if count le 1 then return, 1 else return, 0
+    if min(times) gt min(time_range) then return, 1
+    if max(times) lt max(time_range) then return, 1
+    return, 0
 
 end
