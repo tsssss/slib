@@ -9,7 +9,7 @@
 ; wavelet. A string sets the mother wavelet. 'morlet', 'paul', 'dog'.
 ; param. A number sets the parameter for the mother wavelet. 2 or 6 for dog. No effect for morlet or paul. 
 ;-
-pro calc_psd, var, scales = scales, wavelet=wavelet, param=param
+pro calc_psd, var, scales=scales, wavelet=wavelet, param=param
 
     ; get data.
     if tnames(var) eq '' then message, 'Cannot find var: '+var+' ...'
