@@ -17,6 +17,7 @@ function read_data, files, var0, rec_info=ranges, errmsg=errmsg, $
     _extra=ex
     
     retval = ptr_new(!null)
+    errmsg = ''
     catch, error
     if error ne 0 then begin
         errmsg = handle_error(!error_state.msg)

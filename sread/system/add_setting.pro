@@ -11,8 +11,10 @@ pro add_setting, var, settings, smart=smart
     if tnames(var) eq '' then return
     if n_elements(settings) eq 0 then return
     
-    keys = strlowcase(tag_names(settings))
-    for i=0, n_elements(keys)-1 do options, var, keys[i], settings.(i)
+    if size(settings, /type) eq 8 then settings = dictionary(settings)
+    foreach key, settings.keys() do options, var, key, settings[key]
+;    keys = strlowcase(tag_names(settings))
+;    for i=0, n_elements(keys)-1 do options, var, keys[i], settings.(i)
         
     ; style settings.
     options, var, 'ynozero', 1

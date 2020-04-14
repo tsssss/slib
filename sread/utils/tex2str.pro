@@ -27,6 +27,8 @@ function tex2str, input
         'Gamma': output = '!9'+string(71b)+'!X'
         'sigma': output = '!9'+string(115b)+'!X'
         'Sigma': output = '!9'+string(83b)+'!X'
+        'tau': output = '!9'+string(116b)+'!X'
+        'rho': output = '!9'+string(114b)+'!X'
     ;---Math symbols.
         'perp': output = '!9'+string(94b)+'!X'
         'parallel': output = '||'
