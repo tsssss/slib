@@ -1,15 +1,13 @@
 ;+
-; Read THEMIS ion temperature in eV.
+; Read RBSP ion temperature in eV.
 ;-
-pro themis_read_ion_temp, time, probe=probe, errmsg=errmsg
+pro rbsp_read_ion_temp, time, probe=probe, errmsg=errmsg
 
-    pre0 = 'th'+probe+'_'
+    pre0 = 'rbsp'+probe+'_'
     errmsg = ''
 
-    ; read 'thx_ion_t'
-    data_type = 'l2%ion_t'
-    themis_read_esa, time, id=data_type, probe=probe, errmsg=errmsg
-    if errmsg ne '' then return
+    ; read 'rbspx_ion_t'.
+    rbsp_read_hope, time, id='l3%ion_t', probe=probe, errmsg=errmsg
 
     var = pre0+'ion_t'
     get_data, var, times, data
@@ -26,7 +24,7 @@ pro themis_read_ion_temp, time, probe=probe, errmsg=errmsg
 
 end
 
-time = time_double(['2014-08-28','2014-08-29'])
-probe = 'a'
-themis_read_ion_temp, time, probe=probe
+time = time_double(['2013-05-01','2013-05-02'])
+probe = 'b'
+rbsp_read_ion_temp, time, probe=probe
 end

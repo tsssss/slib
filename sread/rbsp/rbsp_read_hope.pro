@@ -39,12 +39,44 @@ pro rbsp_read_hope, time, id=datatype, probe=probe, $
     type_dispatch = hash()
     ; Level 3 moments.
     case probe of
-        'a': valid_range = ['2012-10-25']
-        'b': valid_range = ['2012-10-26']
+        'a': valid_range = ['2012-10-25','2019-10-14']
+        'b': valid_range = ['2012-10-26','2019-07-17']
     endcase
     base_name = 'rbsp'+probe+'_'+release+'_ect-hope-mom-l3_%Y%m%d_'+version+'.cdf'
     local_path = [local_root,'rbsp'+probe,'hope','level3','mom_'+release,'%Y']
     remote_path = [remote_root,'rbsp'+probe,'l3','ect','hope','moments',release,'%Y']
+    type_dispatch['l3%ion_t'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', 'Tperp_p_30', $
+                'out_vars', 'rbsp'+probe+'_ion_t', $
+                'time_var_name', 'Epoch_Ion', $
+                'time_var_type', 'Epoch')))
+    type_dispatch['l3%ele_t'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', 'Tperp_e_200', $
+                'out_vars', 'rbsp'+probe+'_ele_t', $
+                'time_var_name', 'Epoch_Ele', $
+                'time_var_type', 'Epoch')))
     type_dispatch['l3%ele_n'] = dictionary($
         'pattern', dictionary($
             'local_file', join_path([local_path,base_name]), $
