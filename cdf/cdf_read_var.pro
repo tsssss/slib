@@ -44,7 +44,7 @@ function cdf_read_var, var, range=range, filename=cdf0, errmsg=errmsg
         varinq = create_struct('dim', cdfinq.dim, varinq)
     endif
     nrec = varinfo.maxrec
-    if nrec le 0 then begin
+    if nrec lt 0 then begin
         errmsg = handle_error('No record ...')
         if input_is_file then cdf_close, cdfid
         return, retval
