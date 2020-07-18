@@ -48,14 +48,23 @@ pro rbsp_read_sdt_flag_gen_file, time, probe=probe, filename=data_file, errmsg=e
         file_times=file_times, time=time, nonexist_files=nonexist_files)
 
 ;---Read data from files and save to memory.
-    read_files, time, files=files, request=request
+    ;read_files, time, files=files, request=request
+    prefix = 'rbsp'+probe+'_'
+    cdf2tplot, file=files, convert_int1_to_int2=1, get_support_data=1, prefix=prefix+'efw_'
+    suffix = ['1','2','3','4','5','6']
+    vars = ['GUARD'+suffix,'USHER'+suffix]
+    foreach var, vars do begin
+        old_name = prefix+'efw_IEFI_'+var
+        new_name = prefix+strlowcase(var)
+        tplot_rename, old_name, new_name
+    endforeach
+    del_data, prefix+'efw_*'
 
 
 ;---Load data and search for SDT around apogee.
-    prefix = 'rbsp'+probe+'_'
     data_rate = 60. ; sec.
-    year = fix(time_string(time,tformat='YYYY'))
-    full_time_range = time_double([string(year,format='(I4)'),string(year+1,format='(I4)')])
+    year = fix(time_string(time[0],tformat='YYYY'))
+    full_time_range = time_double(string(year+[0,1],format='(I4)'))
     common_times = smkarthm(full_time_range[0], full_time_range[1]-data_rate*0.5, data_rate, 'dx')
     ncommon_time = n_elements(common_times)
     sdt_flags = intarr(ncommon_time)
@@ -63,8 +72,8 @@ pro rbsp_read_sdt_flag_gen_file, time, probe=probe, filename=data_file, errmsg=e
     ; Use orbit data to eliminate perigee.
     rbsp_read_orbit, time, probe=probe
     apogee_limit = 4.
-    orbit_time_step = 60.
     dis = snorm(get_var_data(prefix+'r_gsm', times=orbit_times))
+    orbit_time_step = total(orbit_times[0:1]*[-1,1])
     index = where(dis ge apogee_limit)
     apogee_time_ranges = time_to_range(orbit_times[index], time_step=orbit_time_step)
     napogee_time_range = n_elements(apogee_time_ranges)/2
@@ -74,7 +83,7 @@ pro rbsp_read_sdt_flag_gen_file, time, probe=probe, filename=data_file, errmsg=e
     step = 5.
     for ii=0, napogee_time_range-1 do begin
         the_time_range = reform(apogee_time_ranges[ii,*])
-;        lprmsg, 'Processing orbit: '+time_string(the_time_range)+' ...'
+        lprmsg, 'Processing orbit: '+time_string(the_time_range)+' ...'
 ;        guard1 = get_var_data(prefix+'guard1', in=the_time_range, times=times)
 ;        ; There could be no data. This is the normal case.
 ;        if n_elements(guard1) eq 0 then continue
@@ -114,11 +123,11 @@ pro rbsp_read_sdt_flag_gen_file, time, probe=probe, filename=data_file, errmsg=e
         end_time = max(end_time)
         if end_time le start_time then continue
         time_ranges.add, [start_time, end_time]
-;        plot_file = join_path([homedir(),'test_sdt_flag','fig_sdt_flag_'+rbspx+'_'+time_string(start_time,tformat='YYYY_MMDD_hhmm')+'.pdf'])
-;        sgopen, plot_file, xsize=5, ysize=8, /inch
-;        tplot, prefix+'guard?', trange=the_time_range
-;        timebar, time_ranges[-1], color=sgcolor('red')
-;        sgclose
+        plot_file = join_path([homedir(),'test_sdt_flag','fig_sdt_flag_'+rbspx+'_'+time_string(start_time,tformat='YYYY_MMDD_hhmm')+'.pdf'])
+        sgopen, plot_file, xsize=5, ysize=8, /inch
+        tplot, prefix+'guard?', trange=the_time_range
+        timebar, time_ranges[-1], color=sgcolor('red')
+        sgclose
     endfor
     if n_elements(time_ranges) eq 0 then begin
         time_ranges = []
@@ -194,7 +203,7 @@ pro rbsp_read_sdt_flag, time, id=datatype, probe=probe, $
 
 ;---Init settings.
     type_dispatch = hash()
-    valid_range = ['2012','2020']
+    valid_range = rbsp_info('efw_l2_data_range', probe=probe)
     rbspx = 'rbsp'+probe
     base_name = rbspx+'_sdt_flag_%Y_'+version+'.cdf'
     local_path = [local_root,rbspx,'flags','sdt']
@@ -203,7 +212,7 @@ pro rbsp_read_sdt_flag, time, id=datatype, probe=probe, $
         'pattern', dictionary($
             'local_file', join_path([local_path,base_name]), $
             'local_index_file', join_path([local_path,default_index_file()])), $
-        'valid_range', time_double(valid_range), $
+        ;'valid_range', time_double(valid_range), $
         'cadence', 'year', $
         'extension', fgetext(base_name), $
         'var_list', list($
@@ -220,7 +229,7 @@ pro rbsp_read_sdt_flag, time, id=datatype, probe=probe, $
         foreach file, request.nonexist_files do begin
             file_time = file.file_time
             year = time_string(file_time,tformat='YYYY')
-            the_time_range = time_double([string(year,format='(I4)'),string(year+1,format='(I4)')])
+            the_time_range = time_double(string(year+[0,1],format='(I4)'))
             local_file = file.local_file
             rbsp_read_sdt_flag_gen_file, the_time_range, probe=probe, filename=local_file, local_root=local_root
         endforeach
@@ -233,5 +242,6 @@ pro rbsp_read_sdt_flag, time, id=datatype, probe=probe, $
 
 end
 
-foreach probe, ['a','b'] do rbsp_read_sdt_flag, time_double(['2012-01-01','2020-01-01']), probe=probe
+;foreach probe, ['a','b'] do rbsp_read_sdt_flag, time_double(['2012-01-01','2020-01-01']), probe=probe
+foreach probe, ['a'] do rbsp_read_sdt_flag, time_double(['2019-01-01','2019-07-16']), probe=probe
 end

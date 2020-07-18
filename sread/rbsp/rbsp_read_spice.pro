@@ -16,7 +16,7 @@
 ; version=. A string to set specific version of files. By default, the
 ;   program finds the files of the highest version.
 ;-
-pro rbsp_read_spice, time, id=datatype, probe=probe, $
+pro rbsp_read_spice, time, id=datatype, probe=probe, coord=coord, $
     print_datatype=print_datatype, errmsg=errmsg, $
     local_files=files, file_times=file_times, version=version, $
     local_root=local_root, remote_root=remote_root
@@ -29,7 +29,8 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, $
     sync_threshold = 0
     if n_elements(probe) eq 0 then probe = 'x'
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'sdata','rbsp'])
-    if n_elements(version) eq 0 then version = 'v01'
+    if n_elements(version) eq 0 then version = 'v04'
+    if n_elements(coord) eq 0 then coord = 'gsm'
 
 ;---Init settings.
     type_dispatch = hash()
@@ -47,8 +48,21 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, $
         'extension', fgetext(base_name), $
         'var_list', list($
             dictionary($
-                'in_vars', ['pos_gsm'], $
-                'time_var_name', 'ut_pos', $
+                'in_vars', rbspx+'_r_'+coord, $
+                'time_var_name', 'time', $
+                'time_var_type', 'unix')))
+    ; Velocity variables.
+    type_dispatch['sc_vel'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file()])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', rbspx+'_v_'+coord, $
+                'time_var_name', 'time', $
                 'time_var_type', 'unix')))
     ; Quaternion.
     type_dispatch['quaternion'] = dictionary($
@@ -60,8 +74,8 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, $
         'extension', fgetext(base_name), $
         'var_list', list($
             dictionary($
-                'in_vars', ['q_uvw2gsm'], $
-                'time_var_name', 'ut_cotran', $
+                'in_vars', rbspx+'_q_uvw2'+coord, $
+                'time_var_name', 'time', $
                 'time_var_type', 'unix')))
 
     if keyword_set(print_datatype) then begin
@@ -101,9 +115,22 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, $
 
 end
 
-time = time_double(['2013-06-07/04:45','2013-06-07/05:15'])
-time = time_double(['2012-09-25','2019-07-16'])
-time = time_double(['2019-07-14','2019-07-15'])
-;time = time_double(['2018-09-18','2018-09-19'])
-foreach probe, ['a','b'] do rbsp_read_spice, time, id='orbit', probe=probe
+
+
+probes = ['a']
+secofday = constant('secofday')
+local_root = join_path([default_local_root(),'sdata','rbsp'])
+foreach probe, probes do begin
+    rbspx = 'rbsp'+probe
+    local_path = [local_root,rbspx,'spice_product_v08','YYYY']
+    valid_range = rbsp_info('spice_data_range', probe=probe)
+    days = make_bins(valid_range+[0,-1], secofday, /inner)
+    foreach day, days do begin
+        lprmsg, 'Processing '+time_string(day)+' ...'
+        base_name = rbspx+'_spice_products_YYYY_MMDD_v08.cdf'
+        data_file = time_string(day, tformat=join_path([local_path,base_name]))
+        if file_test(data_file) eq 1 then continue
+        rbsp_read_spice_gen_file, day, probe=probe, filename=data_file
+    endforeach
+endforeach
 end

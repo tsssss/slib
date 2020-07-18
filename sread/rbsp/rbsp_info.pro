@@ -1,5 +1,8 @@
 ;+
 ; Return basic sc info.
+; 
+; key.
+; probe=.
 ;-
 
 function rbsp_info, key, probe=the_probe
@@ -33,6 +36,7 @@ function rbsp_info, key, probe=the_probe
         'a': efw_l2_data_range = time_double(['2012-09-08','2019-10-14'])
         'b': efw_l2_data_range = time_double(['2012-09-08','2019-07-17'])
     endcase
+
     
     info = dictionary($
         'spice_data_range', spice_data_range, $

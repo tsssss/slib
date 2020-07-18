@@ -19,10 +19,10 @@ pro rbsp_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg
 
     bvar = pre0+'b_gsm'
     get_data, bvar, times, bgsm
-    index = where(bgsm lt -99999, count)
+    index = where(bgsm le -99999, count)
         if count ne 0 then begin
         bgsm[index] = !values.f_nan
-        store_data, var, times, bgsm
+        store_data, bvar, times, bgsm
     endif
     if n_elements(utr0) eq 2 then begin
         index = lazy_where(times, utr0, count=count)
@@ -45,5 +45,6 @@ end
 
 utr0 = time_double(['2013-06-10/05:57:20','2013-06-10/05:59:40'])   ; a shorter time range for test purpose.
 utr0 = time_double(['2013-06-07/04:40','2013-06-07/05:10'])         ; a longer time range for test purpose.
+utr0 = time_double(['2015-09-15','2015-09-16'])         ; a day with data gap.
 rbsp_read_bfield, utr0, probe='b'
 end
