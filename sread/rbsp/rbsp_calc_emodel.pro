@@ -66,8 +66,9 @@ pro rbsp_calc_emodel, time, r_var=r_var, b_var=b_var, probe=probe, spin_axis=sa_
     vcoro_gei[*,0] = -r_gei[*,1]*omega
     vcoro_gei[*,1] =  r_gei[*,0]*omega
     vcoro_gei[*,2] = 0.0
+    vcoro_gei *= re     ; convert Re/s to km/s.
     vcoro_gsm = cotran(vcoro_gei, times, 'gei2gsm')
-    ecoro_gsm = scross(vcoro_gsm, b_gsm)
+    ecoro_gsm = scross(vcoro_gsm, b_gsm)*1e-3   ; convert to mV/m.
     ecoro_var = pre0+'ecoro_gsm'
     store_data, ecoro_var, times, ecoro_gsm
     add_setting, ecoro_var, /smart, {$
