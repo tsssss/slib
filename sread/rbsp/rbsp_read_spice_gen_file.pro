@@ -248,8 +248,8 @@ pro rbsp_read_spice_gen_file, time, probe=probe, $
 end
 
 
-time = time_double(['2014-01-01'])
-probe = 'a'
+time = time_double(['2013-05-01'])
+probe = 'b'
 
 
 ;timespan, time, 86400d, /seconds
