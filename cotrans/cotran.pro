@@ -21,7 +21,8 @@ function cotran, vec0, time, msg, errmsg=errmsg, print_coord=print_coord, _extra
         'geo2mag','mag2geo', $
         'gse2gsm','gsm2gse', $
         'gsm2sm','sm2gsm', $
-        'mgse2gse','gse2mgse']
+        'mgse2gse','gse2mgse', $
+        'uvw2gse','gse2uvw']
         
     supported_coord = strsplit(native_functions,'2',/extract)
     supported_coord = supported_coord.toarray()
@@ -38,7 +39,8 @@ function cotran, vec0, time, msg, errmsg=errmsg, print_coord=print_coord, _extra
     index = where(native_functions eq msg, count)
     if count ne 0 then begin
         pos = strpos(msg, 'mgse')
-        if pos[0] eq -1 then begin
+        pos2 = strpos(msg, 'uvw')
+        if pos[0] eq -1 and pos2[0] eq -1 then begin
             return, call_function(msg, vec0, time)
         endif else begin
             return, call_function(msg, vec0, time, _extra=ex)
@@ -54,6 +56,7 @@ function cotran, vec0, time, msg, errmsg=errmsg, print_coord=print_coord, _extra
         'geo': vec1 = gei2gse(geo2gei(vec0,time),time)
         'mag': vec1 = gei2gse(geo2gei(mag2geo(vec0,time),time),time)
         'mgse': vec1 = mgse2gse(vec0,time,_extra=ex)
+        'uvw': vec1 = uvw2gse(vec0,time,_extra=ex)
         'gse': vec1 = vec0
         else: begin
             errmsg = handle_error('Unknown input coord: '+coords[0]+' ...')
@@ -68,6 +71,7 @@ function cotran, vec0, time, msg, errmsg=errmsg, print_coord=print_coord, _extra
         'geo': return, gei2geo(gse2gei(vec1,time),time)
         'mag': return, geo2mag(gei2geo(gse2gei(vec1,time),time),time)
         'mgse': return, gse2mgse(vec1,time,_extra=ex)
+        'uvw': return, gse2uvw(vec1,time,_extra=ex)
         'gse': return, vec1
         else: begin
             errmsg = handle_error('Unknown output coord: '+coords[1]+' ...')

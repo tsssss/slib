@@ -9,7 +9,7 @@
 ; mGSE is defined here http://www.space.umn.edu/wp-content/uploads/2013/11/MGSE_definition_RBSP_11_2013.pdf.
 ;-
 
-function gse2mgse, vec0, time, wsc=wsc, probe=probe, _extra=ex
+function gse2mgse, vec0, time, wsc=wsc_gse, probe=probe, _extra=ex
     compile_opt idl2 & on_error, 2
 
     vec1 = double(vec0)
@@ -19,18 +19,18 @@ function gse2mgse, vec0, time, wsc=wsc, probe=probe, _extra=ex
     vz0 = vec1[n2:n3-1]
 
     ; get x_mgse, i.e., w_sc in gse.
-    if n_elements(wsc) eq 0 then begin
+    if n_elements(wsc_gse) eq 0 then begin
         time_range = minmax(time)
         if n_elements(probe) eq 0 then message, 'Needs probe ...'
         prefix = 'rbsp'+probe+'_'
         q_var = prefix+'q_uvw2gse'
-        if check_if_update(q_var, time_range) then rbsp_read_quaternion, time_range, probe=probe, coord='gse'
+        if check_if_update(q_var, time_range) then rbsp_read_quaternion, time_range, probe=probe
         q_uvw2gse = get_var_data(q_var, times=ut_cotran)
         quvw2gse = qslerp(q_uvw2gse, ut_cotran, time)
         muvw2gse = qtom(quvw2gse)
-        wsc = reform(muvw2gse[*,*,2])
+        wsc_gse = reform(muvw2gse[*,*,2])
     endif
-    wx = wsc[*,0] & wy = wsc[*,1] & wz = wsc[*,2]
+    wx = wsc_gse[*,0] & wy = wsc_gse[*,1] & wz = wsc_gse[*,2]
 
     ; do rotation.
     p = atan(double(wy),wx)     ; this way p (phi) in [0,2pi].
