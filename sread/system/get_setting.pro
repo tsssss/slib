@@ -7,17 +7,19 @@
 ;-
 function get_setting, var, key, exist
 
+    retval = !null
+    
     get_data, var, limits=lims
     if size(lims,/type) ne 8 then begin
         exist = 0
-        return, -1
+        return, retval
     endif
     
     keys = strlowcase(tag_names(lims))
     idx = where(keys eq key, cnt)
     if cnt eq 0 then begin
         exist = 0
-        return, -1
+        return, retval
     endif
     
     exist = 1

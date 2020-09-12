@@ -6,6 +6,7 @@
 ; in=time_range. Set it to load the data at the given time range.
 ; raw=. A boolean. By default, the program shrinks unnecessary dimensions. Set raw to preserve all dimensions.
 ; times=. An array of times as output.
+; limits=. A structure of options.
 ;-
 ;
 function get_var_data, var, in=time_range, at=time, raw=raw, times=times, limits=lim
