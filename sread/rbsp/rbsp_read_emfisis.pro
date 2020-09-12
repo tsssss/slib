@@ -128,6 +128,13 @@ pro rbsp_read_emfisis, time, id=datatype, probe=probe, $
             rename_var, tn, to=out_vars[index]
         endelse
     endforeach
+    
+    foreach var, out_vars do begin
+        get_data, var, times, data
+        index = lazy_where(times, '[]', time, count=count)
+        if count eq 0 then continue
+        store_data, var, times[index], data[index,*]
+    endforeach
 end
 
 

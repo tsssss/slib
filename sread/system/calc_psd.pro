@@ -62,7 +62,7 @@ pro calc_psd, var, scales=scales, wavelet=wavelet, param=param
     
     
     ; Calc CWT. Continuous wavelet transform. w_nj.
-    w_nj = wv_cwt(x_n, wavelet, param, dscale=dj, start_scale=s0/dt, nscale=J, scale=s_j, /pad)
+    w_nj = wv_cwt(x_n, wavelet, param, dscale=dj, start_scale=s0/dt, nscale=J, scale=s_j, pad=1)
     s_j *= dt
     tau_j = s_j*s2t
     f_j = 1d/tau_j
