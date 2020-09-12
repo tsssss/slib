@@ -29,8 +29,8 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, coord=coord, $
     sync_threshold = 0
     if n_elements(probe) eq 0 then probe = 'x'
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'sdata','rbsp'])
-    if n_elements(version) eq 0 then version = 'v04'
-    if n_elements(coord) eq 0 then coord = 'gsm'
+    if n_elements(version) eq 0 then version = 'v08'
+    if n_elements(coord) eq 0 then coord = 'gse'
 
 ;---Init settings.
     type_dispatch = hash()
@@ -49,8 +49,8 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, coord=coord, $
         'var_list', list($
             dictionary($
                 'in_vars', rbspx+'_r_'+coord, $
-                'time_var_name', 'time', $
-                'time_var_type', 'unix')))
+                'time_var_name', 'Epoch', $
+                'time_var_type', 'epoch')))
     ; Velocity variables.
     type_dispatch['sc_vel'] = dictionary($
         'pattern', dictionary($
@@ -62,8 +62,8 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, coord=coord, $
         'var_list', list($
             dictionary($
                 'in_vars', rbspx+'_v_'+coord, $
-                'time_var_name', 'time', $
-                'time_var_type', 'unix')))
+                'time_var_name', 'Epoch', $
+                'time_var_type', 'epoch')))
     ; Quaternion.
     type_dispatch['quaternion'] = dictionary($
         'pattern', dictionary($
@@ -75,8 +75,34 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, coord=coord, $
         'var_list', list($
             dictionary($
                 'in_vars', rbspx+'_q_uvw2'+coord, $
-                'time_var_name', 'time', $
-                'time_var_type', 'unix')))
+                'time_var_name', 'Epoch', $
+                'time_var_type', 'epoch')))
+    ; Spin phase.
+    type_dispatch['spin_phase'] = dictionary($
+        'pattern', dictionary($
+        'local_file', join_path([local_path,base_name]), $
+        'local_index_file', join_path([local_path,default_index_file()])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+        dictionary($
+        'in_vars', rbspx+'_spin_phase', $
+        'time_var_name', 'Epoch', $
+        'time_var_type', 'epoch')))
+    ; Spin period.
+    type_dispatch['spin_period'] = dictionary($
+        'pattern', dictionary($
+        'local_file', join_path([local_path,base_name]), $
+        'local_index_file', join_path([local_path,default_index_file()])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+        dictionary($
+        'in_vars', rbspx+'_spin_period', $
+        'time_var_name', 'Epoch', $
+        'time_var_type', 'epoch')))
 
     if keyword_set(print_datatype) then begin
         print, 'Suported data type: '
@@ -116,6 +142,12 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, coord=coord, $
 end
 
 
+probe = 'b'
+time_range = time_double(['2013-01-09','2013-01-10'])
+rbsp_read_orbit, time_range, probe=probe
+rbsp_read_sc_vel, time_range, probe=probe
+rbsp_read_quaternion, time_range, probe=probe
+stop
 
 probes = ['a']
 secofday = constant('secofday')
