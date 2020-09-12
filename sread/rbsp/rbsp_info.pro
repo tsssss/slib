@@ -36,13 +36,20 @@ function rbsp_info, key, probe=the_probe
         'a': efw_l2_data_range = time_double(['2012-09-08','2019-10-14'])
         'b': efw_l2_data_range = time_double(['2012-09-08','2019-07-17'])
     endcase
+    
+    efw_phasef_data_range = !null
+    case probe of
+        'a': efw_phasef_data_range = time_double(['2012-09-08','2019-10-16'])
+        'b': efw_phasef_data_range = time_double(['2012-09-08','2019-07-18'])
+    endcase
 
     
     info = dictionary($
         'spice_data_range', spice_data_range, $
         'emfisis_l3_data_range', emfisis_l3_data_range, $
         'efw_l3_data_range', efw_l3_data_range, $
-        'efw_l2_data_range', efw_l2_data_range, $        
+        'efw_l2_data_range', efw_l2_data_range, $ 
+        'efw_phasef', efw_phasef_data_range, $       
         'spin_period', 10.95d, $
         'boom_length', [100d,100,12], $
         'v_uvw_data_rate', 0.03125d)
