@@ -3,8 +3,9 @@
 ; Save data to tplot.
 ; range=. The range of dep_0
 ; time_var=. A string sets the time_var.
+; time_type=. A string sets the type of time_var, e.g., 'epoch', 'tt2000', etc.
 ;-
-pro cdf_load_var, var, range=range, time_var=time_var, filename=cdf0, errmsg=errmsg
+pro cdf_load_var, var, range=range, time_var=time_var, time_type=time_type, filename=cdf0, errmsg=errmsg
 
     errmsg = ''
 
@@ -95,6 +96,7 @@ pro cdf_load_var, var, range=range, time_var=time_var, filename=cdf0, errmsg=err
     if no_time then times = 0 else begin
         if ~keyword_set(time_var) then time_var = vatt[keys[index[0]]]
         times = cdf_read_var(time_var, filename=cdfid, errmsg=errmsg)
+        if keyword_set(time_type) then times = convert_time(times, from=time_type, to='unix')
         if errmsg ne '' then times = !null
     endelse
 
