@@ -6,13 +6,25 @@
 ;-
 pro rbsp_read_orbit, time, probe=probe, errmsg=errmsg, coord=coord, _extra=ex
 
-    if n_elements(coord) eq 0 then coord = 'gsm'
-    ; read 'q_uvw2gsm'.
-    rbsp_read_spice, time, id='orbit', probe=probe, coord=coord, errmsg=errmsg, _extra=ex
+    if n_elements(coord) eq 0 then coord = 'gse'
+    ; read 'r_gse'.
+    rbsp_read_spice, time, id='orbit', probe=probe, errmsg=errmsg, _extra=ex
     if errmsg ne '' then return
+    
+    ; Remove overlapping times.
+    prefix = 'rbsp'+probe+'_'
+    old_var = prefix+'r_gse'
+    get_data, old_var, times, data
+    index = uniq(times, sort(times))
+    store_data, old_var, times[index], data[index,*]
 
-    pre0 = 'rbsp'+probe+'_'
-    var = pre0+'r_'+coord
+    new_var = prefix+'r_'+coord
+    if new_var ne old_var then begin
+        data = get_var_data(old_var, times=times)
+        data = cotran(data, times, 'gse2'+coord, probe=probe)
+        store_data, new_var, times, data
+        del_data, old_var
+    endif
     settings = { $
         display_type: 'vector', $
         unit: 'Re', $
@@ -20,11 +32,6 @@ pro rbsp_read_orbit, time, probe=probe, errmsg=errmsg, coord=coord, _extra=ex
         coord: strupcase(coord), $
         coord_labels: ['x','y','z'], $
         colors: sgcolor(['red','green','blue'])}
-    add_setting, var, settings, /smart
-    
-    ; Remove overlapping times.
-    get_data, var, times, data
-    index = uniq(times, sort(times))
-    store_data, var, times[index], data[index,*]
+    add_setting, new_var, settings, /smart
 
 end

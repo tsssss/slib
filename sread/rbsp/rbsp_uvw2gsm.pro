@@ -13,11 +13,7 @@ pro rbsp_uvw2gsm, ivar, ovar, quaternion=qvar, probe=probe
     time_range = minmax(times)
     if check_if_update(qvar, time_range) then rbsp_read_quaternion, time_range, probe=probe
 
-    get_data, qvar, uts, quvw2gsm
-    if n_elements(uts) ne n_elements(times) then quvw2gsm = qslerp(quvw2gsm, uts, times)
-    muvw2gsm = qtom(quvw2gsm)
-
-    ovec = rotate_vector(ivec, muvw2gsm)
+    ovec = cotran(cotran(ivec,times,'uvw2gse',probe=probe), times, 'gse2gsm')
     store_data, ovar, times, ovec
     colors = get_setting(ivar, 'colors', exist)
     if ~exist then colors = sgcolor(['red','green','blue'])
