@@ -1,8 +1,12 @@
 ;+
 ; Define quaternion for rotation between FAC and the given coord.
+; 
+; b_var.
+; r_var.
+; time_var=.
 ;-
 
-pro define_fac, b_var, r_var
+pro define_fac, b_var, r_var, time_var=time_var
 
     if n_elements(b_var) eq 0 then message, 'No b_var ...'
     if n_elements(r_var) eq 0 then message, 'No r_var ...'
