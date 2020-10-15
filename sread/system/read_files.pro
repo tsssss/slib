@@ -80,62 +80,62 @@ pro read_files, time, files=files, request=request, errmsg=errmsg
         ndep_var = n_elements(dep_vars)
 
 
-    ;---Find a rec_infos using time info.
+    ;---Find rec_infos using time info.
         generic_time = var_list.generic_time
         if generic_time then lprmsg, 'Dependent variable as-is, do not interpret as time ...'
         
-        rec_infos = lon64arr(nfile,2)-1
         check_rec_info = n_elements(time) ne 0 and has_time_var
-
         if check_rec_info then begin
             lprmsg, 'Checking record info using the dependent variable ...'
             if ~keyword_set(generic_time) then begin
                 if n_elements(time_type) eq 0 then time_type = default_time_type()
                 time_info = convert_time(time, from=time_type, to=time_var_type)
+                dtype = size(time_info[0],/type)
+                if dtype eq 9 or dtype eq 6 then begin    ; where doesn't work properly with complex number
+                    time_info = real_part(time_info)    ; can overwrite times, it will be read again later.
+                endif
             endif
-            ptr_times = read_data(files, time_var_name, errmsg=errmsg, /no_merge)
             if errmsg ne '' then begin
                 errmsg = handle_error('Time variable :'+time_var_name+' does not exist in files ...')
                 return
             endif
-            times = []
-            time_ranges = dblarr(nfile,2)
-            nrecs = dblarr(nfile)
-            for i=0, nfile-1 do begin
-                tmp = *ptr_times[i]
-                times = [times,tmp]
-                time_ranges[i,*] = [tmp[0],tmp[-1]]
-                nrecs[i] = n_elements(tmp)
-            endfor
-            if n_elements(time_info) eq 1 then begin
-                tmp = min(times-time_info[0], index, /absolute)
-                rec_infos[*] = index
-            endif else begin
-                time_ranges = time_info[1]<time_ranges>time_info[0]
-                for i=0, nfile-1 do begin
-                    dtype = size(times,/type)
-                    if dtype eq 9 or dtype eq 6 then begin    ; where doesn't work properly with complex number
-                        times = real_part(times)    ; can overwrite times, it will be read again later.
-                        time_ranges = real_part(time_ranges)
-                    endif
-                    index = lazy_where(times, time_ranges[i,*], count=count)
+            
+            rec_infos = list()
+            foreach file, files, ii do begin
+                the_times = *(read_data(file, time_var_name, errmsg=errmsg))
+                dtype = size(the_times[0],/type)
+                if dtype eq 9 or dtype eq 6 then begin    ; where doesn't work properly with complex number
+                    the_times = real_part(the_times)    ; can overwrite times, it will be read again later.
+                endif
+                
+                if n_elements(time_info) eq 1 then begin
+                    if product(minmax(the_times)-time_info[0]) gt 0 then begin
+                        rec_infos.add, !null
+                    endif else begin
+                        tmp = min(the_times-time_info[0], index, /absolute)
+                        rec_infos.add, index
+                    endelse
+                endif else begin
+                    index = lazy_where(the_times, '[]', time_info, count=count)
+                    if count eq 0 then rec_infos.add, !null else rec_infos.add, minmax(index)
+                endelse
+            endforeach
+            
+            flags = bytarr(nfile)   ; 1 for irrelevant files.
+            foreach tmp, rec_infos, ii do if n_elements(tmp) eq 0 then flags[ii] = 1
+            index = where(flags eq 0, count)
+            if count eq 0 then begin
+                errmsg = handle_error('No data found in for given time_info ...')
+                return
+            endif
+            files = files[index]
+            rec_infos = (rec_infos[index]).toarray()
 
-                    rec_infos[i,*] = index[0]+[0,count]
-                    if count eq 0 then begin
-                        errmsg = handle_error('No data found in for given time_info ...')
-                        return  ; return is a rather strong reaction, maybe change to continue is better.
-                        ;continue
-                    endif
-                endfor
-                ; Deal with when files connect, skip the first record of the next file.
-                for i=1, nfile-1 do begin
-                    rec_infos[i:*,*] -= nrecs[i-1]
-                    if time_ranges[i-1,1] eq time_ranges[i,0] then rec_infos[i,1] += 1
-                endfor
-            endelse
             times = read_data(files, time_var_name, rec_info=rec_infos, /data, errmsg=errmsg)
             if ~keyword_set(generic_time) then times = convert_time(times, from=time_var_type, to=time_type)
-        endif
+        endif else begin
+            rec_infos = intarr(nfile,2)-1   ; Read all data.
+        endelse
 
 
     ;---Read data.
