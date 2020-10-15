@@ -113,7 +113,7 @@ function scdfread, cdf0, vnames, recs0, rec_info=recs1, drec=drec, skt=skt, sile
             ; deal with negative recs. [-1,-1] read all.
             if recs[i,0] lt 0 or recs[i,1] lt 0 then recs[i,*] = [0,vinfo.maxrec]
             rec0 = recs[i,0]>0 & recs[i,1]<=vinfo.maxrec
-            nrec = recs[i,1]-rec0
+            nrec = recs[i,1]-rec0+1
             if nrec le 0 then nrec = 1      ; read one record.
             rec0 <= vinfo.maxrec-1
             if rec0 le 0 then rec0 = 0      ; fix vinfo.maxrec = 0 
