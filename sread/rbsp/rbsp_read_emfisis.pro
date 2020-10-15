@@ -38,6 +38,7 @@ pro rbsp_read_emfisis, time, id=datatype, probe=probe, $
 ;---Init settings.
     type_dispatch = hash()
     rbspx = 'rbsp'+probe
+    prefix = 'rbsp'+probe+'_'
     ; Level 2, B UVW.
     base_name = 'rbsp-'+probe+'_magnetometer_uvw_emfisis-l2_%Y%m%d_'+version+'.cdf'
     local_path = [local_root,rbspx,'emfisis','%Y','l2','magnetometer','uvw']
@@ -52,9 +53,10 @@ pro rbsp_read_emfisis, time, id=datatype, probe=probe, $
         'cadence', 'day', $
         'extension', fgetext(base_name), $
         'var_list', list($
+            ; cal_state = 1 for bad data, mag_valid = 1 for bad data.
             dictionary($
-                'in_vars', ['Mag'], $
-                'out_vars', [rbspx+'_b_uvw'], $
+                'in_vars', ['Mag','range_flag','calState','magInvalid'], $
+                'out_vars', prefix+['b_uvw','range_flag','cal_state','mag_valid'], $
                 'time_var_name', 'Epoch', $
                 'time_var_type', 'tt2000')))
     ; Level 3, B in given coord.
@@ -103,7 +105,7 @@ pro rbsp_read_emfisis, time, id=datatype, probe=probe, $
 ;---Read data from files and save to memory.
 ;   v1.6.2 is using a different time format from v1.6.1. So use spedas first.
     if n_elements(time) eq 2 then timespan, time[0], time[1]-time[0], /second
-    cdf2tplot, file=files, varformat=varformat, all=0, prefix='', suffix='', $
+    cdf2tplot, file=files, varformat=varformat, all=1, prefix='', suffix='', $
         tplotnames=tns, /convert_int1_to_int2
 
     all_invars = list()
