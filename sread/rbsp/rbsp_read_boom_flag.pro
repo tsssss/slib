@@ -24,9 +24,25 @@ pro rbsp_read_boom_flag_gen_file, date, probe=probe, filename=data_file, errmsg=
 ;---Load Vsvy.
     max_valid_v = 200.
     secofday = constant('secofday')
-    datatype = (date ge time_double('2016-02-28'))? 'l2%vsvy-highres2': 'l2%vsvy-highres'
     date_time_range = date+[0,secofday]
-    rbsp_read_efw, date_time_range, id=datatype, probe=probe
+    time_range = date_time_range+[-1,1]*600.
+    change_time = time_double('2016-02-28')
+    if product(time_range-change_time) le 0 then begin      ; during change format.
+        datatype = 'l2%vsvy-highres'
+        rbsp_read_efw, [time_range[0],change_time], probe=probe, id=datatype
+        get_data, 'vsvy', tmp1, tmp2
+        datatype = 'l2%vsvy-highres2'
+        rbsp_read_efw, [change_time,time_range[1]], probe=probe, id=datatype
+        get_data, 'vsvy', tmp3, tmp4
+        store_data, 'vsvy', [tmp1,tmp3], [tmp2,tmp4]
+    endif else if time_range[1] lt change_time then begin   ; all before change format.
+        datatype = 'l2%vsvy-highres'
+        rbsp_read_efw, time_range, probe=probe, id=datatype
+    endif else begin                                        ; all after change format.
+        datatype = 'l2%vsvy-highres2'
+        rbsp_read_efw, time_range, probe=probe, id=datatype
+    endelse
+    
 
     efield_time_step = 1d/16
     spinfit_time_step = 10d
@@ -53,28 +69,33 @@ pro rbsp_read_boom_flag_gen_file, date, probe=probe, filename=data_file, errmsg=
         ytitle: '(V)', $
         colors: v_colors, $
         labels: v_labels}
-    uniform_time, vsvy_var, efield_time_step
-    ntime = n_elements(times)
-    ntime0 = secofday/efield_time_step
-    if ntime ne ntime0 then begin
-        new_times = make_bins(date_time_range, efield_time_step)
-        new_vsvy = fltarr(ntime0,nboom)+!values.f_nan
-        index = lazy_where(new_times, '[]', minmax(times), count=count)
-        if count ne 0 then new_vsvy[index,*] = sinterpol(vsvy, times, new_times[index], /nan)
-        store_data, vsvy_var, new_times, new_vsvy
+    highres_times = make_bins(time_range, efield_time_step)
+    interp_time, vsvy_var, highres_times
+    vsvy = get_var_data(vsvy_var, limits=lim)
+    index = where(finite(snorm(vsvy),/nan), count)
+    fillval = !values.f_nan
+    pad_time = 30.  ; sec.
+    if count ne 0 then begin
+        nan_times = highres_times[time_to_range(index,time_step=1)]
+        nnan_time = n_elements(nan_times)*0.5
+        for section_id=0,nnan_time-1 do begin
+            index = lazy_where(highres_times, '[]', nan_times[section_id,*]+[-1,1]*pad_time, count=count)
+            if count eq 0 then continue
+            vsvy[index,*] = fillval
+        endfor
+        store_data, vsvy_var, highres_times, vsvy
     endif
-    vsvy = get_var_data(vsvy_var, times=highres_times, limits=lim)
-    
-    
+
+
 ;---Low-res version.
     vsvy_lowres_var = prefix+'vsvy_lowres'
     nhighres_time = n_elements(highres_times)
     time_index = smkarthm(0,nhighres_time,spinfit_time_step/efield_time_step,'dx')
     lowres_times = highres_times[time_index]
     vsvy = vsvy[time_index,*]
-    store_data, vsvy_lowres_var, lowres_times, vsvy
-    
-    
+    store_data, vsvy_lowres_var, lowres_times, vsvy, limits=lim
+
+
 ;---Get the best-estimated Vsc.
     max_good_v = 150.  ; By inspecting monthly plots, this seems to be a good threshold for bad |V|.
     index = where(abs(vsvy) ge max_good_v, count)
@@ -89,15 +110,15 @@ pro rbsp_read_boom_flag_gen_file, date, probe=probe, filename=data_file, errmsg=
     store_data, vsc_median_var, lowres_times, vsc_median, limits={$
         ytitle: '(V)', $
         labels: 'Vsc median'}
-    
-    
+
+
 ;---Get Vx-Vsc.
     vsvy = get_var_data(vsvy_var, times=highres_times)
     vsc = get_var_data(vsc_median_var, at=highres_times)
     for ii=0,nboom-1 do begin
         id_str = string(ii+1,format='(I0)')
         dv = vsvy[*,ii]-vsc
-        dv0 = smooth(dv, smooth_width, /edge_zero, /nan)
+        dv0 = smooth(dv, smooth_width, /edge_mirror, /nan)
         dv0 = dv0[time_index]
         store_data, prefix+'dv0_'+id_str, lowres_times, dv0, limits={$
             ytitle:'(V)', $
@@ -105,12 +126,12 @@ pro rbsp_read_boom_flag_gen_file, date, probe=probe, filename=data_file, errmsg=
             ystyle: 1, $
             yrange: [-1,1]*5}
     endfor
-    
-    
-    
+
+
+
 ;---Remove SDT, eclipse.
-    rbsp_read_eclipse_flag, date_time_range, probe=probe
-    rbsp_read_sdt_flag, date_time_range, probe=probe
+    rbsp_read_eclipse_flag, time_range, probe=probe
+    rbsp_read_sdt_flag, time_range, probe=probe
 
     flag_vars = prefix+['eclipse','sdt']+'_flag'
     flag_time_step = 60.    ; sec.
@@ -129,17 +150,23 @@ pro rbsp_read_boom_flag_gen_file, date, probe=probe, filename=data_file, errmsg=
     for ii=0,nboom-1 do begin
         id_str = string(ii+1,format='(I0)')
         dv0 = get_var_data(prefix+'dv0_'+id_str)
-        
-    ;---Mask times when other flags are 1.        
-        for jj=0, nflag_time_range-1 do begin
-            index = lazy_where(lowres_times, '[]', flag_time_ranges[jj,*]+[-1,1]*pad_time, count=count)
-            if count eq 0 then continue
-            dv0[index,*] = !values.f_nan
-        endfor
-        
+
+    ;---Tell from dv0.
         probe_flags = intarr(nlowres_time)
         index = where(abs(dv0) lt max_valid_dv0, count)
         if count ne 0 then probe_flags[index] = 1
+        
+    ;---Data gap if fine?
+        index = where(finite(dv0,/nan), count)
+        if count ne 0 then probe_flags[index] = 1
+        
+   
+    ;---Mask times when other flags are 1.
+        for jj=0, nflag_time_range-1 do begin
+            index = lazy_where(lowres_times, '[]', flag_time_ranges[jj,*]+[-1,1]*pad_time, count=count)
+            if count eq 0 then continue
+            probe_flags[index,*] = 0
+        endfor
 
         flag_var = prefix+'v'+id_str+'_flag'
         store_data, flag_var, lowres_times, probe_flags, limits={$
@@ -154,22 +181,52 @@ pro rbsp_read_boom_flag_gen_file, date, probe=probe, filename=data_file, errmsg=
     endfor
 
 
-
-;;---Remove perigee data.
-;    min_dis = 3.
-;    rbsp_read_orbit, date_time_range, probe=probe
-;    r_var = prefix+'r_gsm'
-;    dis = snorm(get_var_data(r_var, times=orbit_times))
-;    dis = interpol(dis, orbit_times, highres_times)
-;    index = where(dis le min_dis, count)
-;    if count ne 0 then vsvy[index,*] = !values.f_nan
-
+;;---Fix false flag due to the data gap around day change.
+;    vsc_median = get_var_data(prefix+'vsc_median')
+;    index = where(finite(vsc_median,/nan), count)
+;    boom_flags = intarr(nlowres_time,nboom)
+;    for ii=0,nboom-1 do begin
+;        boom_flags[*,ii] = get_var_data(prefix+'v'+id_str+'_flag'
+;    endfor
+;    
+;    if count ne 0 then begin
+;        nan_times = lowres_times[time_to_range(index,time_step=1)]
+;        nnan_time = n_elements(nan_times)*0.5
+;        max_dt = 60.
+;        foreach test_time, date_time_range do begin
+;            section_index = where(abs(nan_times[*,0]-test_time) le max_dt or $
+;                abs(nan_times[*,0]-test_time) le max_dt, nsection)
+;            if nsection eq 0 then continue
+;            for ii=0,nsection-1 do begin
+;                index = lazy_where(lowres_times, '[]', nan_times[section_index[ii],*], count)
+;                if count eq 0 then continue
+;            endfor
+;            stop
+;        endforeach
+;    endif
 
 
 
 ;---Uniform time.
-    common_times = lowres_times
+    time_index = lazy_where(lowres_times, '[]', date_time_range)
+    common_times = lowres_times[time_index]
     ncommon_time = n_elements(common_times)
+    
+    ; Boom flag.
+    boom_flags = intarr(ncommon_time,nboom)
+    for ii=0, nboom-1 do begin
+        id_str = string(ii+1,format='(I0)')
+        boom_flags[*,ii] = (get_var_data(prefix+'v'+id_str+'_flag'))[time_index]
+    endfor
+    store_data, prefix+'boom_flag', common_times, boom_flags
+    
+    ; Other vars.
+    foreach var, prefix+['vsc_median'] do begin
+        data = get_var_data(var)
+        store_data, var, common_times, data[time_index,*]
+    endforeach
+
+
 
 
 ;---Write to file.
@@ -217,11 +274,7 @@ pro rbsp_read_boom_flag_gen_file, date, probe=probe, filename=data_file, errmsg=
         'ystyle', 1, $
         'colors', v_colors, $
         'depend_0', time_var)
-    boom_flags = intarr(ncommon_time,nboom)
-    for ii=0, nboom-1 do begin
-        id_str = string(ii+1,format='(I0)')
-        boom_flags[*,ii] = get_var_data(prefix+'v'+id_str+'_flag')
-    endfor
+    boom_flags = get_var_data(prefix+'boom_flag')
     cdf_save_var, boom_flag_var, value=boom_flags, filename=data_file
     cdf_save_setting, settings, filename=data_file, varname=boom_flag_var
 
@@ -301,18 +354,30 @@ pro rbsp_read_boom_flag, time, id=datatype, probe=probe, $
 end
 
 
-; Vsvy miss data on that day.
-rbsp_read_boom_flag_gen_file, time_double('2014-04-28'), probe='a', filename=join_path([homedir(),'test.cdf'])
+
+;probe = 'a'
+;date = time_double('2014-06-19')    ; Vsvy miss data on that day.
+;
+;probe = 'b'
+;date = time_double('2013-01-27')    ; Flag on at the beginning of the day.
+;date = time_double('2014-01-09')    ; Small data gaps.
+;date = time_double('2014-08-27')    ; Charging.
+;date = time_double('2014-08-29')    ; Flag on in a small chunck.
+;
+;data_file = join_path([homedir(),'test.cdf'])
+;rbsp_read_boom_flag_gen_file, date, probe=probe, filename=data_file
+;stop
 
 
-;; Run through the whole mission.
-;secofday = constant('secofday')
-;foreach probe, ['b'] do begin
-;    valid_time_range = rbsp_info('efw_l2_data_range', probe=probe)
-;    dates = make_bins(valid_time_range, secofday)
-;    foreach date, dates do begin
-;        date_time_range = date+[0,secofday]
-;        rbsp_read_boom_flag, date_time_range, probe=probe
-;    endforeach
-;endforeach
+; Run through the whole mission.
+secofday = constant('secofday')
+foreach probe, ['a','b'] do begin
+    valid_time_range = rbsp_info('efw_l2_data_range', probe=probe)
+    valid_time_range = time_double(['2016-02-27','2016-02-29'])
+    dates = make_bins(valid_time_range, secofday)
+    foreach date, dates do begin
+        date_time_range = date+[0,secofday]
+        rbsp_read_boom_flag, date_time_range, probe=probe
+    endforeach
+endforeach
 end
