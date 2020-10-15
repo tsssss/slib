@@ -16,6 +16,7 @@ function tex2str, input
     ;---Greek letters.
         'alpha': output = '!9'+string(97b)+'!X'
         'beta': output = '!9'+string(98b)+'!X'
+        'gamma': output = '!9'+string(103b)+'!X'
         'delta': output = '!9'+string(100b)+'!X'
         'Delta': output = '!9'+string(68b)+'!X'
         'phi': output = '!9'+string(102b)+'!X'
