@@ -1,6 +1,10 @@
 ;+
 ; Convert a vector in certain coord to FAC, which is
 ; pre-defined by define_fac.
+; 
+; var.
+; to=. The new var.
+; q_var=. The quaternion.
 ;-
 pro to_fac, var, to=out_var, q_var=q_var
 
@@ -17,7 +21,7 @@ pro to_fac, var, to=out_var, q_var=q_var
     get_data, var, times, vec
     ntime = n_elements(times)
     get_data, q_var, qtimes, q_xxx2fac
-    if ntime ne n_elements(times) then q_xxx2fac = qslerp(q_xxx2fac, qtimes, times)
+    if ntime ne n_elements(qtimes) then q_xxx2fac = qslerp(q_xxx2fac, qtimes, times)
     m_xxx2fac = qtom(q_xxx2fac)
     vec = rotate_vector(vec, m_xxx2fac)
 
