@@ -33,7 +33,9 @@ pro interp_time, var, times, to=new_var, data_gap_window=data_gap_window, _extra
     
     ; Treat data gap in between.
     new_time_step = total(times[0:1]*[-1,1])
-    if n_elements(data_gap_window) eq 0 then data_gap_window = new_time_step*4
+    old_time_step = total(old_times[0:1]*[-1,1])
+    the_time_step = max([new_time_step,old_time_step])
+    if n_elements(data_gap_window) eq 0 then data_gap_window = the_time_step*4
     dtimes = old_times[1:-1]-old_times[0:-2]
     index = where(dtimes ge data_gap_window, count)
     if count ne 0 then begin
