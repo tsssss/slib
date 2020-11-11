@@ -28,7 +28,7 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, coord=coord, $
 ;---Check inputs.
     sync_threshold = 0
     if n_elements(probe) eq 0 then probe = 'x'
-    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'sdata','rbsp'])
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','rbsp'])
     if n_elements(version) eq 0 then version = 'v08'
     if n_elements(coord) eq 0 then coord = 'gse'
 
@@ -37,7 +37,7 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, coord=coord, $
     valid_range = rbsp_info('spice_data_range', probe=probe)
     rbspx = 'rbsp'+probe
     base_name = rbspx+'_spice_products_%Y_%m%d_'+version+'.cdf'
-    local_path = [local_root,rbspx,'spice_product','%Y']
+    local_path = [local_root,rbspx,'spice_cdfs','%Y']
     ; Orbit variables.
     type_dispatch['orbit'] = dictionary($
         'pattern', dictionary($
