@@ -1,5 +1,5 @@
 ;+
-; Return all attributs in the CDF file.
+; Return all attributes in the CDF file.
 ;-
 function cdf_atts, cdf0, errmsg=errmsg
 

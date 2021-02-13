@@ -45,8 +45,12 @@ pro snetcdfskt, nc0, skeleton, filename=fn
         for jj=0, natt-1 do begin
             attname0 = ncdf_attname(ncid, ii, jj)
             attinq = ncdf_attinq(ncid, ii, attname0)
-            ncdf_attget, ncid, ii, attname0, value
-            if size(value,/type) eq 1 then value = string(value)
+            if attinq.datatype eq 'UNKNOWN' then begin
+                value = !values.f_nan
+            endif else begin
+                ncdf_attget, ncid, ii, attname0, value
+                if size(value,/type) eq 1 then value = string(value)
+            endelse
             attname = idl_validname(attname0, /convert_all)
             vatts = create_struct(vatts, attname, {name:attname0, value:value})
         endfor

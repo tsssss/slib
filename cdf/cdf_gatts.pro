@@ -1,5 +1,5 @@
 ;+
-; Return all gattributs in the CDF file.
+; Return all global attributs in the CDF file.
 ;-
 function cdf_gatts, cdf0, errmsg=errmsg
 

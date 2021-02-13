@@ -106,18 +106,24 @@ function snetcdfread, nc0, vnames, recs0, rec_info=recs1, skt=skt, silent=silent
         vinfo = skt.vars.(idx)
         if ~keyword_set(silent) then print, 'reading '+vinfo.name+' ...'
         ; read data.
-        varid = ncdf_varid(ncid, vinfo.name)
-        ncdf_varget, ncid, varid, value
-        dims = size(value, /dimensions)
-        nrec = dims[0]
-        ; trim data.
-        rec_info = (nrec-1)<recs[i,*]>0
-        if rec_info[0] gt 0 and rec_info[1] gt 0 then begin
-            ; works for both A=B and A<B.
-            if rec_info[0] gt rec_info[1] then rec_info = rec_info[[1,0]]
-            nrec = rec_info[1]-rec_info[0]+1
-            value = reform(value[rec_info[0]:rec_info[1],*,*,*,*,*,*,*])
-        endif
+        if vinfo.datatype eq 'UNKNOWN' then begin
+            value = !values.f_nan
+            nrec = 0
+        endif else begin
+            varid = ncdf_varid(ncid, vinfo.name)
+            ncdf_varget, ncid, varid, value
+            dims = size(value, /dimensions)
+            nrec = dims[0]
+            ; trim data.
+            rec_info = (nrec-1)<recs[i,*]>0
+            if rec_info[0] gt 0 and rec_info[1] gt 0 then begin
+                ; works for both A=B and A<B.
+                if rec_info[0] gt rec_info[1] then rec_info = rec_info[[1,0]]
+                nrec = rec_info[1]-rec_info[0]+1
+                value = reform(value[rec_info[0]:rec_info[1],*,*,*,*,*,*,*])
+            endif
+        endelse
+        
         tvar = {name: vinfo.name, value: ptr_new(value), nrec:long64(nrec)}
         vars = [vars, tvar]
     endfor
