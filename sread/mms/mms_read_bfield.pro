@@ -3,7 +3,7 @@
 ; Save data as 'mmsx_b_gsm'.
 ;-
 
-pro mms_read_bfield, time, probe=probe, resolution=resolution, errmsg=errmsg
+pro mms_read_bfield, time, probe=probe, resolution=resolution, errmsg=errmsg, _extra=ex
 
     resolution = (keyword_set(resolution))? strlowcase(resolution): 'survey'
     case resolution of

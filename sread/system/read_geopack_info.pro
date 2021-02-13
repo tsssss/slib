@@ -55,7 +55,8 @@ pro read_geopack_info, r_var, errmsg=errmsg, $
         time_range = minmax(times)
         sgeopack_par, time_range, model
     endif
-    interp_time, par_var, to=r_var
+    get_data, par_var, uts, pars
+    store_data, par_var, times, sinterpol(pars, uts, times)
 
     ndim = 3
     fgsm = fltarr(ntime,ndim)   ; footpoint position in GSM.
@@ -136,7 +137,7 @@ pro read_geopack_info, r_var, errmsg=errmsg, $
     add_setting, bmod_var, /smart, {$
         display_type: 'vector', $
         unit: 'nT', $
-        short_name: 'T89 B', $
+        short_name: strupcase(model)+' B', $
         coord: 'GSM', $
         coord_labels: ['x','y','z']}
 

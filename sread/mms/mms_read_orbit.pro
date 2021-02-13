@@ -4,7 +4,7 @@
 ; time. A time or a time range in ut sec.
 ; probe. A string sets the probe, '1',...,'4'.
 ;-
-pro mms_read_orbit, time, probe=probe, errmsg=errmsg
+pro mms_read_orbit, time, probe=probe, errmsg=errmsg, _extra=ex
 
     re = 6378d
     re1 = 1d/re
@@ -32,5 +32,10 @@ pro mms_read_orbit, time, probe=probe, errmsg=errmsg
 end
 
 time = time_double(['2016-10-28/22:30:00','2016-10-29/01:00:00'])
-mms_read_orbit, time, probe='1'
+time_range = time_double(['2019-01-01','2020-01-01'])
+time_range = time_double(['2019-08-01','2019-08-31'])
+time_range = time_double(['2019-08-18','2019-08-19'])
+secofday = constant('secofday')
+times = make_bins(time_range, secofday)
+foreach time, times do mms_read_orbit, time+[0,secofday], probe='1', errmsg=errmsg
 end

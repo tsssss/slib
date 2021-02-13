@@ -5,13 +5,24 @@
 ; dt. Data rate. By default, times are used to find the median data rate.
 ;-
 
-pro uniform_time, var, dt
+pro uniform_time, var, dt, errmsg=errmsg
     
+    errmsg = ''
     if tnames(var) eq '' then return
     get_data, var, times
     ntime = n_elements(times)
-    if ntime eq 0 then return
-    if times[0] eq 0 then return
+    if ntime eq 0 then begin
+        errmsg = 'No data ...'
+        return
+    endif
+    if times[0] eq 0 then begin
+        errmsg = 'No data ...'
+        return
+    endif
+    if ntime eq 1 then begin
+        errmsg = 'Not enough data ...'
+        return
+    endif
     
     if n_elements(dt) eq 0 then dt = sdatarate(times)
     dtime = times[1:ntime-1]-times[0:ntime-2]

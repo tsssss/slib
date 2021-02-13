@@ -362,7 +362,12 @@ function prepare_files, request=request, errmsg=errmsg, $
     local_files = local_files.toarray()
     nonexist_files = nonexist_files.toarray()
     request['nonexist_files'] = ne_files
-
+    
+    if n_elements(local_files) eq 0 then begin
+        errmsg = 'No file found ...'
+        return, retval
+    endif
+    
     return, local_files
 end
 

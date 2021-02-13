@@ -93,10 +93,27 @@ pro omni_read, time, id=datatype, $
 
 ;---Read data from files and save to memory.
     read_files, time, files=files, request=request
+    
+    out_vars = list()
+    foreach var_list, request.var_list do out_vars.add, var_list.out_vars, /extract
+    foreach var, out_vars do begin
+        get_data, var, times, data
+        case var of
+            'n': fillval = 999
+            'p': fillval = 99
+            't': fillval = 9999999
+            else: fillval = 9999
+        endcase
+        index = where(data ge fillval, count)
+        if count eq 0 then continue
+        data[index] = !values.f_nan
+        store_data, var, times, data
+    endforeach
 
 end
 
 
 time = time_double(['2014-08-25','2014-09-05'])
 omni_read, time, id='ae_dst'
+omni_read, time, id='sw'
 end
