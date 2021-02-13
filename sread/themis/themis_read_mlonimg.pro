@@ -317,10 +317,14 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
 
         pre0 = 'thg_'+site+'_asf_'
         out_vars = pre0+['mlon_image']
-        read_and_store_var, files, time_info=time, errmsg=errmsg, $
-            in_vars=in_vars, out_vars=out_vars, $
-            time_var_name=time_var_name, time_var_type=time_var_type
-
+        request = dictionary($
+            'var_list', list($
+                dictionary($
+                    'in_vars', in_vars, $
+                    'out_vars', out_vars, $
+                    'time_var_name', time_var_name, $
+                    'time_var_type', time_var_type )))
+        read_files, time, files=files, request=request
         themis_read_mlonimg_metadata, time, site=site
     endforeach
 

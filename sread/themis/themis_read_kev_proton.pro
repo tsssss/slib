@@ -53,7 +53,7 @@ pro themis_read_kev_proton, time_range, probe=probe, errmsg=errmsg, energy=energ
         color_table: 52, $
         unit: '#/cm!U2!N-s-sr-keV', $
         value_unit: 'keV', $
-        short_name: 'e!U-!N flux'}
+        short_name: 'H!U+!N flux'}
 
 end
 

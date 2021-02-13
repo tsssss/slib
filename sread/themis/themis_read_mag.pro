@@ -34,19 +34,28 @@ pro themis_read_mag_per_site, time, id=datatype, site=site, $
     pre0 = thx+'_'+site+'_'
     pre1 = thx+'_mag_'
 
-    type_dispatch = []
-    type_dispatch = [type_dispatch, $
-        {id: 'l2%mag', $
-        base_pattern: thx+'_l2_mag_'+site+'_%Y%m%d_'+version+'.cdf', $
-        remote_paths: ptr_new([remote_root,thx,'l2','mag',site,'%Y']), $
-        local_paths: ptr_new([local_root,thx,'l2','mag',site,'%Y']), $
-        ptr_in_vars: ptr_new([pre1+site]), $
-        ptr_out_vars: ptr_new([pre0+'mag']), $
-        time_var_name: pre1+site+'_time', $
-        time_var_type: 'unix', $
-        generic_time: 0, $
-        cadence: 'day', $
-        placeholder: 0b}]
+    sync_threshold = 86400d*120
+    base_name = thx+'_l2_mag_'+site+'_%Y%m%d_'+version+'.cdf'
+    local_path = [local_root,thx,'l2','mag',site,'%Y']
+    remote_path = [remote_root,thx,'l2','mag',site,'%Y']
+    type_dispatch = hash()
+    type_dispatch['l2%mag'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', pre1+site, $
+                'out_vars', pre0+'mag', $
+                'time_var_name', pre1+site+'_time', $
+                'time_var_type', 'unix')))    
+
+
     if keyword_set(print_datatype) then begin
         print, 'Suported data type: '
         ids = type_dispatch.id
@@ -55,38 +64,23 @@ pro themis_read_mag_per_site, time, id=datatype, site=site, $
     endif
 
 ;---Dispatch patterns.
+    datatype = 'l2%mag'
     if n_elements(datatype) eq 0 then begin
         errmsg = handle_error('No input datatype ...')
         return
     endif
-    ids = type_dispatch.id
-    index = where(ids eq datatype, count)
-    if count eq 0 then begin
+    if not type_dispatch.haskey(datatype) then begin
         errmsg = handle_error('Do not support type '+datatype+' yet ...')
         return
     endif
-    myinfo = type_dispatch[index[0]]
-    if n_elements(time_var_name) ne 0 then myinfo.time_var_name = time_var_name
-    if n_elements(time_var_type) ne 0 then myinfo.time_var_type = time_var_type
+    request = type_dispatch[datatype]
 
 ;---Find files, read variables, and store them in memory.
-    files = prepare_file(files=files, errmsg=errmsg, $
-        file_times=file_times, index_file=index_file, time=time, $
-        stay_local=stay_local, sync_index=sync_index, $
-        sync_files=sync_files, sync_after=sync_time, $
-        skip_index=skip_index, $
-        _extra=myinfo)
-    if errmsg ne '' then begin
-        errmsg = handle_error('Error in finding files ...')
-        return
-    endif
+    files = prepare_files(request=request, errmsg=errmsg, local_files=files, $
+        file_times=file_times, time=time, nonexist_files=nonexist_files)
 
-    read_and_store_var, files, time_info=time, errmsg=errmsg, $
-        in_vars=in_vars, out_vars=out_vars, generic_time=generic_time, _extra=myinfo
-    if errmsg ne '' then begin
-        errmsg = handle_error('Error in reading or storing data ...')
-        return
-    endif
+;---Read data from files and save to memory.
+    read_files, time, files=files, request=request
 
 end
 
@@ -140,6 +134,8 @@ pro themis_read_mag, time, sites=sites, errmsg=errmsg, $
     foreach site, sites, ii do begin
         themis_read_mag_per_site, time, site=site, id='l2%mag', errmsg=errmsg
         if errmsg ne '' then site_flags[ii] = 1
+        the_var = 'thg_'+site+'_mag'
+        if check_if_update(the_var) then site_flags[ii] = 1
     endforeach
     
     ; Filter out the sites have no data.
@@ -170,7 +166,7 @@ pro themis_read_mag, time, sites=sites, errmsg=errmsg, $
     comps = ['h','d','z']   ; north, east, down.
     comp_indices = [0,1,2]
     if size(component,/type) eq 7 then begin
-        index = where(component eq comps, count)
+        index = (where(component eq comps, count))[0]
         if count ne 0 then begin
             comps = comps[index]
             comp_indices = comp_indices[index]

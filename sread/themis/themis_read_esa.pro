@@ -41,6 +41,36 @@ pro themis_read_esa, time, id=datatype, probe=probe, $
                 'out_vars', thx+'_ele_n', $
                 'time_var_name', thx+'_peer_time', $
                 'time_var_type', 'unix')))
+    type_dispatch['l2%ele_en_spec'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', 'cdf', $
+        'var_list', list($
+            dictionary($
+                'in_vars', thx+'_'+['peer_en_eflux','peer_en_eflux_yaxis'], $
+                'out_vars', thx+'_'+['ele_en_spec','ele_en_spec_en'], $
+                'time_var_name', thx+'_peer_time', $
+                'time_var_type', 'unix')))
+    type_dispatch['l2%ion_en_spec'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
+        'cadence', 'day', $
+        'extension', 'cdf', $
+        'var_list', list($
+            dictionary($
+                'in_vars', thx+'_'+['peir_en_eflux','peir_en_eflux_yaxis'], $
+                'out_vars', thx+'_'+['ion_en_spec','ion_en_spec_en'], $
+                'time_var_name', thx+'_peir_time', $
+                'time_var_type', 'unix')))
     type_dispatch['l2%ele_t'] = dictionary($
         'pattern', dictionary($
             'local_file', join_path([local_path,base_name]), $

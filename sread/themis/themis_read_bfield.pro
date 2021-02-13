@@ -9,6 +9,7 @@ pro themis_read_bfield, time, probe=probe, resolution=resolution, errmsg=errmsg,
     errmsg = ''
     pre0 = 'th'+probe+'_'
 
+    ;resolution = (keyword_set(resolution))? strlowcase(resolution): '3sec'
     resolution = (keyword_set(resolution))? strlowcase(resolution): '3sec'
     case resolution of
         '3sec': begin
@@ -28,14 +29,16 @@ pro themis_read_bfield, time, probe=probe, resolution=resolution, errmsg=errmsg,
     uniform_time, var, dt
     uniform_time, flag_var, dt
     
+    ; Remove data out of normal range.
     get_data, var, times, bgsm
-    index = where(snorm(bgsm) ge 1e4, count)
+    index = where(snorm(bgsm) ge 4e4, count)
     if count ne 0 then begin
         bgsm[index,*] = !values.f_nan
         store_data, var, times, bgsm
     endif
     
     ; Flags for bad data.
+    ; Looks like: 2 for eclipse, 1 for commisional phase.
     pad = 120.  ; sec.
     flag_time = time_double('2007-01-14')
 
@@ -73,6 +76,9 @@ end
 time = time_double(['2013-10-30/23:00','2013-10-31/06:00'])
 time = time_double(['2014-08-28','2014-08-29'])
 time = time_double(['2013-08-26/20:41','2013-08-29/04:26'])
+
+time = time_double(['2014-08-28','2014-08-29'])
+probe = 'a'
 ;time = time_double(['2008-01-12','2008-01-15'])
-themis_read_bfield, time, probe='a', errmsg=errmsg
+themis_read_bfield, time, probe=probe, errmsg=errmsg
 end
