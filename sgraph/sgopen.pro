@@ -180,6 +180,8 @@ pro sgopen, id0, xsize = xsize, ysize = ysize, cm = cm, inch = inch, $
     if dev0 eq devw then begin
         window, mode.sgid, xsize = mode.area[0], ysize = mode.area[1]
         polyfill, [0,1,1,0,0], [0,0,1,1,0], /normal, color = !p.background
+    endif else if dev0 eq devz then begin
+        polyfill, [0,1,1,0,0], [0,0,1,1,0], /normal, color = !p.background
     endif
     
     xchsz = double(!d.x_ch_size)/!d.x_size

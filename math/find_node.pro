@@ -18,8 +18,7 @@
 function find_node, dat, err, sign = sign
     compile_opt idl2 & on_error, 2
 
-    if n_elements(err) eq 0 then $
-        err = 0.5   ; good for 1-min data, larger for lower time res.
+    if n_elements(err) eq 0 then err = max(abs(dat))*0.1
     if n_elements(sign) eq 0 then sign = 0    ; both signs of slope.
     
     nrec = n_elements(dat)
