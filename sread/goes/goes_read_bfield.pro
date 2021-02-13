@@ -28,8 +28,10 @@ pro goes_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg, _
     endcase
     
     ; read 'gxx_b_gsm'
-    goes_read_fgm, utr0, probe=probe, coord='gsm', id=resolution, errmsg=errmsg, _extra=ex
-    if errmsg ne '' then return
+    goes_read_bfield_cdaweb, utr0, probe=probe, errmsg=errmsg, coord='gsm'
+    if errmsg ne '' then begin
+        goes_read_fgm, utr0, probe=probe, coord='gsm', id=resolution, errmsg=errmsg, _extra=ex
+    endif
     
     pre0 = 'g'+probe+'_'
     
@@ -41,11 +43,19 @@ pro goes_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg, _
         coord: 'GSM', $
         coord_labels: ['x','y','z']}
         
-    uniform_time, bvar, dt
+    ;uniform_time, bvar, dt
 
 end
 
 time = time_double(['2014-08-28/09:30','2014-08-28/11:00'])
+probe = '13'
+
+; Bad data.
+time = time_double(['2019-03-07/00:00','2019-03-08/00:00'])
+probe = '15'
+
+; Test.
+time = time_double(['2008-03-14/00:00','2008-03-15/00:00'])
 probe = '13'
 goes_read_bfield, time, probe=probe
 end

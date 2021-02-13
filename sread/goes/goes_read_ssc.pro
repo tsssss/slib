@@ -37,6 +37,14 @@ pro goes_read_ssc, time, id=datatype, probe=probe, $
     type_dispatch = hash()
     goesx = 'goes'+probe
     gx = 'g'+probe
+;    case probe of
+;        '12': valid_range = ['2006-01-01','2016-12-31']
+;        '13': valid_range = ['2006-01-01']
+;        '14': valid_range = ['2009-01-01']
+;        '15': valid_range = ['2010-01-01']
+;        '16': valid_range = ['2016-01-01']
+;        '17': valid_range = ['2018-01-01']
+;    endcase
     ; position.
     base_name = goesx+'_ephemeris_ssc_%Y0101_v01.cdf'
     local_path = [local_root,goesx,'orbit','%Y']
@@ -48,6 +56,7 @@ pro goes_read_ssc, time, id=datatype, probe=probe, $
             'remote_file', join_path([remote_path,base_name]), $
             'remote_index_file', join_path([remote_path,''])), $
         'sync_threshold', sync_threshold, $
+;        'valid_range', time_double(valid_range), $
         'cadence', 'year', $
         'extension', fgetext(base_name), $
         'var_list', list($

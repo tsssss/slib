@@ -95,10 +95,29 @@ pro goes_read_fgm, time, id=datatype, probe=probe, $
     rgei = pos.pos_values
     store_data, pre1+'pos_gei', uts, rgei
     enp_matrix_make, pre1+'pos_gei'
-    enp_var = (uint(probe) ge 13)? 'H_enp_1': 'H_enp'
-    tvector_rotate, pre1+'pos_gei_enp_mat', enp_var, /invert
+
+    ; Need to choose which version of data to use.    
+    max_b_enp = 200.
+    fillval = !values.f_nan
+    foreach enp_var, 'H_enp'+['','_1','_2'] do begin
+        get_data, enp_var, times, b_enp
+        if n_elements(b_enp) eq 1 then continue
+        index = where(abs(b_enp) ge max_b_enp, count)
+        if count eq 0 then break
+        b_enp[index] = fillval
+        index = where(finite(snorm(b_enp),/nan))
+        b_enp[index,*] = fillval
+        store_data, enp_var, times, b_enp
+    endforeach
+    
+    tvector_rotate, pre1+'pos_gei_enp_mat', enp_var, $
+        invert=1;, vector_skip_nonmonotonic=1   ; Sheng not worth to set vector_skip_nomonotonic b/c it's often just bad data.
     bgeivar = enp_var+'_rot'
     get_data, bgeivar, uts, bgei
+    if n_elements(uts) eq 1 and uts[0] eq 0 then begin
+        errmsg = 'No valid data ...'
+        return
+    endif
     ets = stoepoch(uts,'unix')
     bgsm = sgei2gsm(bgei, ets)
 
@@ -125,12 +144,17 @@ end
 
 utr0 = time_double(['2014-08-28','2014-08-29'])
 probe = '13'
+
+utr0 = time_double(['2019-09-06','2019-09-07'])
+utr0 = time_double(['2019-08-07','2019-08-08'])
+;utr0 = time_double(['2019-09-07','2019-09-08'])
+probe = '15'
+
 pre0 = 'g'+probe+'_'
 goes_read_fgm, utr0, probe=probe, id='512ms'
 get_data, pre0+'b_gsm', uts, bgsm
-ets = stoepoch(uts, 'unix')
-bsm = sgsm2sm(bgsm, ets)
+bsm = cotran(bgsm, uts, 'gsm2sm')
 store_data, pre0+'b_sm', uts, [[bsm],[snorm(bsm)]], limits=$
-    {colors:[2,4,6,0], labels:'SM B'+['x','y','z','t'], ytitle:'(nT)', labflag:-1}
+    {colors:sgcolor(['red','green','blue','black']), labels:'SM B'+['x','y','z','t'], ytitle:'(nT)', labflag:-1}
 tplot, pre0+'b_sm'
 end
