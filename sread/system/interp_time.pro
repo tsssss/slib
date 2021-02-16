@@ -3,7 +3,8 @@
 ;
 ; var. A string of a variable name.
 ; times. An array of times to be interpolated to.
-; to. A string specified the varialbe, whos times will be used.
+; to=. A string specified the varialbe, whos times will be used.
+; data_gap_window=. A number n sec, time diff larger than this will be NaN'ed.
 ;-
 
 pro interp_time, var, times, to=new_var, data_gap_window=data_gap_window, _extra=ex
