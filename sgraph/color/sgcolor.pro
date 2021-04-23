@@ -18,7 +18,8 @@
 ;   2014-04-05, Sheng Tian, create.
 ;-
 
-function sgcolor, c0, ct = ct, file = file, triplet = triplet, names = names
+function sgcolor, c0, ct=ct, file=file, triplet=triplet, names=names, reverse_ct=reverse_ct
+
     common colors, r_orig, g_orig, b_orig, r_curr, g_curr, b_curr
     
     if float(!version.release) lt 8 then begin
@@ -48,10 +49,12 @@ function sgcolor, c0, ct = ct, file = file, triplet = triplet, names = names
         if keyword_set(ct) eq 0 then ct = 0
         if n_elements(file) ne 0 then begin
             ctfn = srootdir()+'/'+file+'.tbl'
-            loadct, ct, rgb_table = rgb0, /silent, file = ctfn
-            tmp = [[0,1,0,0,0,1,1,1],[0,0,0,1,1,1,0,1],[0,1,1,1,0,0,0,1]]*255b
-            rgb0[0:7,*] = tmp
-        endif else loadct, ct, rgb_table = rgb0, /silent
+            loadct, ct, rgb_table=rgb0, /silent, file=ctfn
+            ; Do not need to save colors? Sheng: 2021-03-10.
+            ;tmp = [[0,1,0,0,0,1,1,1],[0,0,0,1,1,1,0,1],[0,1,1,1,0,0,0,1]]*255b
+            ;rgb0[0:7,*] = tmp
+        endif else loadct, ct, rgb_table=rgb0, /silent
+        if keyword_set(reverse_ct) then rgb0 = reverse(rgb0,1)
         nc = n_elements(rgb0)/3
         rgb = rgb0[c0 mod nc,*]
     endelse
