@@ -87,7 +87,7 @@ function cdf_read_skeleton, cdf0
     endfor
 
 ;---Variable attribute.
-    foreach var, vars.keys() do (vars[var])['setting'] = cdf_read_setting(var, filename=cdf0)
+    foreach var, vars.keys() do (vars[var])['setting'] = cdf_read_setting(var, filename=cdfid)
     skeleton['var'] = vars
 
 

@@ -20,7 +20,7 @@ function scdffmidltype, types, structure=structure
     cdftypes = 'CDF_'+['XXX','BYTE','UINT1','INT1','CHAR','UCHAR',$
         'INT2','UINT2','INT4','UINT4','REAL4','FLOAT','DOUBLE','REAL8',$
         'EPOCH','EPOCH16','LONG_EPOCH']
-    idltypes = [0,1,1,1,1,1,2,12,3,13,4,4,5,5,5,9,9]
+    idltypes = [0,1,1,1,7,7,2,12,3,13,4,4,5,5,5,9,9]
 
 
     ntype = n_elements(types)

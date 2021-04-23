@@ -8,6 +8,7 @@ function cdf_has_var, var, filename=cdf0, iszvar=iszvar, errmsg=errmsg
 
     errmsg = ''
     retval = 0
+    on_error, 0
 
     ; Check if var is a string.
     if n_elements(var) eq 0 then return, retval
@@ -51,7 +52,7 @@ function cdf_has_var, var, filename=cdf0, iszvar=iszvar, errmsg=errmsg
             return, 1
         endif
     endfor
-    
+
     iszvar = 0
     if input_is_file then cdf_close, cdfid
     return, 0

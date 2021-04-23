@@ -66,7 +66,7 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=v_settings, $
     ; Strings are special.
     numelem = 1
     if var_type eq 'CDF_CHAR' or var_type eq 'CDF_UCHAR' then begin
-        for ii=0, nrec do numelem >= strlen(vals[ii])
+        for ii=0, nrec-1 do numelem >= strlen(vals[ii])
     endif
 
     ; Get the dimensions.
