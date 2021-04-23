@@ -141,12 +141,23 @@ pro cdf_load_var, var, range=range, time_var=time_var, time_type=time_type, file
         if nrec ne 1 and size(vals,/n_dimensions) gt 1 then $
             vals = transpose(vals,shift(indgen(n_elements(vinfo.dims)+1),1))
     endelse
+
+
+;---Load depend_1.
+    index = where(strlowcase(keys) eq 'depend_1', count)
+    if count eq 0 then begin
+        dep_vals = !null
+    endif else begin
+        dep_var = vatt[keys[index[0]]]
+        dep_vals = cdf_read_var(dep_var, filename=cdfid)
+    endelse
+    
     if input_is_file then cdf_close, cdfid
 
 
 ;---Save to tplot.
     if n_elements(times) eq 0 then times = 0
-    store_data, the_var, times, vals
+    store_data, the_var, times, vals, dep_vals
     add_setting, the_var, /smart, vatt.tostruct()
 ;    time_range = minmax(times)
 ;    nsec = total(time_range*[-1,1])
