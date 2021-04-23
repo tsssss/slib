@@ -50,5 +50,6 @@ function cdf_read_var_att, var, filename=cdf0, errmsg=errmsg
         vatt[attname] = value
     endfor
 
+    if input_is_file then cdf_close, cdfid
     return, vatt
 end
