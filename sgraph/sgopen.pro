@@ -53,8 +53,8 @@ pro sgopen, id0, xsize = xsize, ysize = ysize, cm = cm, inch = inch, $
     if keyword_set(cm) and keyword_set(inch) then $
         message, 'cannot set incn and cm at the same time ...'
     case 1 of
-        keyword_set(cm): tmp = 40d      ; cm2px.
-        keyword_set(inch): tmp = 101.6d ; in2px = in2cm*2.54.
+        keyword_set(cm): tmp = 40d
+        keyword_set(inch): tmp = 101.6d
         else: tmp = 1d
     endcase
     

@@ -19,7 +19,7 @@
 ; History:
 ;   2016-03-22, Sheng Tian, rewrite.
 ;-
-pro sgtv, img0, position = pos0, ct = ct0, file = file, resize=resize, $
+pro sgtv, img0, position = pos0, ct = ct0, file = file, resize=resize, reverse_ct=reverse_ct, $
     _extra = extra
     
     ; store current color.
@@ -44,8 +44,12 @@ pro sgtv, img0, position = pos0, ct = ct0, file = file, resize=resize, $
         img = bytarr([3,imgsz]) ; [r,g,b], true = 1.
         ; determine and load color table.
         ncolor = 255
-        if n_elements(ct0) eq 0 then tvlct, rgb1, /get $
-        else rgb1 = sgcolor(bindgen(ncolor), ct = ct0, file = file, /triplet)
+        if n_elements(ct0) eq 0 then begin
+            tvlct, rgb1, /get
+            rgb1 = reverse(rgb1,1)
+        endif else begin
+            rgb1 = sgcolor(bindgen(ncolor), ct=ct0, file=file, /triplet, reverse_ct=reverse_ct)
+        endelse
         
         img[0,*,*] = rgb1[img0 mod ncolor,0]
         img[1,*,*] = rgb1[img0 mod ncolor,1]
