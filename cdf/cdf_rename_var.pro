@@ -1,5 +1,9 @@
 ;+
 ; Rename a variable.
+; 
+; var. A string for old_var.
+; to=. A string for new_var.
+; filename=. A string for filename.
 ;-
 pro cdf_rename_var, var, to=var1, filename=cdf0, errmsg=errmsg
 

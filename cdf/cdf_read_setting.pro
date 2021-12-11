@@ -1,5 +1,8 @@
 ;+
 ; Return a dictionary of settings.
+; 
+; var.
+; filename=.
 ;-
 function cdf_read_setting, var, filename=cdf0, errmsg=errmsg
 

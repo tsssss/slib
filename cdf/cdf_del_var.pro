@@ -1,5 +1,8 @@
 ;+
 ; Delete one variable in a one file.
+; 
+; var. The variable.
+; filename=. The file.
 ;-
 pro cdf_del_var, var, filename=cdf0, errmsg=errmsg
 

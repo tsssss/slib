@@ -6,7 +6,7 @@
 ; probe. A string of 'a' or 'b'. Doesn't need this if wsc is set.
 ;-
 
-function uvw2gse, vec0, time, wsc=wsc_gse, probe=probe, _extra=ex
+function uvw2gse, vec0, time, probe=probe, _extra=ex
     compile_opt idl2 & on_error, 2
 
     vec1 = double(vec0)

@@ -13,7 +13,7 @@
 
 function make_bins, dat0, step, inner=inner
 
-    if step eq 0 then message, 'Step is 0 ...'
+    if n_elements(step) eq 0 then message, 'Step is 0 ...'
     step0 = abs(step)
 
     range0 = double([min(dat0,/nan),max(dat0,/nan)])

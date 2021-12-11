@@ -158,7 +158,7 @@ pro cdf_load_var, var, range=range, time_var=time_var, time_type=time_type, file
 ;---Save to tplot.
     if n_elements(times) eq 0 then times = 0
     store_data, the_var, times, vals, dep_vals
-    add_setting, the_var, /smart, vatt.tostruct()
+    add_setting, the_var, /smart, vatt
 ;    time_range = minmax(times)
 ;    nsec = total(time_range*[-1,1])
 ;    if nsec gt 0 then timespan, time_range[0], nsec, /seconds

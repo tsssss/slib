@@ -9,9 +9,11 @@
 ; compress=. A number sets the compress level, 0-9?
 ; cdf_type=. A string specifies the cdf_type.
 ; save_as_is=. A boolean to suppress smart guess on dimensions.
+; save_as_one=. A boolean to save value as a whole, i.e., nrec=1. Used to save metadata.
 ;-
-pro cdf_save_var, varname, value=data, filename=cdf0, settings=v_settings, $
-    compress=compress, cdf_type=cdf_type, save_as_is=save_as_is
+pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
+    compress=compress, cdf_type=cdf_type, $
+    save_as_is=save_as_is, save_as_one=save_as_one
 
     compile_opt idl2
     catch, error
@@ -20,6 +22,13 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=v_settings, $
         errmsg = handle_error(!error_state.msg, cdfid=cdfid)
         return
     endif
+
+    ; Check if var is a string.
+    if n_elements(varname) eq 0 then begin
+        errmsg = handle_error('No input var name ...')
+        return
+    endif
+    the_var = varname[0]
 
     ; Check if given file is a cdf_id or filename.
     if n_elements(cdf0) eq 0 then begin
@@ -38,17 +47,10 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=v_settings, $
     if keyword_set(compress) then cdf_compression, cdfid, set_gzip_level=compress
 
 
-    ; Check if var is a string.
-    if n_elements(varname) eq 0 then begin
-        errmsg = handle_error('No input var name ...')
-        return
-    endif
-    the_var = varname[0]
-
 
 ;---Save data. Needs to know cdf_type, numelem, dimensions
     vals = temporary(data)
-    
+
     ; Delete existing var b/c dimension/rec/settings could be inconsistent.
     has_data = n_elements(vals)
     has_var = cdf_has_var(the_var, filename=cdfid)
@@ -83,6 +85,12 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=v_settings, $
     endif
     ; CDF assumes [dims,nrec].
     if ~keyword_set(save_as_is) and n_elements(dimensions) ne 0 then vals = transpose(vals, shift(indgen(ndimension+1),-1))
+    ; Sometimes we need to save all data as nrec=1.
+    if keyword_set(save_as_one) then begin
+        dimensions = data_dims
+        dimvary = 1
+        extra = create_struct('REC_NOVARY', 1, extra)
+    endif
 
     ; Save data.
     if n_elements(dimensions) eq 0 then begin

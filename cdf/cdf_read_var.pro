@@ -45,7 +45,7 @@ function cdf_read_var, var, range=range, filename=cdf0, errmsg=errmsg
     endif
     nrec = varinfo.maxrec
     if nrec lt 0 then begin
-        errmsg = handle_error('No record ...')
+        errmsg = handle_error('Empty cdf_var:'+the_var+' ...')
         if input_is_file then cdf_close, cdfid
         return, retval
     endif
@@ -71,7 +71,7 @@ function cdf_read_var, var, range=range, filename=cdf0, errmsg=errmsg
         if nrec ne 1 and size(vals,/n_dimensions) gt 1 then $
             vals = transpose(vals,shift(indgen(n_elements(varinq.dim)+1),1))
     endelse
-    
+
     if input_is_file then cdf_close, cdfid
     return, vals
 
