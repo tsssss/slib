@@ -2,8 +2,8 @@
 ; Convert a time in certain format to the specified format.
 ; 
 ; time. A time or an array of time.
-; from. The input format of the time.
-; to. The output format of the time.
+; from=. The input format of the time.
+; to=. The output format of the time.
 ; 
 ; return. The time in the output format.
 ; 

@@ -35,10 +35,11 @@ pro swarm_read_mag, time, id=datatype, probe=probe, $
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'sdata','swarm'])
     if n_elements(version) eq 0 then version = '.*'
     if n_elements(coord) eq 0 then coord = 'gsm'
+    up_probe = strupcase(probe)
 
     type_dispatch = hash()
     ; Level 1b.
-    base_name = 'SW_OPER_MAGC_LR_1B_%Y%m%dT.*_%Y%m%dT.*_'+version+'_MDR_MAG_LR.cdf'
+    base_name = 'SW_OPER_MAG'+up_probe+'_LR_1B_%Y%m%dT.*_%Y%m%dT.*_'+version+'_MDR_MAG_LR.cdf'
     local_path = join_path([local_root,'swarm'+probe,'level1b','Current','MAGx_LR','%Y'])
 
     type_dispatch['1b%mag'] = dictionary($
@@ -50,7 +51,7 @@ pro swarm_read_mag, time, id=datatype, probe=probe, $
         'extension', fgetext(base_name), $
         'var_list', list($
             dictionary($
-            'in_vars', ['Longitude','Latitude','Radius','B_NEC'], $
+            'in_vars', ['B_NEC'], $
             'time_var_name', 'Timestamp', $
             'time_var_type', 'epoch')))
 
@@ -90,11 +91,73 @@ pro swarm_read_mag, time, id=datatype, probe=probe, $
 
 ;---Read data from files and save to memory.
     read_files, time, files=files, request=request
+    
+    
+    ; NEC (North-East-Center ITRF): (x, y, z)
+    ; The x and y components lie in the horizontal plane, 
+    ; pointing northward and eastward, respectively. 
+    ; z points to the centre of gravity of the Earth.
+    swarm_read_orbit, time, probe=probe
+    prefix = 'swarm'+probe+'_'
+    r_gsm = get_var_data(prefix+'r_gsm', times=times)
+    ntime = n_elements(times)
+    ndim = 3
+    bmod_gsm = fltarr(ntime,ndim)
+    for ii=0,ntime-1 do begin
+        tilt = geopack_recalc(times[ii])
+        rx = r_gsm[ii,0]
+        ry = r_gsm[ii,1]
+        rz = r_gsm[ii,2]
 
+        ; in-situ B field.
+        geopack_igrf_gsm, rx,ry,rz, bx,by,bz
+        bmod_gsm[ii,*] = [bx,by,bz]
+    endfor
+    bmod_var = prefix+'bmod_gsm'
+    store_data, bmod_var, times, bmod_gsm
+    xyz = constant('xyz')
+    add_setting, bmod_var, /smart, dictionary($
+        'display_type', 'vector', $
+        'unit', 'nT', $
+        'short_name', 'Model B', $
+        'coord', 'GSM', $
+        'coord_labels', xyz )
+
+    ; Convert B NEC to GSM.
+    chat = -sunitvec(r_gsm)
+    bmod_c = vec_dot(bmod_gsm, chat)
+    zhat = fltarr(ntime,ndim)
+    zhat[*,2] = 1
+    zhat = cotran(zhat, times, 'geo2gsm')
+    ehat = sunitvec(vec_cross(chat, zhat))
+    nhat = vec_cross(ehat,chat)
+    bmod_e = vec_dot(bmod_gsm, ehat)
+    bmod_n = vec_dot(bmod_gsm, nhat)
+    bmod_nec = [[bmod_n],[bmod_e],[bmod_c]]
+    bmod_nec_var = prefix+'bmod_nec'
+    store_data, bmod_nec_var, times, bmod_nec
+    add_setting, bmod_var, /smart, dictionary($
+        'display_type', 'vector', $
+        'unit', 'nT', $
+        'short_name', 'Model B', $
+        'coord', 'NEC', $
+        'coord_labels', xyz )
+    
+    db_nec = get_var_data('B_NEC')-bmod_nec
+    db_var = prefix+'db_nec'
+    store_data, db_var, times, db_nec
+    add_setting, db_var, /smart, dictionary($
+        'display_type', 'vector', $
+        'unit', 'nT', $
+        'short_name', 'dB', $
+        'coord', 'NEC', $
+        'coord_labels', xyz )
+        
 
 end
 
 swarm_read_mag, /print_datatype
-time = time_double(['2013-12-28','2013-12-30'])
-swarm_read_mag, time, probe='c', id='1b%mag'
+time = time_double(['2014-08-28/09:30','2014-08-28/11:30'])
+swarm_read_mag, time, probe='a', id='1b%mag'
+
 end

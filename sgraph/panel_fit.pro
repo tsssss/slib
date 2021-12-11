@@ -15,7 +15,7 @@ pro panel_fit, panels, xsize=xsize, ysize=ysize
     if n_elements(xsize) eq 0 and n_elements(ysize) ne 0 then begin
         xsize = ysize/aspect_ratio
     endif
-    if n_elements(xsize) eq 0 and n_elements(ysize) eq 0 then begin
+    if n_elements(xsize) ne 0 and n_elements(ysize) eq 0 then begin
         ysize = xsize*aspect_ratio
     endif
     new_xsize = xsize

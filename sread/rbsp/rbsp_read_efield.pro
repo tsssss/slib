@@ -1,9 +1,13 @@
 ;+
-; Read RBSP DC E field. Default is to read 'survey mgse' at 11 sec.
+; Read RBSP DC E field. Default is to read 'survey gse' at 11 sec.
+; 
+; time_range.
+; probe=.
+; resolution=. 'hires', 'survey'.
+; coord=.
 ;-
-;
 
-pro rbsp_read_efield, time_range, probe=probe, resolution=resolution, errmsg=errmsg
+pro rbsp_read_efield, time_range, probe=probe, resolution=resolution, coord=coord, errmsg=errmsg
 
     errmsg = ''
     pre0 = 'rbsp'+probe+'_'
@@ -27,8 +31,9 @@ pro rbsp_read_efield, time_range, probe=probe, resolution=resolution, errmsg=err
     q_var = pre0+'q_uvw2gse'
     if check_if_update(q_var, time_range) then rbsp_read_quaternion, time_range, probe=probe
 
-    ; read 'rbspx_e_gse'
-    evar = pre0+'e_gse'
+    ; read 'rbspx_e_coord'
+    if n_elements(coord) eq 0 then coord = 'gse'
+    evar = pre0+'e_'+coord
     if resolution eq 'survey' then begin
         rbsp_read_efw, time_range, id='l3%efw', probe=probe, errmsg=errmsg
         if errmsg ne '' then return
@@ -45,7 +50,7 @@ pro rbsp_read_efield, time_range, probe=probe, resolution=resolution, errmsg=err
             coord_labels: xyz, $
             colors: rgb}
         emgse = sinterpol(emgse, uts, times)
-        egse = cotran(emgse, times, 'mgse2gse', probe=probe)
+        egse = cotran(emgse, times, 'mgse2'+coord, probe=probe)
         store_data, evar, times, egse
     endif else if resolution eq 'hires' then begin
         uvw = ['u','v','w']        
@@ -79,7 +84,7 @@ pro rbsp_read_efield, time_range, probe=probe, resolution=resolution, errmsg=err
         del_data, pre0+'efw_esvy_ccsds_data_'+['BEB','DFB']+'_config'
         
         ; Calc E GSE.
-        e_gse = cotran(e_uvw, times, 'uvw2gse', probe=probe)
+        e_gse = cotran(e_uvw, times, 'uvw2'+coord, probe=probe)
         store_data, evar, times, e_gse
     endif
 
@@ -88,7 +93,7 @@ pro rbsp_read_efield, time_range, probe=probe, resolution=resolution, errmsg=err
         display_type: 'vector', $
         unit: unit, $
         short_name: 'E0', $
-        coord: 'GSE', $
+        coord: strupcase(coord), $
         coord_labels: xyz, $
         colors: rgb}
 

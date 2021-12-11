@@ -14,11 +14,16 @@
 ; file_times=. An array of N times. Set to fine tuning the times of the files.
 ; resolution=. A string for data resolution. Default is 4sec.
 ; coordinate=. A string to set vector coordinate, 'gsm' by default.
+; orig_time_tag=. A boolean. Set to keep the original time tags of the CDFs.
+;   By default, we correct the data by adding 0.5*time_step.
+;   As of 2021-08-24. The EMFISIS data time tags are not true times, but need
+;   to be shifted by 0.5*time_step.
 ;-
 pro rbsp_read_emfisis, time, id=datatype, probe=probe, $
     print_datatype=print_datatype, errmsg=errmsg, $
     local_root=local_root, remote_root=remote_root, $
-    resolution=resolution, coordinate=coord
+    resolution=resolution, coordinate=coord, $
+    orig_time_tag=orig_time_tag
 
     compile_opt idl2
     on_error, 0
@@ -29,8 +34,8 @@ pro rbsp_read_emfisis, time, id=datatype, probe=probe, $
     sync_threshold = 86400d*120
     if n_elements(probe) eq 0 then probe = 'x'
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','rbsp'])
-    if n_elements(remote_root) eq 0 then remote_root = 'http://cdaweb.gsfc.nasa.gov/pub/data/rbsp'
-    if n_elements(version) eq 0 then version = 'v[0-9.]{5}'
+    if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/rbsp'
+    if n_elements(version) eq 0 then version = 'v[0-9.]*'
     if n_elements(resolution) eq 0 then resolution = '4sec'
     if n_elements(coord) eq 0 then coord = 'gsm'
 
@@ -76,6 +81,25 @@ pro rbsp_read_emfisis, time, id=datatype, probe=probe, $
             dictionary($
                 'in_vars', ['Mag'], $
                 'out_vars', [rbspx+'_b_'+coord], $
+                'time_var_name', 'Epoch', $
+                'time_var_type', 'tt2000')))
+    ; Level 4, density.
+    base_name = 'rbsp-'+probe+'_density_emfisis-l4_%Y%m%d_'+version+'.cdf'
+    local_path = [local_root,rbspx,'emfisis','%Y','l4','density']
+    remote_path = [remote_root,rbspx,'l4','emfisis','density','%Y']
+    type_dispatch['l4%density'] = dictionary($
+        'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,''])), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['density'], $
+                'out_vars', [rbspx+'_emfisis_density'], $
                 'time_var_name', 'Epoch', $
                 'time_var_type', 'tt2000')))
 
@@ -130,17 +154,60 @@ pro rbsp_read_emfisis, time, id=datatype, probe=probe, $
             rename_var, tn, to=out_vars[index]
         endelse
     endforeach
-    
+
     foreach var, out_vars do begin
         get_data, var, times, data
         index = lazy_where(times, '[]', time, count=count)
         if count eq 0 then continue
         store_data, var, times[index], data[index,*]
     endforeach
+
+
+    ; Fix time tags.
+    if ~keyword_set(orig_time_tag) then begin
+        case resolution of
+            '4sec': time_step = 4d
+            '1sec': time_step = 1d
+            'hires': time_step = 1d/64
+        endcase
+        if datatype eq 'l2%magnetometer' then time_step = 1d/64
+        dtime = time_step*0.5
+        foreach var, out_vars do begin
+            get_data, var, times, data
+            store_data, var, times+dtime, data
+        endforeach
+    endif
+
+
+
 end
 
 
 rbsp_read_emfisis, /print_datatype
 utr0 = time_double(['2013-06-07/04:52','2013-06-07/05:02'])
-rbsp_read_emfisis, utr0, id='l3%magnetometer', probe='b', resolution='4sec'
+probe = 'b'
+
+prefix = 'rbsp'+probe+'_'
+resolutions = ['1sec','4sec','hires']
+colors = sgcolor(['red','green','blue'])
+foreach res, resolutions do begin
+    rbsp_read_emfisis, utr0, id='l3%magnetometer', probe=probe, resolution=res
+    rename_var, prefix+'b_gsm', to=prefix+'b_gsm_'+res
+endforeach
+
+ndim = 3
+xyz = constant('xyz')
+vars = prefix+'b_gsm_'+resolutions
+get_data, vars[0], times
+ntime = n_elements(times)
+for ii=0,ndim-1 do begin
+    var = prefix+'b'+xyz[ii]+'_gsm'
+    data = fltarr(ntime,ndim)
+    foreach res, resolutions, jj do begin
+        b_gsm = get_var_data(vars[jj], at=times)
+        data[*,jj] = b_gsm[*,ii]
+    endforeach
+    store_data, var, times, data, limits={colors:colors, labels:resolutions}
+endfor
+
 end

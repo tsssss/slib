@@ -29,7 +29,7 @@ pro rbsp_read_efw, time, id=datatype, probe=probe, $
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','rbsp'])
     if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.sci.gsfc.nasa.gov/pub/data/rbsp'
     if n_elements(version) eq 0 then version = 'v[0-9]{2}'
-    
+
 
 ;---Init settings.
     type_dispatch = hash()
@@ -55,8 +55,8 @@ pro rbsp_read_efw, time, id=datatype, probe=probe, $
                     'time_var_name', 'epoch', $
                     'time_var_type', 'epoch16')))
     endforeach
-    
-    base_name = rbspx+'l1_esvy_%Y%m%d_'+version+'.cdf'
+
+    base_name = rbspx+'_l1_esvy_%Y%m%d_'+version+'.cdf'
     local_path = [local_root,rbspx,'efw','l1','esvy','%Y']
     remote_path = ['http://themis.ssl.berkeley.edu/data/rbsp', $
         rbspx,'l1','esvy','%Y']
@@ -74,7 +74,26 @@ pro rbsp_read_efw, time, id=datatype, probe=probe, $
                 'in_vars', ['esvy'], $
                 'time_var_name', 'epoch', $
                 'time_var_type', 'epoch16')))
-    
+
+    base_name = rbspx+'_l1_vsvy_%Y%m%d_'+version+'.cdf'
+    local_path = [local_root,rbspx,'l1','vsvy','%Y']
+    remote_path = ['http://themis.ssl.berkeley.edu/data/rbsp', $
+        rbspx,'l1','vsvy','%Y']
+    type_dispatch['l1%vsvy'] = dictionary($
+        'pattern', dictionary($
+        'local_file', join_path([local_path,base_name]), $
+        'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+        'remote_file', join_path([remote_path,base_name]), $
+        'remote_index_file', join_path([remote_path,''])), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name), $
+        'var_list', list($
+            dictionary($
+                'in_vars', ['vsvy'], $
+                'time_var_name', 'epoch', $
+                'time_var_type', 'epoch16')))
+
     ; Level 2.
     base_name = rbspx+'_efw-l2_e-hires-uvw_%Y%m%d_'+version+'.cdf'
     local_path = [local_root,rbspx,'efw','l2','e-highres-uvw','%Y']
@@ -142,7 +161,7 @@ pro rbsp_read_efw, time, id=datatype, probe=probe, $
                 'out_vars', [rbspx+'_e_mgse'], $
                 'time_var_name', 'epoch', $
                 'time_var_type', 'epoch16')))
-    
+
     ; Level 3.
     base_name = rbspx+'_efw-l3_%Y%m%d_'+version+'.cdf'
     local_path = [local_root,rbspx,'efw','l3','%Y']

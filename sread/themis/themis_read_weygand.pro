@@ -53,10 +53,13 @@ pro themis_read_weygand_gen_file, file_time, filename=local_file, remote_root=re
         if nfile eq 0 then return
         zip_dir = files[index2]
         files = files[index]
+        times = time_double(strmid(fgetbase(files),4,15),tformat='YYYYMMDD_hhmmss')
+        index = sort(times)
+        files = files[index]
+        times = times[index]
 
         time_var = 'ut'
         if ~cdf_has_var(time_var, filename=local_file) then begin
-            times = time_double(strmid(fgetbase(files),4,15),tformat='YYYYMMDD_hhmmss')
             cdf_save_var, time_var, value=times, filename=local_file
             cdf_save_setting, varname=time_var, filename=local_file, dictionary($
                 'unit', 'sec', $
@@ -108,7 +111,7 @@ pro themis_read_weygand_gen_file, file_time, filename=local_file, remote_root=re
         ; Clean up.
         file_delete, zip_file
         file_delete, files
-        file_delete, zip_dir
+        file_delete, zip_dir, /allow_nonexistent
     endforeach
 
 end
@@ -181,6 +184,10 @@ pro themis_read_weygand, time, id=datatype, probe=probe, $
         glonbins = sort_uniq(glon)
         nglatbin = n_elements(glatbins)
         nglonbin = n_elements(glonbins)
+        if nglatbin eq 0 then begin
+            errmsg = 'No data ...'
+            return
+        endif
         glatbinsize = glatbins[1]-glatbins[0]
         glonbinsize = glonbins[1]-glonbins[0]
         glat_index = round((glat-glatbins[0])/glatbinsize)

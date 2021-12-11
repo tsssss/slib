@@ -276,7 +276,7 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
     deg = 180d/!dpi
     rad = !dpi/180d
 
-    test = 0
+test = 0
 
 ;---Check inputs.
     if n_elements(time) eq 0 then begin
@@ -377,33 +377,38 @@ pro themis_read_mlonimg, time, sites=sites, errmsg=errmsg, $
         mos_images[ii,*,*] = mos_image
     endfor
 
-;---Crop to the wanted mlon/mlat range.
-    if n_elements(mlon_range) eq 2 then begin
-        x_range = round(mlon_range/mos_bin_size[0])
-        index = where(mos_xbins ge x_range[0] and mos_xbins le x_range[1], count)
-        if count ne 0 then begin
-            mos_images = mos_images[*,index,*]
-            mos_xbins = mos_xbins[index]
-        endif
-    endif
-    if n_elements(mlat_range) eq 2 then begin
-        y_range = round(mlat_range/mos_bin_size[1])
-        index = where(mos_ybins ge y_range[0] and mos_ybins le y_range[1], count)
-        if count ne 0 then begin
-            mos_images = mos_images[*,*,index]
-            mos_ybins = mos_ybins[index]
-        endif
-    endif
+    
+;;---Crop to the wanted mlon/mlat range.
+;    if n_elements(mlon_range) eq 2 then begin
+;        x_range = round(mlon_range/mos_bin_size[0])
+;        index = where(mos_xbins ge x_range[0] and mos_xbins le x_range[1], count)
+;        if count ne 0 then begin
+;            mos_images = mos_images[*,index,*]
+;            mos_xbins = mos_xbins[index]
+;        endif
+;    endif else 
+;    if n_elements(mlat_range) eq 2 then begin
+;        y_range = round(mlat_range/mos_bin_size[1])
+;        index = where(mos_ybins ge y_range[0] and mos_ybins le y_range[1], count)
+;        if count ne 0 then begin
+;            mos_images = mos_images[*,*,index]
+;            mos_ybins = mos_ybins[index]
+;        endif
+;    endif
 
+    mlonimg_var = 'thg_mlonimg'
     mos_mlons = mos_xbins*mos_bin_size[0]
     mos_mlats = mos_ybins*mos_bin_size[1]
-    mlonimg_var = 'thg_mlonimg
+    mlon_range = minmax(mos_mlons)
+    mlat_range = minmax(mos_mlats)
     store_data, mlonimg_var, times, mos_images
     add_setting, mlonimg_var, /smart, {$
-        bin_size:mos_bin_size, $
-        image_size:image_size, $
-        mlon_bins:mos_mlons, $
-        mlat_bins:mos_mlats}
+        bin_size: mos_bin_size, $
+        image_size: image_size, $
+        mlon_bins: mos_mlons, $
+        mlat_bins: mos_mlats, $
+        mlon_range: mlon_range, $
+        mlat_range: mlat_range }
 
     if keyword_set(test) then begin
         image_size = size(reform(mos_images[0,*,*]),/dimensions)
@@ -441,9 +446,19 @@ time = time_double(['2014-08-28/10:13:03','2014-08-28/10:13:06'])
 sites = ['whit','fsim']
 min_elevs = [5,20]
 mlon_range = [-100,-55]
-mlat_range = [60,75]
+mlat_range = [60,70]
 renew_file = 0
 merge_method = 'max_elev'
+
+time = time_double(['2016-10-13/12:20','2016-10-13/13:00'])
+time = time_double(['2016-10-13/12:00','2016-10-13/13:00'])
+sites = ['kian','mcgr','gako','whit']
+min_elevs = [22.5,5,5,5]
+sites = ['mcgr','gako','whit']
+min_elevs = [5,5,5]
+mlat_range = [55,70]
+mlon_range = !null
+merge_method = 'merge_elev'
 
 site_infos = themis_read_mlonimg_default_site_info(sites)
 foreach min_elev, min_elevs, ii do site_infos[ii].min_elev = min_elev

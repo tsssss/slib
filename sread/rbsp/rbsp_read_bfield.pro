@@ -1,6 +1,10 @@
 ;+
 ; Read RBSP DC B field. Default is to read '4sec' data.
 ; Save as rbspx_b_gsm.
+; 
+; utr0.
+; probe=.
+; resolution=. 'hires', '1sec', '4sec'.
 ;-
 pro rbsp_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg, _extra=ex
 

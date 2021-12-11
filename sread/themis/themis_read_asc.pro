@@ -49,7 +49,7 @@ pro themis_read_asc, time, vars=vars, id=id, site=site, errmsg=errmsg, $
     in_vars = pre1+tvars
     out_vars = pre2+tvars
     themis_read_asi, time, id='asc', site=site, errmsg=errmsg, $
-        in_vars=in_vars, out_vars=out_vars, version=version, skip_index=1
+        in_vars=in_vars, out_vars=out_vars, version=version;, skip_index=1
     time_var = pre2+'time'
     alti_var = pre2+'alti'
     if n_elements(height) eq 0 then height = 110d   ; km.

@@ -25,6 +25,7 @@ function tex2str, input
         'pi': output = '!9'+string(112b)+'!X'
         'theta': output = '!9'+string(113b)+'!X'
         'omega': output = '!9'+string(119b)+'!X'
+        'Omega': output = '!9'+string(87b)+'!X'
         'Gamma': output = '!9'+string(71b)+'!X'
         'sigma': output = '!9'+string(115b)+'!X'
         'Sigma': output = '!9'+string(83b)+'!X'

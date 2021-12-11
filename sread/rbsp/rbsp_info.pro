@@ -51,6 +51,7 @@ function rbsp_info, key, probe=the_probe
         'efw_l2_data_range', efw_l2_data_range, $ 
         'efw_phasef', efw_phasef_data_range, $       
         'spin_period', 10.95d, $
+        'spin_rate', 10.95d, $
         'boom_length', [100d,100,12], $
         'v_uvw_data_rate', 0.03125d)
 

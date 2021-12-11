@@ -6,7 +6,7 @@
 ; r_var. A string of an orbit variable.
 ; par. Default is 2, input parameter for Txx models.
 ; h0. The altitude of lower boundary. Default is 100 km.
-; direction. The tracing direction. 1 for parallel to B, -1 for anti-parallel.
+; direction. The tracing direction. =1 for parallel to B, 1 for anti-parallel.
 ;   The default behaviour is to use z_gsm to tell the hemisphere, and trace to
 ;   the ionosphere.
 ; prefix. A string to be added before variables, e.g., 'rbspb_'. Default
@@ -15,6 +15,7 @@
 ;-
 pro read_geopack_info, r_var, errmsg=errmsg, $
     model=model, h0=h0, direction=dir, $
+    refine=refine, igrf=igrf, $
     prefix=pre0, suffix=suf0
 
 ;---Check inputs.
@@ -23,6 +24,8 @@ pro read_geopack_info, r_var, errmsg=errmsg, $
         errmsg = handle_error('Orbit data not found: '+r_var+' ...')
         return
     endif
+    
+    if n_elements(igrf) eq 0 then igrf = 1
 
     ; coord = get_setting(r_var, 'coord', exist)
     ; if exist then if strlowcase(coord) ne 'gsm' then begin
@@ -30,7 +33,7 @@ pro read_geopack_info, r_var, errmsg=errmsg, $
     ; endif
 
     ; Check mapping direction.
-    auto_dir = not keyword_set(dir)
+    auto_dir = ~keyword_set(dir)
 
     ; Check mapping altitude.
     re = 6378d  ; km.
@@ -98,9 +101,16 @@ pro read_geopack_info, r_var, errmsg=errmsg, $
             if rz ge 0 then dir = -1 else dir = 1   ; -1 is along B, i.e., to ionosphere for nothern hemisphere.
         endif
         ; r0 is in Re, using /refine and /ionosphere forces r0 = 1+100km/Re.
-        geopack_trace, rx,ry,rz, dir, par, tilt=tilt, $
-            fx,fy,fz, r0=r0, /igrf, $
-            t89=t89, t96=t96, t01=t01, ts04=t04s, storm=storm
+        if keyword_set(refine) then begin
+            geopack_trace, rx,ry,rz, dir, par, tilt=tilt, $
+                fx,fy,fz, /refine, /ionosphere, igrf=igrf, $
+                t89=t89, t96=t96, t01=t01, ts04=t04s, storm=storm
+        endif else begin
+            geopack_trace, rx,ry,rz, dir, par, tilt=tilt, $
+                fx,fy,fz, r0=r0, igrf=igrf, $
+                t89=t89, t96=t96, t01=t01, ts04=t04s, storm=storm
+        endelse
+        
         fgsm[ii,*] = [fx,fy,fz]
 
         ; footpoint B field.

@@ -116,4 +116,5 @@ end
 time = time_double(['2014-08-25','2014-09-05'])
 omni_read, time, id='ae_dst'
 omni_read, time, id='sw'
+
 end

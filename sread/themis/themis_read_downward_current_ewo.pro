@@ -1,20 +1,20 @@
 ;+
-; Read upward current EWOgram.
+; Read downward current EWOgram.
 ;
 ; time_range. Time range in unix time.
 ; mlt_range=. MLT range in hr.
 ; mlat_range=. MLat range for calc EWOgram, in deg.
 ;-
-pro themis_read_upward_current_ewo, time_range, mlat_range=mlat_range, $
+pro themis_read_downward_current_ewo, time_range, mlat_range=mlat_range, $
     mlt_range=mlt_range
 
-    themis_read_j_ver_ewo, time_range, mlat_range=mlat_range, mlt_range=mlt_range, direction='up'
+    themis_read_j_ver_ewo, time_range, mlat_range=mlat_range, mlt_range=mlt_range, direction='down'
 
 end
 
 mlt_range = [-1,1]*6
 time_range = time_double(['2013-06-07/04:00','2013-06-07/07:00'])
-themis_read_upward_current_ewo, time_range, mlt_range=mlt_range
+;themis_read_upward_current_ewo, time_range, mlt_range=mlt_range
 themis_read_downward_current_ewo, time_range, mlt_range=mlt_range
 
 end

@@ -21,7 +21,12 @@ pro interp_time, var, times, to=new_var, data_gap_window=data_gap_window, _extra
     if count ne 0 then bad_index = [bad_index,index]
     
     ; Treat NaN.
-    index = where(finite(old_data[*,0],/nan), count)
+    ndim = size(old_data,/n_dimensions)
+    if ndim eq 1 then begin
+        index = where(finite(old_data,/nan), count)
+    endif else begin
+        index = where(finite(snorm(old_data),/nan), count)
+    endelse
     if count ne 0 then begin
         nan_time_ranges = old_times[time_to_range(index,time_step=1)]
         nnan_time_range = n_elements(nan_time_ranges)*0.5

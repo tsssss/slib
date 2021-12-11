@@ -57,5 +57,11 @@ probe = '15'
 ; Test.
 time = time_double(['2008-03-14/00:00','2008-03-15/00:00'])
 probe = '13'
+
+
+time = time_double(['2008-02-29/08:00','2008-02-29/10:00'])
+probe = '10'
+
+
 goes_read_bfield, time, probe=probe
 end

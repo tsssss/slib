@@ -28,19 +28,24 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, coord=coord, $
 ;---Check inputs.
     sync_threshold = 0
     if n_elements(probe) eq 0 then probe = 'x'
-    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','rbsp'])
+    if n_elements(local_root) eq 0 then local_root = join_path([diskdir('data'),'rbsp'])
+    if n_elements(remote_root) eq 0 then remote_root = join_path([rbsp_efw_phasef_get_server()])
     if n_elements(version) eq 0 then version = 'v08'
     if n_elements(coord) eq 0 then coord = 'gse'
 
 ;---Init settings.
     type_dispatch = hash()
-    valid_range = rbsp_info('spice_data_range', probe=probe)
+    valid_range = rbsp_efw_phasef_get_valid_range('spice', probe=probe)
     rbspx = 'rbsp'+probe
     base_name = rbspx+'_spice_products_%Y_%m%d_'+version+'.cdf'
-    local_path = [local_root,rbspx,'spice_cdfs','%Y']
+    local_path = [local_root,'efw_phasef','spice_var',rbspx,'%Y']
+    remote_path = [remote_root,'efw_phasef','spice_var',rbspx,'%Y']
+
     ; Orbit variables.
     type_dispatch['orbit'] = dictionary($
         'pattern', dictionary($
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,'']), $
             'local_file', join_path([local_path,base_name]), $
             'local_index_file', join_path([local_path,default_index_file()])), $
         'valid_range', time_double(valid_range), $
@@ -54,6 +59,8 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, coord=coord, $
     ; Velocity variables.
     type_dispatch['sc_vel'] = dictionary($
         'pattern', dictionary($
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,'']), $
             'local_file', join_path([local_path,base_name]), $
             'local_index_file', join_path([local_path,default_index_file()])), $
         'valid_range', time_double(valid_range), $
@@ -67,6 +74,8 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, coord=coord, $
     ; Quaternion.
     type_dispatch['quaternion'] = dictionary($
         'pattern', dictionary($
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,'']), $
             'local_file', join_path([local_path,base_name]), $
             'local_index_file', join_path([local_path,default_index_file()])), $
         'valid_range', time_double(valid_range), $
@@ -80,30 +89,33 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, coord=coord, $
     ; Spin phase.
     type_dispatch['spin_phase'] = dictionary($
         'pattern', dictionary($
-        'local_file', join_path([local_path,base_name]), $
-        'local_index_file', join_path([local_path,default_index_file()])), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,'']), $
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file()])), $
         'valid_range', time_double(valid_range), $
         'cadence', 'day', $
         'extension', fgetext(base_name), $
         'var_list', list($
-        dictionary($
-        'in_vars', rbspx+'_spin_phase', $
-        'time_var_name', 'Epoch', $
-        'time_var_type', 'epoch')))
+            dictionary($
+                'in_vars', rbspx+'_spin_phase', $
+                'time_var_name', 'Epoch', $
+                'time_var_type', 'epoch')))
     ; Spin period.
     type_dispatch['spin_period'] = dictionary($
         'pattern', dictionary($
-        'local_file', join_path([local_path,base_name]), $
-        'local_index_file', join_path([local_path,default_index_file()])), $
+            'remote_file', join_path([remote_path,base_name]), $
+            'remote_index_file', join_path([remote_path,'']), $
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file()])), $
         'valid_range', time_double(valid_range), $
         'cadence', 'day', $
         'extension', fgetext(base_name), $
         'var_list', list($
-        dictionary($
-        'in_vars', rbspx+'_spin_period', $
-        'time_var_name', 'Epoch', $
-        'time_var_type', 'epoch')))
-
+            dictionary($
+                'in_vars', rbspx+'_spin_period', $
+                'time_var_name', 'Epoch', $
+                'time_var_type', 'epoch')))
     if keyword_set(print_datatype) then begin
         print, 'Suported data type: '
         ids = type_dispatch.keys()
@@ -118,8 +130,21 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, coord=coord, $
         return
     endif
     if not type_dispatch.haskey(datatype) then begin
-        errmsg = handle_error('Do not support type '+datatype+' yet ...')
-        return
+        ;errmsg = handle_error('Do not support type '+datatype+' yet ...')
+        ;return
+        ; A generic datatype.
+        type_dispatch[datatype] = dictionary($
+            'pattern', dictionary($
+            'local_file', join_path([local_path,base_name]), $
+            'local_index_file', join_path([local_path,default_index_file()])), $
+            'valid_range', time_double(valid_range), $
+            'cadence', 'day', $
+            'extension', fgetext(base_name), $
+            'var_list', list($
+            dictionary($
+            'in_vars', rbspx+'_'+datatype, $
+            'time_var_name', 'Epoch', $
+            'time_var_type', 'epoch')))
     endif
     request = type_dispatch[datatype]
 
@@ -142,16 +167,38 @@ pro rbsp_read_spice, time, id=datatype, probe=probe, coord=coord, $
 end
 
 
-probe = 'b'
-time_range = time_double(['2013-01-09','2013-01-10'])
-rbsp_read_orbit, time_range, probe=probe
-rbsp_read_sc_vel, time_range, probe=probe
-rbsp_read_quaternion, time_range, probe=probe
+;probe = 'b'
+;time_range = time_double(['2013-01-09','2013-01-10'])
+;rbsp_read_orbit, time_range, probe=probe
+;rbsp_read_sc_vel, time_range, probe=probe
+;rbsp_read_quaternion, time_range, probe=probe
+;stop
+
+probes = ['a']
+root_dir = join_path([rbsp_efw_phasef_local_root()])
+root_dir = join_path([homedir(),'data','rbsp'])
+secofday = constant('secofday')
+foreach probe, probes do begin
+    prefix = 'rbsp'+probe+'_'
+    rbspx = 'rbsp'+probe
+
+    time_range = rbsp_efw_phasef_get_valid_range('spice', probe=probe)
+    days = make_bins(time_range+[0,-1]*secofday, secofday)
+    foreach day, days do begin
+        str_year = time_string(day,tformat='YYYY')
+        path = join_path([root_dir,'efw_phasef','spice_var',rbspx,str_year])
+        base = prefix+'spice_products_'+time_string(day,tformat='YYYY_MMDD')+'_v08.cdf'
+        file = join_path([path,base])
+        print, file
+        rbsp_read_spice_gen_file, day, probe=probe, filename=file, errmsg=errmsg
+    endforeach
+endforeach
 stop
+
 
 probes = ['a']
 secofday = constant('secofday')
-local_root = join_path([default_local_root(),'sdata','rbsp'])
+local_root = join_path([default_local_root(),'data','rbsp'])
 foreach probe, probes do begin
     rbspx = 'rbsp'+probe
     local_path = [local_root,rbspx,'spice_product_v08','YYYY']

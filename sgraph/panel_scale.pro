@@ -17,6 +17,6 @@ pro panel_scale, panels, xsize=xsize, ysize=ysize
     if n_elements(xsize) ne 0 then ysize = xsize*aspect_ratio
     if n_elements(ysize) ne 0 then xsize = ysize/aspect_ratio
 
-    region_resize, panels, xsize=xsize, ysize=ysize
+    panel_resize, panels, xsize=xsize, ysize=ysize
 
 end

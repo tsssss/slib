@@ -207,8 +207,8 @@ pro rbsp_read_hope, time, id=datatype, probe=probe, $
                 'time_var_name', 'Epoch_Ele', $
                 'time_var_type', 'Epoch'), $
             dictionary($
-                'in_vars', ['Sector_Collapse_Cntr','Energy_Collapsed','Epoch'], $
-                'out_vars', ['sector_collapse_cntr','energy_collapsed','epoch'], $
+                'in_vars', ['Sector_Collapse_Cntr','Energy_Collapsed','Epoch','Epoch_Ele','Epoch_Ion'], $
+                'out_vars', ['sector_collapse_cntr','energy_collapsed','epoch','epoch_ele','epoch_ion'], $
                 'generic_time', 1)))
 
     if keyword_set(print_datatype) then begin

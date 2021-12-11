@@ -157,9 +157,9 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
         hgtidx = where([90,110,150] eq height)
         
         for j = 0, nsite-1 do begin
-            elev = asc.(j).elev
-            mlat = asc.(j).mlat
-            mlon = asc.(j).mlon
+            elev = reform(asc.(j).elev)
+            mlat = reform(asc.(j).mlat)
+            mlon = reform(asc.(j).mlon)
                         
             mlon = reform(mlon[hgtidx,*,*],[npx+1,npx+1])
             mlat = reform(mlat[hgtidx,*,*],[npx+1,npx+1])

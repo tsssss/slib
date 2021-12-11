@@ -37,15 +37,15 @@ pro rbsp_read_en_spec, time, probe=probe, errmsg=errmsg, $
         en_var = 'hope_energy_'+the_type
         en0s = get_var_data(en_var)
 
-        en_spec_var = 'rbsp'+probe+'_'+the_species+'_enspec'
+        en_spec_var = 'rbsp'+probe+'_'+the_species+'_en_spec'
         if n_elements(pitch_info) eq 1 then begin
             en_spec_var += '_'+sgnum2str(the_pitch)+'deg'
-        endif 
+        endif
         if n_elements(pitch_index) eq 0 then begin
             dims = size(fdat,/dimensions)
             data = total(fdat,3,/nan)/dims[2]
         endif else data = reform(fdat[*,*,pitch_index])
-        
+
         store_data, en_spec_var, times, data, en0s
 
         zrange = (the_species eq 'e')? [1e4,1e10]: [1e4,1e8]

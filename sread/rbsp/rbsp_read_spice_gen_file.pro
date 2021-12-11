@@ -5,12 +5,87 @@
 ; probe=. A string of 'a' or 'b'.
 ; filename=. A string to set the output file name.
 ;
-; To replace rbsp_gen_spice_product. Need to regenerate from 2012-09-25 to 2018-09-18.
+; To replace rbsp_gen_spice_product. Need to regenerate from 2013-09-25 to 2018-09-18.
 ;-
+
+pro rbsp_read_spice_gen_file_add_label, filename=file
+
+    base = file_basename(file)
+    probe = strmid(base,4,1)
+    prefix = 'rbsp'+probe+'_'
+    vars = cdf_vars(file)
+    index = where(stregex(vars, prefix+'q_uvw2*') ne -1, count)
+    q_var = vars[index[0]]
+    coord = strmid(q_var,strpos(q_var,'2')+1)
+
+    var = prefix+'r_'+coord
+    settings = dictionary($
+        'VAR_NOTES', 'The spacecraft position')
+    cdf_save_setting, settings, var=var, filename=file
+
+    var = prefix+'v_'+coord
+    settings = dictionary($
+        'VAR_NOTES', 'The spacecraft velocity')
+    cdf_save_setting, settings, var=var, filename=file
+
+    var = prefix+'q_uvw'+coord
+    settings = dictionary($
+        'VAR_NOTES', 'The quaternion of the rotation matrix from UVW to '+strupcase(coord))
+    cdf_save_setting, settings, var=var, filename=file
+
+    var = prefix+'wsc_'+coord
+    settings = dictionary($
+        'VAR_NOTES', 'The unit vector of the direction of the spin axis (w-axis) in '+strupcase(coord))
+    cdf_save_setting, settings, var=var, filename=file
+
+    var = prefix+'mlt'
+    settings = dictionary($
+        'VAR_NOTES', 'The spacecraft magnetic local time')
+    cdf_save_setting, settings, var=var, filename=file
+
+    var = prefix+'mlat'
+    settings = dictionary($
+        'VAR_NOTES', 'The spacecraft magnetic latitude')
+    cdf_save_setting, settings, var=var, filename=file
+
+    var = prefix+'lshell'
+    settings = dictionary($
+        'VAR_NOTES', 'The spacecraft L-shell')
+    cdf_save_setting, settings, var=var, filename=file
+
+    var = prefix+'sphase_ssha'
+    settings = dictionary($
+        'VAR_NOTES', 'The angle between the u-axis and the SSH look direction. Used for the rotation between UVW and DSC, c.f., rbsp_uvw_to_dsc.pro')
+    cdf_save_setting, settings, var=var, filename=file
+
+    var = prefix+'spin_period'
+    settings = dictionary($
+        'VAR_NOTES', 'The spin period of the spacecraft')
+    cdf_save_setting, settings, var=var, filename=file
+
+    var = prefix+'spin_phase'
+    settings = dictionary($
+        'VAR_NOTES', 'The angle of the sun sensor with respect to the sun-pulse location (i.e., DSC x), as defined in rbsp_load_state.pro.')
+    cdf_save_setting, settings, var=var, filename=file
+
+
+    gatts = dictionary( $
+        'TEXT', 'Commonly used quantities exported from the SPICE kernel, including information on the position, attitude, spin of the spacecraft. Contacts: Sheng Tian, tianx138@umn.edu', $
+        'TITLE', '', $
+        'Generation_date', time_string(systime(1),tformat='YYYY:MM:DDThh:mm:ss'), $
+        'Logical_file_id', strmid(base,0,strlen(base)-4), $
+        'Project', 'RBSP>Radiation Belt Storm Probes' )
+    foreach key, gatts.keys() do begin
+        cdf_save_setting, key, gatts[key], filename=file
+    endforeach
+
+end
+
+
 pro rbsp_read_spice_gen_file, time, probe=probe, $
     filename=file, errmsg=errmsg
 
-;---Check inputs.
+    ;---Check inputs.
     if n_elements(file) eq 0 then begin
         errmsg = handle_error('No output file ...')
         return
@@ -27,7 +102,7 @@ pro rbsp_read_spice_gen_file, time, probe=probe, $
     endif
 
 
-;---Constants and settings.
+    ;---Constants and settings.
     secofday = 86400d
     deg = 180d/!dpi
     rad = !dpi/180
@@ -42,7 +117,7 @@ pro rbsp_read_spice_gen_file, time, probe=probe, $
     prefix = 'rbsp'+probe+'_'
 
 
-;---Init file.
+    ;---Init file.
     out_dir = fgetpath(file)
     if file_test(out_dir,/directory) eq 0 then file_mkdir, out_dir
     data_file = file
@@ -54,7 +129,7 @@ pro rbsp_read_spice_gen_file, time, probe=probe, $
     cdf_save_setting, ginfo, filename=cdf_id
 
 
-;---Save common_times.
+    ;---Save common_times.
     ; Need to overlapping with next day for interpolation purpose.
     common_times = make_bins(time_range, common_time_step)
     utname = 'Epoch'
@@ -68,7 +143,7 @@ pro rbsp_read_spice_gen_file, time, probe=probe, $
 
 
 
-;---Load spice kernels for all times.
+    ;---Load spice kernels for all times.
     defsysv,'!rbsp_spice', exists=flag
     if flag eq 0 then rbsp_load_spice_kernel
 
@@ -103,9 +178,10 @@ pro rbsp_read_spice_gen_file, time, probe=probe, $
         ; v_coord.
         vname = prefix+'v'+suffix
         tplot_rename, prefix+'state_vel_'+coord, vname
-        r_coord = get_var_data(prefix+'r'+suffix)*re
-        data = r_coord
-        for ii=0,2 do data[*,ii] = deriv(common_times, r_coord[*,ii])
+        ;        r_coord = get_var_data(prefix+'r'+suffix)*re
+        ;        data = r_coord
+        ;        for ii=0,2 do data[*,ii] = deriv(common_times, r_coord[*,ii])
+        data = get_var_data(vname)
         settings = dictionary($
             'FIELDNAM', 'V '+cap_coord, $
             'UNITS', 'km/s', $
@@ -146,20 +222,19 @@ pro rbsp_read_spice_gen_file, time, probe=probe, $
     ; MLT.
     vname = prefix+'mlt'
     r_gse = get_var_data(prefix+'r_gse')
-    data = atan(r_gse[*,1],r_gse[*,0])*deg/15
+    r_sm = cotran(r_gse, common_times, 'gse2sm')
+    data = atan(r_sm[*,1],r_sm[*,0])*deg/15+12
     settings = dictionary($
         'FIELDNAM', 'MLT', $
         'UNITS', 'hr', $
         'VAR_TYPE', 'data', $
+        'yrange', [0,24], $
         'DEPEND_0', utname )
     cdf_save_var, vname, value=data, filename=cdf_id
     cdf_save_setting, settings, var=vname, filename=cdf_id
 
     ; MLat.
     vname = prefix+'mlat'
-    cotrans, prefix+'r_gse', prefix+'r_gsm', /GSE2GSM
-    cotrans, prefix+'r_gsm', prefix+'r_sm', /GSM2SM
-    r_sm = get_var_data(prefix+'r_sm')
     mlat = atan(r_sm[*,2],sqrt(r_sm[*,0]^2+r_sm[*,1]^2))
     data = mlat*deg
     settings = dictionary($
@@ -221,7 +296,7 @@ pro rbsp_read_spice_gen_file, time, probe=probe, $
     ; Spin period and spin phase.
     timespan, time, 86400d, /seconds
     rbsp_load_state, probe=probe, dt=common_time_step, /no_spice_load
-    
+
     vname = prefix+'spin_period'
     data = get_var_data(prefix+'spinper')
     settings = dictionary($
@@ -231,7 +306,7 @@ pro rbsp_read_spice_gen_file, time, probe=probe, $
         'DEPEND_0', utname )
     cdf_save_var, vname, value=data, filename=cdf_id
     cdf_save_setting, settings, var=vname, filename=cdf_id
-    
+
     vname = prefix+'spin_phase'
     data = get_var_data(prefix+'spinphase')
     settings = dictionary($
@@ -248,7 +323,15 @@ pro rbsp_read_spice_gen_file, time, probe=probe, $
 end
 
 
-time = time_double(['2013-05-01'])
+fn = 'C:\Users\tshen\data\rbsp\efw_phasef\spice_var\rbspb\2013\rbspb_spice_products_2013_0109_v08.cdf'
+rbsp_read_spice_gen_file_add_label, filename=fn
+
+stop
+
+; Last dates of RBSP-A and -B
+time = time_double(['2019-10-15'])
+probe = 'a'
+time = time_double(['2019-07-17'])
 probe = 'b'
 
 
@@ -256,6 +339,9 @@ probe = 'b'
 ;rbsp_read_emfisis, time+[0,86400], probe=probe, id='l2%magnetometer'
 ;rbsp_uvw_to_dsc, probe, prefix+'b_uvw', /debug
 ;stop
+
+time = time_double(['2013-07-17'])
+probe = 'a'
 
 prefix = 'rbsp'+probe+'_'
 file = join_path([homedir(),prefix+'spice_products_'+time_string(time,tformat='YYYY_MMDD')+'_v08.cdf'])

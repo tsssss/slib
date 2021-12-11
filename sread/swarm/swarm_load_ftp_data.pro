@@ -21,10 +21,11 @@ pro swarm_load_ftp_data, time, id=datatype, probe=probe, $
     if n_elements(remote_root) eq 0 then remote_root = 'ftp://swarm0555:othonwoo01@swarm-diss.eo.esa.int'
     if n_elements(version) eq 0 then version = '.*'
     if n_elements(coord) eq 0 then coord = 'gsm'
+    up_probe = strupcase(probe)
 
     type_dispatch = hash()
     ; Level 1b.
-    base_name = 'SW_OPER_MAGC_LR_1B_%Y%m%dT.*_%Y%m%dT.*_'+version+'.CDF.ZIP'
+    base_name = 'SW_OPER_MAG'+up_probe+'_LR_1B_%Y%m%dT.*_%Y%m%dT.*_'+version+'.CDF.ZIP'
     local_path = join_path([local_root,'swarm'+probe,'level1b','Current','MAGx_LR','%Y'])
     remote_path = join_path([remote_root,'Level1b','Latest_baselines','MAGx_LR','Sat_'+strupcase(probe)])
 
@@ -35,7 +36,7 @@ pro swarm_load_ftp_data, time, id=datatype, probe=probe, $
             'remote_file', join_path([remote_path,base_name]), $
             'remote_index_file', join_path([remote_path,''])), $
         'sync_threshold', 0, $      ; sync if mtime is after t_now-sync_threshold.
-        'target_file', 'SW_OPER_MAGC_LR_1B_.*_MDR_MAG_LR.cdf', $
+        'target_file', 'SW_OPER_MAG'+up_probe+'_LR_1B_.*_MDR_MAG_LR.cdf', $
         'cadence', 'day')
 
     if keyword_set(print_datatype) then begin

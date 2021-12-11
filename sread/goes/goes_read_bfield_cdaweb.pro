@@ -60,5 +60,8 @@ end
 
 probe = '11'
 time_range = time_double(['2008-03-14/06:30','2008-03-14:06:40'])
+
+probe = '10'
+time_range = time_double(['2008-02-29/08:00','2008-02-29/10:00'])
 goes_read_bfield_cdaweb, time_range, probe=probe
 end

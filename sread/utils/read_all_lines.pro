@@ -9,6 +9,7 @@ function read_all_lines, txtfile, skip_header=nheader
     if file_test(txtfile) eq 0 then return, ''
     
     nline = file_lines(txtfile)
+    if nline eq 0 then return, ''
     lines = strarr(nline)
     openr, lun, txtfile, /get_lun
     readf, lun, lines

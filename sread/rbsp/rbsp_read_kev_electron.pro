@@ -10,7 +10,7 @@ pro rbsp_read_kev_electron, time, probe=probe, errmsg=errmsg, pitch_angle=pitch_
 
     ; read 'rbspx_kev_ele_flux'
     rbsp_read_mageis, time, id='l3%electron', probe=probe, errmsg=errmsg
-    if errmsg ne 0 then return
+    if errmsg ne '' then return
 
     var = pre0+'kev_e_flux'
     enbins = get_var_data('FEDU_Energy')

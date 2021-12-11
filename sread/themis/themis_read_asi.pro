@@ -19,7 +19,7 @@ pro themis_read_asi, time, id=datatype, site=site, $
     sync_threshold = 86400d*120
     if n_elements(probe) eq 0 then probe = 'x'
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','themis'])
-    if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.sci.gsfc.nasa.gov/pub/data/themis'
+    if n_elements(remote_root) eq 0 then remote_root = 'http://themis.ssl.berkeley.edu/data/themis'
     if n_elements(version) eq 0 then version = 'v[0-9]{2}'
 
 ;---Init settings.
@@ -41,14 +41,14 @@ pro themis_read_asi, time, id=datatype, site=site, $
         'var_list', list($
             dictionary($
                 'in_vars', ['thg_asf_'+site], $
-                'out_vars', ['thg_'+site+'asf'], $
+                'out_vars', ['thg_'+site+'_asf'], $
                 'time_var_name', 'thg_asf_'+site+'_time', $
                 'time_var_type', 'unix')))
     ; thumnail resolution, 1024 pixels in total.
     base_name = thx+'_l1_ast_'+site+'_%Y%m%d_'+version+'.cdf'
     local_path = [local_root,thx,'l1','asi',site,'%Y','%m']
     remote_path = [remote_root,thx,'l1','asi',site,'%Y','%m']
-    type_dispatch['asf'] = dictionary($
+    type_dispatch['ast'] = dictionary($
         'pattern', dictionary($
             'local_file', join_path([local_path,base_name]), $
             'local_index_file', join_path([local_path,default_index_file(/sync)]), $
@@ -60,7 +60,7 @@ pro themis_read_asi, time, id=datatype, site=site, $
         'var_list', list($
             dictionary($
                 'in_vars', ['thg_ast_'+site], $
-                'out_vars', ['thg_'+site+'ast'], $
+                'out_vars', ['thg_'+site+'_ast'], $
                 'time_var_name', 'thg_ast_'+site+'_time', $
                 'time_var_type', 'unix')))
     ; calibration data.
@@ -80,7 +80,7 @@ pro themis_read_asi, time, id=datatype, site=site, $
             dictionary($
                 'in_vars', ['thg_asc_'+site+'_'+['mlon','mlat']], $
                 'out_vars', ['thg_'+site+'_asc_'+['mlon','mlat']], $
-                generic_time, 1)))
+                'generic_time', 1)))
 
     if keyword_set(print_datatype) then begin
         print, 'Suported data type: '

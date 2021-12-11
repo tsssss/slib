@@ -20,7 +20,7 @@ function lookup_index_file, files, index_file, silent=silent
     if n_elements(lines) eq 1 and lines[0] eq '' then return, ''
 
     foreach file, files, ii do begin
-        if file_test(file) eq 1 then continue
+        if (strpos(file,'['))[0] eq -1 then if file_test(file) eq 1 then continue
         base_name = fgetbase(file)
         the_files = stregex(lines, base_name, /extract, /fold_case)
         index = where(the_files ne '', count)
