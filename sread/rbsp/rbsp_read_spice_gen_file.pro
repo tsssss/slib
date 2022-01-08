@@ -85,7 +85,7 @@ end
 pro rbsp_read_spice_gen_file, time, probe=probe, $
     filename=file, errmsg=errmsg
 
-    ;---Check inputs.
+;---Check inputs.
     if n_elements(file) eq 0 then begin
         errmsg = handle_error('No output file ...')
         return
@@ -102,7 +102,7 @@ pro rbsp_read_spice_gen_file, time, probe=probe, $
     endif
 
 
-    ;---Constants and settings.
+;---Constants and settings.
     secofday = 86400d
     deg = 180d/!dpi
     rad = !dpi/180
@@ -117,7 +117,7 @@ pro rbsp_read_spice_gen_file, time, probe=probe, $
     prefix = 'rbsp'+probe+'_'
 
 
-    ;---Init file.
+;---Init file.
     out_dir = fgetpath(file)
     if file_test(out_dir,/directory) eq 0 then file_mkdir, out_dir
     data_file = file
@@ -129,7 +129,7 @@ pro rbsp_read_spice_gen_file, time, probe=probe, $
     cdf_save_setting, ginfo, filename=cdf_id
 
 
-    ;---Save common_times.
+;---Save common_times.
     ; Need to overlapping with next day for interpolation purpose.
     common_times = make_bins(time_range, common_time_step)
     utname = 'Epoch'
@@ -143,7 +143,7 @@ pro rbsp_read_spice_gen_file, time, probe=probe, $
 
 
 
-    ;---Load spice kernels for all times.
+;---Load spice kernels for all times.
     defsysv,'!rbsp_spice', exists=flag
     if flag eq 0 then rbsp_load_spice_kernel
 
@@ -178,9 +178,9 @@ pro rbsp_read_spice_gen_file, time, probe=probe, $
         ; v_coord.
         vname = prefix+'v'+suffix
         tplot_rename, prefix+'state_vel_'+coord, vname
-        ;        r_coord = get_var_data(prefix+'r'+suffix)*re
-        ;        data = r_coord
-        ;        for ii=0,2 do data[*,ii] = deriv(common_times, r_coord[*,ii])
+;        r_coord = get_var_data(prefix+'r'+suffix)*re
+;        data = r_coord
+;        for ii=0,2 do data[*,ii] = deriv(common_times, r_coord[*,ii])
         data = get_var_data(vname)
         settings = dictionary($
             'FIELDNAM', 'V '+cap_coord, $

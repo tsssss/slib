@@ -1,13 +1,13 @@
 ;+
 ; Read RBSP keV electron flux.
-; Save as rbspx_kev_e_flux.
+; Save as rbspx_kev_ele_flux.
 ;
 ; set pitch_angle to load data for a specific pitch angle, otherwise load all pitch angles.
 ;-
 pro rbsp_read_kev_electron, time, probe=probe, errmsg=errmsg, pitch_angle=pitch_angle, energy=energy
 
     pre0 = 'rbsp'+probe+'_'
-    
+
     ; read 'rbspx_kev_ele_flux'
     rbsp_read_mageis, time, id='l3%electron', probe=probe, errmsg=errmsg
     if errmsg ne '' then return
@@ -75,8 +75,7 @@ pro rbsp_read_kev_electron, time, probe=probe, errmsg=errmsg, pitch_angle=pitch_
     ; Average pitch angle if no pitch angle info is provided.
     if n_elements(pitch_angle) eq 0 then begin
         dat = total(dat,3,/nan)/npabin
-        npabin = 1
-        pabins = -1
+        npabin = 0
     endif
 
     ; save data.
