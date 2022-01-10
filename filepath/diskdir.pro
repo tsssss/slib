@@ -31,7 +31,8 @@ function diskdir, disk, trailing_slash = trailing_slash, errmsg=errmsg
             tmp = (where(idx ge idx1))[0]
             outputs = outputs[idx[tmp-1]:idx[tmp]]    ; locate the block.
             idx = where(stregex(outputs, 'VolumeName') ne -1)
-            the_disk = (strsplit(outputs[idx],' ',/extract))[2]
+            tmp = strsplit(outputs[idx],':',/extract)
+            the_disk = strtrim(tmp[1],2)
             if strlowcase(the_disk) ne strlowcase(disk) then begin
                 errmsg = handle_error('No such disk: '+disk+' ...')
                 return, retval
