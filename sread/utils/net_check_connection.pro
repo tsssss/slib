@@ -54,7 +54,6 @@ end
 urls = list()
 urls.add, 'www.google.com'
 urls.add, 'https://www.google.com'
-urls.add, 'ftp://swarm0555:othonwoo01@swarm-diss.eo.esa.int/Level1b/Latest_baselines/MAGx_LR'
 urls.add, 'sftp://swarm-diss.eo.esa.int/Level1b/Latest_baselines/MAGx_LR'
 foreach url, urls do print, check_network_connection(url)
 end
