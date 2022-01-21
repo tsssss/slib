@@ -35,7 +35,7 @@ pro themis_read_current_mlonimg, time_range, mlat_range=mlat_range, $
     pixel_glats = fltarr(nglonbin,nglatbin)
     for ii=0,nglatbin-1 do pixel_glons[*,ii] = glonbins
     for ii=0,nglonbin-1 do pixel_glats[ii,*] = glatbins
-    apexfile = join_path([homedir(),'Projects','idl','spacephys','aurora','image','support','mlatlon.1997a.xdr'])
+    ;apexfile = join_path([homedir(),'codes','idl','spacephys','aurora','image','support','mlatlon.1997a.xdr'])
     geotoapex, pixel_glats, pixel_glons, apexfile, pixel_mlats, pixel_mlons
 
 

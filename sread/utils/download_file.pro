@@ -91,6 +91,8 @@ pro download_file, local_file, remote_file, errmsg=errmsg
         url_port=url_info.port, $
         url_username=url_info.username, $
         url_password=url_info.password
+    ; Need these ssl settings to download certain type of files.
+    net->setproperty, ssl_verify_peer=0, ssl_verify_host=0
     net->setproperty, callback_function='download_file_callback', $
         callback_data={ $
             net_object: net, $
