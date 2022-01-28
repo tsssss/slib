@@ -6,9 +6,11 @@
 ; mlat_range=. MLat range for calc EWOgram, in deg.
 ;-
 pro themis_read_upward_current_ewo, time_range, mlat_range=mlat_range, $
-    mlt_range=mlt_range
+    mlt_range=mlt_range, errmsg=errmsg
 
-    themis_read_j_ver_ewo, time_range, mlat_range=mlat_range, mlt_range=mlt_range, direction='up'
+    themis_read_j_ver_ewo, time_range, mlat_range=mlat_range, mlt_range=mlt_range, direction='up', errmsg=errmsg
+    options, 'thg_j_up_ewo', 'color_table', 62
+
 
 end
 

@@ -47,7 +47,7 @@ function cdf_read_var_att, var, filename=cdf0, errmsg=errmsg
         if strmid(scope,0,1) eq 'G' then continue
         if ~cdf_attexists(cdfid, attname, the_var) then continue
         cdf_attget, cdfid, attname, the_var, value
-        vatt[attname] = value
+        vatt[strtrim(attname,2)] = value
     endfor
 
     if input_is_file then cdf_close, cdfid

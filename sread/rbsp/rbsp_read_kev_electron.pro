@@ -106,12 +106,14 @@ pro rbsp_read_kev_electron, time, probe=probe, errmsg=errmsg, pitch_angle=pitch_
             value_unit: 'keV', $
             short_name: 'e!U-!N flux '+sgnum2str(sround(pabins))+' deg'}
     endif else begin
-        store_data, var, uts, dat
+        store_data, var, uts, dat, enbins
         add_setting, var, /smart, {$
-            display_type: 'data', $
+            display_type: 'list', $
             ylog: 1, $
-            energy: enbins, $
-            pitch_angle: pabins}
+            color_table: 52, $
+            unit: '#/cm!U2!N-s-sr-keV', $
+            value_unit: 'keV', $
+            short_name: 'e!U-!N flux' }
     endelse
 
 

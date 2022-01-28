@@ -9,18 +9,19 @@
 
 pro themis_read_current_mlonimg, time_range, mlat_range=mlat_range, $
     mlon_range=mlon_range, $
-    varname=mlonimg_var
+    varname=mlonimg_var, errmsg=errmsg
 
 
 ;---Check input.
     if n_elements(mlon_range) eq 0 then mlon_range = [-150.,50]
     if n_elements(mlat_range) eq 0 then mlat_range = [55.,85]
     if n_elements(varname) eq 0 then varname = 'thg_j_ver_mlonimg'
-
+    errmsg = ''
 
 ;---Read images in glon/glat.
     if n_elements(j_var) eq 0 then j_var = 'thg_j_ver'
-    if check_if_update(j_var, time_range) then themis_read_weygand, time_range
+    if check_if_update(j_var, time_range) then themis_read_weygand, time_range, errmsg=errmsg
+    if errmsg ne '' then return
     j_orig = get_var_data(j_var, in=time_range, times=times)
     glonbins = get_setting(j_var, 'glonbins')
     glatbins = get_setting(j_var, 'glatbins')

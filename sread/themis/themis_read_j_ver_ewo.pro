@@ -8,7 +8,7 @@
 ;-
 pro themis_read_j_ver_ewo, time_range, mlat_range=mlat_range, $
     mlt_range=mlt_range, $
-    direction=direction
+    direction=direction, errmsg=errmsg
 
     if n_elements(mlat_range) eq 0 then mlat_range = [60.,70]
     if n_elements(mlt_range) eq 0 then mlt_range = [-1,1]*6
@@ -21,7 +21,8 @@ pro themis_read_j_ver_ewo, time_range, mlat_range=mlat_range, $
 
 ;---Load MLon image.
     mltimg_var = 'thg_j_ver_mltimg'
-    themis_read_current_mltimg, time_range, varname=mltimg_var
+    themis_read_current_mltimg, time_range, varname=mltimg_var, errmsg=errmsg
+    if errmsg ne '' then return
     get_data, mltimg_var, times, j_new
     ntime = n_elements(times)
     mlt_bins = get_setting(mltimg_var, 'mlt_bins')

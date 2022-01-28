@@ -8,7 +8,7 @@
 
 pro themis_read_current_mltimg, time_range, mlat_range=mlat_range, $
     mlt_range=mlt_range, $
-    varname=mltimg_var
+    varname=mltimg_var, errmsg=errmsg
 
 
 ;---Check input.
@@ -18,7 +18,8 @@ pro themis_read_current_mltimg, time_range, mlat_range=mlat_range, $
 
 ;---Load MLon image.
     mlonimg_var = 'thg_j_ver_mlonimg'
-    themis_read_current_mlonimg, time_range, varname=mlonimg_var
+    themis_read_current_mlonimg, time_range, varname=mlonimg_var, errmsg=errmsg
+    if errmsg ne '' then return
     get_data, mlonimg_var, times, j_mlonimg
     ntime = n_elements(times)
     mlon_bins = get_setting(mlonimg_var, 'mlon_bins')

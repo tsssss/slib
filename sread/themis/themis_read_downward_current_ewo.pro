@@ -9,6 +9,7 @@ pro themis_read_downward_current_ewo, time_range, mlat_range=mlat_range, $
     mlt_range=mlt_range
 
     themis_read_j_ver_ewo, time_range, mlat_range=mlat_range, mlt_range=mlt_range, direction='down'
+    options, 'thg_j_down_ewo', 'color_table', 49
 
 end
 

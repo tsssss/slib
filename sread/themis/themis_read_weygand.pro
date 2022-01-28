@@ -9,6 +9,7 @@ function themis_read_weygand_parse_eics, file, glat, glon
     ;   Jy (mA/m, points to geographic east)
 
     nline = file_lines(file)
+    if nline ne 183 then return, !null
     ncol = 4
     data = fltarr(ncol, nline)
     openr, lun, file, /get_lun
@@ -37,7 +38,7 @@ function themis_read_weygand_parse_secs, file, glat, glon
 
 end
 
-pro themis_read_weygand_gen_file, file_time, filename=local_file, remote_root=remote_root
+pro themis_read_weygand_gen_file, file_time, filename=local_file, remote_root=remote_root, errmsg=errmsg
 
     local_path = fgetpath(local_file)
     foreach the_type, ['EICS','SECS'] do begin
@@ -45,16 +46,22 @@ pro themis_read_weygand_gen_file, file_time, filename=local_file, remote_root=re
         zip_name = base_name+'.zip'
         zip_file = join_path([local_path,zip_name])
         remote_file = apply_time_to_pattern(join_path([remote_root,the_type,'%Y','%m',zip_name]), file_time)
-        download_file, zip_file, remote_file
-
-        ;zip_dir = join_path([local_path,the_type])
-        file_unzip, zip_file, files=files
-        index = where(stregex(files, '\.dat') ne -1, nfile, complement=index2)
-        if nfile eq 0 then return
-        zip_dir = files[index2]
-        files = files[index]
-        times = time_double(strmid(fgetbase(files),4,15),tformat='YYYYMMDD_hhmmss')
-        index = sort(times)
+        download_file, zip_file, remote_file, errmsg=errmsg
+        if errmsg ne '' then begin
+            if file_test(zip_file) eq 1 then file_delete, zip_file
+            return
+        endif
+        
+        file_unzip, zip_file, files=orig_files
+        index = where(stregex(orig_files, '\.dat') ne -1, nfile, complement=index2)
+        if nfile eq 0 then begin
+            errmsg = 'No data ...'
+            return
+        endif
+        zip_dir = orig_files[index2]
+        files = orig_files[index]
+        times = time_double(strmid(fgetbase(files),4,15),tformat='YYYYMMDD_hhmmss') ; some files are duplicated.
+        index = uniq(times,sort(times))
         files = files[index]
         times = times[index]
 
@@ -80,7 +87,11 @@ pro themis_read_weygand_gen_file, file_time, filename=local_file, remote_root=re
 
 
         data = fltarr([nfile,size(tmp,/dimensions)])
-        foreach file, files, ii do data[ii,*,*] = call_function(routine, file)
+        foreach file, files, ii do begin
+            tmp = call_function(routine, file)
+            if n_elements(tmp) eq 0 then continue
+            data[ii,*,*] = tmp
+        endforeach
         case the_type of
             'EICS': begin
                 var_name = 'thg'+suffix
@@ -109,9 +120,14 @@ pro themis_read_weygand_gen_file, file_time, filename=local_file, remote_root=re
 
 
         ; Clean up.
-        file_delete, zip_file
-        file_delete, files
-        file_delete, zip_dir, /allow_nonexistent
+        nfile = n_elements(orig_files)
+        flags = bytarr(nfile)
+        for ii=0, nfile-1 do flags[ii] = file_test(orig_files[ii], directory=1)
+        index = where(flags eq 0, complement=index2)
+        file_delete, orig_files[index], allow_nonexistent=1
+        file_delete, orig_files[index2], allow_nonexistent=1
+        file_delete, zip_file, allow_nonexistent=1
+        file_delete, zip_dir, allow_nonexistent=1
     endforeach
 
 end
@@ -168,8 +184,12 @@ pro themis_read_weygand, time, id=datatype, probe=probe, $
     endif
 
 ;---Read data from files and save to memory.
-    read_files, time, files=files, request=request
-
+    if n_elements(files) eq 0 then begin
+        errmsg = 'No data ...'
+        return
+    endif
+    read_files, time, files=files, request=request, errmsg=errmsg
+    if errmsg ne '' then return
 
 ;---Read glat and glon and map 1D data to 2D grid.
     foreach type, types do begin
@@ -305,5 +325,10 @@ end
 
 
 time = time_double(['2014-08-28/10:05','2014-08-28/10:20'])
+time = time_double(['2007-03-23/10:05','2007-03-23/10:20']) ; No data online.
+time = time_double(['2007-06-04/10:05','2007-06-04/10:20']) ; Duplicated data.
+time = time_double(['2007-08-17/10:05','2007-08-17/10:20']) ; irregular txt file.
+time = time_double(['2007-12-12/10:05','2007-12-12/10:20']) ; data gap.
+
 themis_read_weygand, time
 end

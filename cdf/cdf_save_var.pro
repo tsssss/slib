@@ -88,7 +88,8 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
     ; Sometimes we need to save all data as nrec=1.
     if keyword_set(save_as_one) then begin
         dimensions = data_dims
-        dimvary = 1
+        ndimension = n_elements(dimensions)
+        dimvary = bytarr(ndimension)+1
         extra = create_struct('REC_NOVARY', 1, extra)
     endif
 
