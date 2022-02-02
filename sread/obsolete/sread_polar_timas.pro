@@ -37,7 +37,7 @@ function sread_polar_timas, tr0, filename = fn0, $
     ; local and remote root directory.
     if n_elements(locroot) eq 0 then locroot = spreproot('polar/timas')
     if n_elements(remroot) eq 0 then $
-        remroot = 'ftp://cdaweb.gsfc.nasa.gov/pub/data/polar/timas'
+        remroot = 'https://cdaweb.gsfc.nasa.gov/pub/data/polar/timas'
     
     ; **** prepare file names.
     utr0 = tr0
