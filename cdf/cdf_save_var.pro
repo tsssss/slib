@@ -19,7 +19,8 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
     catch, error
     if error ne 0 then begin
         catch, /cancel
-        errmsg = handle_error(!error_state.msg, cdfid=cdfid)
+        if input_is_file then cdf_close, cdfid
+        errmsg = !error_state.msg
         return
     endif
 
@@ -84,7 +85,11 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
         dimvary = bytarr(ndimension)+1
     endif
     ; CDF assumes [dims,nrec].
-    if ~keyword_set(save_as_is) and n_elements(dimensions) ne 0 then vals = transpose(vals, shift(indgen(ndimension+1),-1))
+    transpose_val = 1
+    if keyword_set(save_as_is) then transpose_val = 0
+    if keyword_set(save_as_one) then transpose_val = 0
+    if n_elements(dimensions) eq 0 then transpose_val = 0
+    if transpose_val then vals = transpose(vals, shift(indgen(ndimension+1),-1))
     ; Sometimes we need to save all data as nrec=1.
     if keyword_set(save_as_one) then begin
         dimensions = data_dims

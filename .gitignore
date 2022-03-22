@@ -1,4 +1,6 @@
 *.swp
 *.swo
-types_pro.taghl
-tags
+*.pdf
+*.png
+*.jpg
+.DS_Store
