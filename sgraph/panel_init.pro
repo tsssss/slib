@@ -36,7 +36,8 @@ function panel_init, plot_file, $
     xpad = 8d
     if n_elements(xpads) eq 0 then xpads = xpad
     if n_elements(xpads) eq 1 then xpad = xpads[0]
-    if n_elements(xpads) ne nxpan then begin
+    if nxpan eq 1 then xpads = !null
+    if n_elements(xpads) ne nxpan-1 then begin
         xpads = dblarr(nxpan-1)+xpad
     endif
     if nxpan eq 1 then xpads = !null
@@ -52,7 +53,8 @@ function panel_init, plot_file, $
     ypad = 0.4d
     if n_elements(ypads) eq 0 then ypads = ypad
     if n_elements(ypads) eq 1 then ypad = ypads[0]
-    if n_elements(ypads) ne nypan then begin
+    if nypan eq 1 then ypads = !null
+    if n_elements(ypads) ne nypan-1 then begin
         ypads = dblarr(nypan-1)+ypad
     endif
     if nypan eq 1 then ypads = !null

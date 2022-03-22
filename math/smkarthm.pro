@@ -39,3 +39,9 @@ function smkarthm, a0, b0, c0, mode
         end
     endcase
 end
+
+print, smkarthm(0,1,9, 'x0')
+print, smkarthm(0,-1,9, 'x1')
+print, smkarthm(0,10,1, 'dx')
+print, smkarthm(0,10,5, 'n')
+end
