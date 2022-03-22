@@ -20,11 +20,11 @@ function themis_read_mlonimg_default_site_info, sites, errmsg=errmsg
     site_infos = replicate(site_info, nsite)
     foreach site, sites, ii do site_infos[ii].name = strlowcase(site)
 
-    ; fsim has trees, so we want a higher min_elev
-    index = where(sites eq 'fsim', count)
-    if count ne 0 then begin
-        site_infos[index].min_elev = 20
-    endif
+;    ; fsim has trees, so we want a higher min_elev
+;    index = where(sites eq 'fsim', count)
+;    if count ne 0 then begin
+;        site_infos[index].min_elev = 20
+;    endif
 
     return, site_infos
 end

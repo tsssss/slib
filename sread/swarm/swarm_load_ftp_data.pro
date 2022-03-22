@@ -16,7 +16,7 @@ pro swarm_load_ftp_data, time, id=datatype, probe=probe, $
     if n_elements(probe) eq 0 then probe = 'x'
 
 ;---Default settings.
-    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','swarm'])
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'swarm'])
     if n_elements(data_root) eq 0 then data_root = join_path([default_local_root(),'sdata','swarm'])
     if n_elements(remote_root) eq 0 then remote_root = 'ftp://swarm0555:othonwoo01@swarm-diss.eo.esa.int'
     if n_elements(version) eq 0 then version = '.*'

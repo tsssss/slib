@@ -26,7 +26,7 @@ pro themis_read_mag_per_site, time, id=datatype, site=site, $
     if n_elements(out_vars) ne n_elements(in_vars) then out_vars = in_vars
 
 ;---Default settings.
-    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','themis'])
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'themis'])
     if n_elements(remote_root) eq 0 then remote_root = 'http://themis.ssl.berkeley.edu/data/themis'
     if n_elements(version) eq 0 then version = 'v[0-9]{2}'
     if n_elements(index_file) eq 0 then index_file = default_index_file()

@@ -6,7 +6,7 @@
 function default_local_root, disk
 
     if n_elements(disk) eq 0 then begin
-        disk = 'Research'
+        disk = 'data'
         if susrhost() eq 'kersten@xwaves7.space.umn.edu' then disk = '/Volumes/UserA/user_volumes/kersten/data_external'
     endif
     

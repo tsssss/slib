@@ -372,7 +372,7 @@ function prepare_files, request=request, errmsg=errmsg, $
 end
 
 probe = 'c'
-local_root = join_path([default_local_root(),'data','swarm'])
+local_root = join_path([default_local_root(),'swarm'])
 remote_root = 'ftp://swarm0555:othonwoo01@swarm-diss.eo.esa.int'
 version = '.*'
 local_base = 'SW_OPER_MAGC_LR_1B_%Y%m%dT.*_%Y%m%dT.*_'+version+'.CDF'

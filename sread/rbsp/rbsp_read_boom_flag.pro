@@ -18,7 +18,7 @@
 
 pro rbsp_read_boom_flag_gen_file, date, probe=probe, filename=data_file, errmsg=errmsg, local_root=local_root
 ;---Internal, do not check inputs.
-    local_root = join_path([default_local_root(),'data','rbsp'])
+    local_root = join_path([default_local_root(),'rbsp'])
     rbspx = 'rbsp'+probe
 
 ;---Load Vsvy.
@@ -300,7 +300,7 @@ pro rbsp_read_boom_flag, time, id=datatype, probe=probe, $
         errmsg = handle_error('invalid probe ...')
         return
     endif
-    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','rbsp'])
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'rbsp'])
     if n_elements(remote_root) eq 0 then remote_root = join_path([rbsp_efw_phasef_get_server()])
     if n_elements(version) eq 0 then version = 'v01'
 

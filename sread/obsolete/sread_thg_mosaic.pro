@@ -4,7 +4,7 @@
 ;   This version is for batch reading and saving, default is half.
 ;   Source: http://themis.ssl.berkeley.edu/data/themis.
 ;   tr0, in, double/string, req. Set the time.
-;       For double, it's the unix time or UTC. For string, it's the 
+;       For double, it's the unix time or UTC. For string, it's the
 ;       formatted string accepted by stoepoch, e.g., 'YYYY-MM-DD/hh:mm'.
 ;
 ; minlat, strongly suggest to ignore or set to 50 (deg).
@@ -24,7 +24,7 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
     plot = plot, save = save, ofn = fn
 
     compile_opt idl2
-    
+
 
     ; emission height and min geomagnetic latitude.
     if n_elements(height) eq 0 then height = 110D   ; km in altitude.
@@ -48,7 +48,7 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
         if type eq 'ast' then minelev = -10
         if type eq 'asf' then minelev = 5
     endif
-    
+
     ; dark threshold.
     if n_elements(dark) eq 0 then dark = keyword_set(weight)? 5d: 50d
 
@@ -65,7 +65,7 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
         nsite = n_elements(site0)
     endif
     sites = site0
-    
+
     ; exclude sites.
     for i = 0, n_elements(exclude)-1 do begin
         idx = where(sites eq exclude[i], tmp)
@@ -134,7 +134,7 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
     cmlon = cmlon[idx] & cmidn = cmidn[idx]
     idx = where(finite(cmidn))
     cmlon = cmlon[idx] & cmidn = cmidn[idx]
-    
+
 
     ; glat and glon of the sites' center, used to tell moon position.
     ; mlat, mlon for 'asf', to convert to mltimg.
@@ -149,23 +149,23 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
     if type eq 'asf' then begin
         vars = ['elev','mlat','mlon','multiply']
         asc = sread_thg_asc(0, sites, type = type, vars = vars)
-        
+
         elevs = fltarr(nsite,npx,npx)
         mults = fltarr(nsite,npx,npx)
         mlats = fltarr(nsite,npx+1,npx+1)
         mlons = fltarr(nsite,npx+1,npx+1)
         hgtidx = where([90,110,150] eq height)
-        
+
         for j = 0, nsite-1 do begin
             elev = reform(asc.(j).elev)
             mlat = reform(asc.(j).mlat)
             mlon = reform(asc.(j).mlon)
-                        
+
             mlon = reform(mlon[hgtidx,*,*],[npx+1,npx+1])
             mlat = reform(mlat[hgtidx,*,*],[npx+1,npx+1])
             mult = asc.(j).multiply
             if keyword_set(weight) then mult = sin(elev*!dtor)
-            
+
             elevs[j,*,*] = elev
             mults[j,*,*] = mult
             mlats[j,*,*] = mlat
@@ -174,19 +174,19 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
     endif else begin
         vars = ['elev','binr','binc']
         asc = sread_thg_asc(0, sites, type = type, vars = vars)
-        
+
         elevs = fltarr(nsite,npx*npx)
         mults = fltarr(nsite,npx*npx)
         binrs = fltarr(nsite,npx*npx)
         bincs = fltarr(nsite,npx*npx)
-        
+
         for j = 0, nsite-1 do begin
             elevs[j,*] = asc.(j).elev
             mults[j,*] = 1
             binrs[j,*] = asc.(j).binr
             bincs[j,*] = asc.(j).binc
         endfor
-        
+
         nmlon = 300
         nmlat = 120
     endelse
@@ -197,7 +197,7 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
     fnets = stoepoch(fnuts,'unix')
     nfnet = n_elements(fnets)
     fnetidx = 0
-    
+
     asifns = strarr(nsite)
     cdfids = lonarr(nsite)
     utptrs = ptrarr(nsite,/allocate_heap)
@@ -214,7 +214,7 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
 
     for i = 0, nrec-1 do begin
         print, 'processing '+sfmepoch(ets[i])+' ...'
-        
+
         ; check if need to renew filenames, cdfids, uts.
         if i eq 0 then loadflag = 1 else begin
             tfnet = fnets[fnetidx]
@@ -225,12 +225,12 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
             endif
         endelse
 
-        
+
         ; open cdfids, read the times at each site.
         if loadflag eq 1 then begin
             ; close old files.
             for j = 0, nsite-1 do if asifns[j] ne '' then cdf_close, cdfids[j]
-            
+
             ; prepare asifns, cdfids.
             for j = 0, nsite-1 do begin
                 ; test moon.
@@ -242,13 +242,13 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
                         continue
                     endif
                 endif
-                
+
                 ; download or load file.
                 basefn = file_basename(locfns[j,fnetidx])
                 locpath = file_dirname(locfns[j,fnetidx])
                 rempath = file_dirname(remfns[j,fnetidx])
                 asifns[j] = sgetfile(basefn, locpath, rempath)
-                
+
                 ; read the times.
                 if asifns[j] eq '' then continue
                 cdfids[j] = cdf_open(asifns[j])
@@ -263,7 +263,6 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
 
         ; midn mlon in deg for current time.
         midn = interpol(cmlon, cmidn, (uts[i]/86400d mod 1)*24, /nan)
-        midn = 0
         midns[i] = midn
 
         if type eq 'asf' then begin
@@ -273,19 +272,19 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
             imf = dblarr(nmlon,nmlat)
             imc = dblarr(nmlon,nmlat)
         endelse
-        
+
         ; loop through each site.
         for j = 0, nsite-1 do begin
             if asifns[j] eq '' then continue
-            
+
             ; find the record to read.
             rec = where(*utptrs[j] eq uts[i], cnt)
             if cnt eq 0 then continue     ; no data for current time.
-            
+
             ; read raw image.
             tvar = 'thg_'+type+'_'+sites[j]
             cdf_varget, cdfids[j], tvar, img, rec_start = rec, /zvariable
-            
+
             ; prelim image processing.
             img = double(img)
             ; remove edge.
@@ -301,10 +300,10 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
             ; apply true weight.
             img *= mults[j,*,*]
             mult = mults[j,*,*] & mult = mult[*]
-            
+
 ;            ; tmp.
 ;            if sites[j] eq 'pina' or sites[j] eq 'gill' then img *= 0.5
-            
+
             ; convert to mlt image.
             if type eq 'asf' then begin
                 ; convert lat/lon corner to x/y corner grid.
@@ -341,36 +340,36 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
             endelse
         endfor
         imf = imf/imc
-        
+
         if type eq 'ast' then begin
             lat = smkarthm(50,0.25,nmlat,'x0')
             lon = smkarthm(-130,0.6,nmlon,'x0')
             r = (90-lat)/(90-minlat) ## (fltarr(nmlon)+1)
             t = (lon-(90+midn))*(!dpi/180) # (fltarr(nmlat)+1)
-            
+
             xc = round(r*cos(t)*(isz*0.5-1))+isz*0.5
             yc = round(r*sin(t)*(isz*0.5-1))+isz*0.5
             imf0 = imf
-            
+
             idx = where(xc ge 0 and xc le isz-1 and yc ge 0 and yc le isz-1)
             xc = xc[idx]
             yc = yc[idx]
             imf0 = imf0[idx]
-            
+
             imf = dblarr(isz,isz)
             imc = dblarr(isz,isz)
-            
+
             for k = 0, n_elements(imf0)-1 do begin
                 imf[xc[k],yc[k]] += imf0[k]
                 imc[xc[k],yc[k]] += 1
             endfor
-            
+
             idx = where(imc ne 0)
             imf[idx] = imf[idx]/imc[idx]
         endif
         if keyword_set(full) then imfs[i,*,*] = imf else imfs[i,*,*] = imf[*,0:ceil(isz*0.5)-1]
     endfor
-    
+
 
     ; shrink data.
     imgsz = size(reform(imfs[0,*,*]), /dimensions)
@@ -396,7 +395,7 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
     endif
     mlat = mlat[pxidx]
     mlt = mlt[pxidx]
-    
+
     ; save data.
     ; uts, mos, cmidns, minlat,  mlt, mlat.
     locroot = shomedir()
@@ -423,7 +422,7 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
     cdf_attput, cdfid, 'FIELDNAM', vname, 'ut'
     cdf_attput, cdfid, 'UNITS', vname, 'sec'
     cdf_attput, cdfid, 'CATDESC', vname, 'unit time in sec'
-    
+
     vname = 'thg_mosaic' & dimvary = 1. & var = transpose(temporary(moss))
     extra = create_struct('cdf_float',1, 'recvary',1, 'zvariable',1, $
         'dimensions',n_elements(pxidx))
@@ -439,7 +438,7 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
     cdf_attput, cdfid, 'DEPEND_3', vname, 'mlt'
     cdf_attput, cdfid, 'DEPEND_4', vname, 'mlat'
     cdf_attput, cdfid, 'CATDESC', vname, 'thg mosaic in mlt/mlat coord'
-    
+
     vname = 'midn' & dimvary = 0 & var = transpose(midns)
     extra = create_struct('cdf_float',1, 'recvary',1, 'zvariable',1, $
         'dimensions',1)
@@ -449,7 +448,7 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
     cdf_attput, cdfid, 'UNITS', vname, 'hr'
     cdf_attput, cdfid, 'DEPEND_0', vname, 'time'
     cdf_attput, cdfid, 'CATDESC', vname, 'mlt of midnight'
-    
+
     vname = 'mlt' & dimvary = 1 & var = mlt
     extra = create_struct('cdf_float',1, 'recvary',0, 'zvariable',1, $
         'dimensions',size(var,/dimensions))
@@ -458,7 +457,7 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
     cdf_attput, cdfid, 'FIELDNAM', vname, 'mlt'
     cdf_attput, cdfid, 'UNITS', vname, 'hr'
     cdf_attput, cdfid, 'CATDESC', vname, 'pixel mlt'
-    
+
     vname = 'mlat' & dimvary = 1 & var = mlat
     extra = create_struct('cdf_float',1, 'recvary',0, 'zvariable',1, $
         'dimensions',size(var,/dimensions))
@@ -467,7 +466,7 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
     cdf_attput, cdfid, 'FIELDNAM', vname, 'mlat'
     cdf_attput, cdfid, 'UNITS', vname, 'deg'
     cdf_attput, cdfid, 'CATDESC', vname, 'pixel mlat'
-    
+
     vname = 'image_size' & dimvary = 1 & var = imgsz
     extra = create_struct('cdf_int4',1, 'recvary',0, 'zvariable',1, $
         'dimensions',size(var,/dimensions))
@@ -475,7 +474,7 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
     cdf_varput, cdfid, vname, var
     cdf_attput, cdfid, 'FIELDNAM', vname, 'image size in pixel'
     cdf_attput, cdfid, 'CATDESC', vname, '[xsize,ysize]'
-    
+
     vname = 'pixel_index' & dimvary = [1,1] & var = pxidx
     extra = create_struct('cdf_uint4',1, 'recvary',0, 'zvariable',1, $
         'dimensions',size(var,/dimensions))
@@ -483,7 +482,7 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
     cdf_varput, cdfid, vname, var
     cdf_attput, cdfid, 'FIELDNAM', vname, 'pixel index'
     cdf_attput, cdfid, 'CATDESC', vname, 'index of non-zero pixels'
-    
+
     vname = 'minlat' & dimvary = 0 & var = minlat
     extra = create_struct('cdf_float',1, 'recvary',0, 'zvariable',1, $
         'dimensions',1)
@@ -492,9 +491,9 @@ function sread_thg_mosaic, tr0, site0, exclude = exclude, $
     cdf_attput, cdfid, 'FIELDNAM', vname, 'minlat'
     cdf_attput, cdfid, 'UNITS', vname, 'deg'
     cdf_attput, cdfid, 'CATDESC', vname, 'min latitude in deg'
-    
+
     cdf_close, cdfid
-    
+
     return, fn
 end
 

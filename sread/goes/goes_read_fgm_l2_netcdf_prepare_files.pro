@@ -12,7 +12,7 @@ function goes_read_fgm_l2_netcdf_prepare_files, time, probe=probe, errmsg=errmsg
     retval = !null
 
 ;---Check inputs.
-    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','goes'])
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'goes'])
     if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/goes'
     if n_elements(version) eq 0 then version = 'v.*'
 

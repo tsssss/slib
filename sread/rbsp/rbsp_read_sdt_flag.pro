@@ -18,7 +18,7 @@
 
 pro rbsp_read_sdt_flag_gen_file, time, probe=probe, filename=data_file, errmsg=errmsg, local_root=local_root
 ;---Internal, do not check inputs.
-    local_root = join_path([default_local_root(),'data','rbsp'])
+    local_root = join_path([default_local_root(),'rbsp'])
     remote_root = 'http://themis.ssl.berkeley.edu/data/rbsp'
     rbspx = 'rbsp'+probe
     base_name = rbspx+'_l1_hsk_beb_analog_%Y%m%d_v.*.cdf'

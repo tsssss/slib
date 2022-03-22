@@ -14,7 +14,7 @@ pro arase_read_ssc, time, id=datatype, $
 
 ;---Check inputs.
     sync_threshold = 1e7    ; sec of 4 months.
-    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','arase'])
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'arase'])
     if n_elements(remote_root) eq 0 then remote_root = 'https://ergsc.isee.nagoya-u.ac.jp/data/ergsc/satellite/erg'
     if n_elements(version) eq 0 then version = 'v[0-9.]{2}'
     if n_elements(coord) eq 0 then coord = 'gsm'

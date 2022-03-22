@@ -6,7 +6,7 @@
 ; r_var. A string of an orbit variable.
 ; par. Default is 2, input parameter for Txx models.
 ; h0. The altitude of lower boundary. Default is 100 km.
-; direction. The tracing direction. =1 for parallel to B, 1 for anti-parallel.
+; direction. The tracing direction. -1 for parallel to B, 1 for anti-parallel.
 ;   The default behaviour is to use z_gsm to tell the hemisphere, and trace to
 ;   the ionosphere.
 ; prefix. A string to be added before variables, e.g., 'rbspb_'. Default

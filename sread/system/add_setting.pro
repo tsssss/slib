@@ -9,13 +9,6 @@
 pro add_setting, var, settings, smart=smart
     
     if tnames(var) eq '' then return
-    if n_elements(settings) eq 0 then return
-    
-    if size(settings, /type) eq 8 then settings = dictionary(settings)
-    foreach key, settings.keys() do options, var, key, settings[key]
-;    keys = strlowcase(tag_names(settings))
-;    for i=0, n_elements(keys)-1 do options, var, keys[i], settings.(i)
-        
     ; style settings.
     options, var, 'ynozero', 1
     options, var, 'labflag', -1
@@ -23,11 +16,39 @@ pro add_setting, var, settings, smart=smart
     options, var, 'xticklen', -0.02
     options, var, 'yticklen', -0.01
     
+    if n_elements(settings) eq 0 then return
+    
+    if size(settings, /type) eq 8 then settings = dictionary(settings)
+    foreach key, settings.keys() do options, var, key, settings[key]
+;    keys = strlowcase(tag_names(settings))
+;    for i=0, n_elements(keys)-1 do options, var, keys[i], settings.(i)
+
+    
     ; do smart things.
     if not keyword_set(smart) then return
 
     ; use display type to init labels.
     dtype = get_setting(var, 'display_type', exist)
+    ; Try to guess
+    if ~exist then begin
+        get_data, var, times, data, val
+        ntime = n_elements(times)
+        dims = size(data, dimensions=1)
+        ndim = size(data, n_dimensions=1)
+        nval = n_elements(val)
+        if ndim eq 1 and ntime eq dims[0] then begin
+            dtype = 'scalar'
+        endif else if ndim gt 2 then begin
+            errmsg = handle_error('Unknown display type ...')
+            return
+        endif else if dims[1] eq 3 then begin
+            dtype = 'vector'
+        endif else if dims[1] eq nval then begin
+            dtype = 'spec'
+        endif else if product(dims) eq nval then begin
+            dtype = 'spec'
+        endif
+    endif
     if exist then begin
         case dtype of
             ; data is just a work-around to saved data, usually high-dimension
@@ -87,6 +108,7 @@ pro add_setting, var, settings, smart=smart
                 tname = get_setting(var, 'short_name')
                 coord = get_setting(var, 'coord')
                 clabels = get_setting(var, 'coord_labels')
+                if n_elements(clabels) ne 3 then clabels = constant('xyz')
                 options, var, 'labels', coord+' '+tname+'!D'+clabels+'!N'
                 
                 ; use unit to init ytitle.

@@ -335,7 +335,9 @@ test = 0
         pre0 = 'thg_'+site+'_asf_'
         get_data, pre0+'mlon_image', times, mlonimgs
         ntime = n_elements(times)
-        themis_read_asi_treat_raw_count, pre0+'mlon_image', to=pre0+'mlon_image_norm'
+;        themis_read_asi_normalize_count, pre0+'mlon_image', to=pre0+'mlon_image_norm'
+;        themis_read_asi_treat_raw_count, pre0+'mlon_image', to=pre0+'mlon_image_norm'
+        themis_asi_cal_brightness, pre0+'mlon_image', newname=pre0+'mlon_image_norm'
     endforeach
 
 ;---Get the meta data for merging.
@@ -359,25 +361,65 @@ test = 0
 
 
 ;---Get the mosaic image.
-    cadence = 3d
-    times = (n_elements(time) eq 1)? time: make_bins(time,cadence)
+    time_step = 3d
+    times = (n_elements(time) eq 1)? time: make_bins(time,time_step)
     ntime = n_elements(times)
     mos_images = fltarr([ntime,image_size])
-    for ii=0, ntime-1 do begin
-        lprmsg, time_string(times[ii])+' ...'
-        mos_image = fltarr(image_size)
-        ; Fill in the pixels by sites.
-        for jj=0, nsite-1 do begin
-            pre0 = 'thg_'+sites[jj]+'_asf_'
-            site_image = get_var_data(pre0+'mlon_image_norm', at=times[ii])
-            mos_image[site_is[jj,0]:site_is[jj,1], $
-                site_js[jj,0]:site_js[jj,1]] += $
-                site_image*site_metadata[jj].weight_2d
-        endfor
-        mos_images[ii,*,*] = mos_image
-    endfor
 
-    
+    foreach site, sites, jj do begin
+        lprmsg, 'Processing '+site+' ...'
+        prefix = 'thg_'+site+'_asf_'
+
+        ; The location where current sites map to the mosaic.
+        site_i0 = site_is[jj,0]
+        site_i1 = site_is[jj,1]
+        site_j0 = site_js[jj,0]
+        site_j1 = site_js[jj,1]
+        weight_2d = site_metadata[jj].weight_2d
+
+        get_data, prefix+'mlon_image_norm', uts, imgs
+        time_index = (uts-times[0])/time_step
+        index = lazy_where(time_index, '[)', [0,time], count=ntime_index)
+        if ntime_index eq 0 then continue
+        time_index = time_index[index]
+        uts = uts[index]
+        imgs = imgs[index,*,*]
+        foreach ii, time_index, site_ii do begin
+            mos_image = fltarr(image_size)
+            site_image = reform(imgs[site_ii,*,*])
+            mos_images[ii,site_i0:site_i1,site_j0:site_j1] += site_image*weight_2d
+        endforeach
+    endforeach
+
+
+
+
+;    site_image_list = list()
+;    for jj=0,nsite-1 do begin
+;        pre0 = 'thg_'+sites[jj]+'_asf_'
+;        imgs = get_var_data(pre0+'mlon_image_norm', in=minmax(times), times=times)
+;        nimg = n_elements(imgs[*,0,0])
+;        site_image_list.add, imgs
+;    endfor
+;    ntime = n_elements(times)
+;    mos_images = fltarr([ntime,image_size])
+;
+;    for ii=0, ntime-1 do begin
+;        lprmsg, time_string(times[ii])+' ...'
+;        mos_image = fltarr(image_size)
+;        ; Fill in the pixels by sites.
+;        for jj=0, nsite-1 do begin
+;            pre0 = 'thg_'+sites[jj]+'_asf_'
+;;            site_image = get_var_data(pre0+'mlon_image_norm', at=times[ii])
+;            site_image = reform((site_image_list[jj])[ii,*,*])
+;            mos_image[site_is[jj,0]:site_is[jj,1], $
+;                site_js[jj,0]:site_js[jj,1]] += $
+;                site_image*site_metadata[jj].weight_2d
+;        endfor
+;        mos_images[ii,*,*] = mos_image
+;    endfor
+
+
 ;;---Crop to the wanted mlon/mlat range.
 ;    if n_elements(mlon_range) eq 2 then begin
 ;        x_range = round(mlon_range/mos_bin_size[0])
@@ -386,7 +428,7 @@ test = 0
 ;            mos_images = mos_images[*,index,*]
 ;            mos_xbins = mos_xbins[index]
 ;        endif
-;    endif else 
+;    endif else
 ;    if n_elements(mlat_range) eq 2 then begin
 ;        y_range = round(mlat_range/mos_bin_size[1])
 ;        index = where(mos_ybins ge y_range[0] and mos_ybins le y_range[1], count)
@@ -409,7 +451,7 @@ test = 0
         mlat_bins: mos_mlats, $
         mlon_range: mlon_range, $
         mlat_range: mlat_range }
-
+test = 0
     if keyword_set(test) then begin
         image_size = size(reform(mos_images[0,*,*]),/dimensions)
         window, 0, xsize=image_size[0], ysize=image_size[1]
@@ -418,7 +460,8 @@ test = 0
         for ii=0, ntime-1 do begin
             mos_image = reform(mos_images[ii,*,*])
             tv, bytscl(mos_image, max=700, top=254)
-            wait, 0.02
+            xyouts, 0,0,normal=1, time_string(times[ii]), color=170
+            wait, 0.05
         endfor
         stop
     endif

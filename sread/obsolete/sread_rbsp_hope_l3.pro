@@ -37,7 +37,7 @@ function sread_rbsp_hope_l3, tr0, probes = probe0, filename = fn0, $
     sep = path_sep()
     if n_elements(locroot) eq 0 then locroot = spreproot('rbsp')
     if n_elements(remroot) eq 0 then $
-        remroot = 'ftp://cdaweb.gsfc.nasa.gov/pub/data/rbsp'
+        remroot = 'https://cdaweb.gsfc.nasa.gov/pub/data/rbsp'
 
 
     ; **** prepare file names.

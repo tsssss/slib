@@ -28,7 +28,7 @@ pro themis_read_ssc, time, id=datatype, probe=probe, $
 ;---Check inputs.
     sync_threshold = 86400d*120
     if n_elements(probe) eq 0 then probe = 'x'
-    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','themis'])
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'themis'])
     if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.sci.gsfc.nasa.gov/pub/data/themis'
     if n_elements(version) eq 0 then version = 'v[0-9]{2}'
     if n_elements(coord) eq 0 then coord = 'gsm'

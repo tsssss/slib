@@ -33,7 +33,7 @@ pro rbsp_read_emfisis, time, id=datatype, probe=probe, $
 ;---Check inputs.
     sync_threshold = 86400d*120
     if n_elements(probe) eq 0 then probe = 'x'
-    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','rbsp'])
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'rbsp'])
     if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/rbsp'
     if n_elements(version) eq 0 then version = 'v[0-9.]*'
     if n_elements(resolution) eq 0 then resolution = '4sec'

@@ -102,7 +102,7 @@ pro rbsp_load_spice_kernel, reload=reload, $
     rbsp_spice_init
 
     if n_elements(remote_root) eq 0 then remote_root = 'http://themis.ssl.berkeley.edu/data/rbsp/'
-    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','rbsp'])
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'rbsp'])
 
     ; Load the meta kernel.
     probes = ['a','b']

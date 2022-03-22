@@ -6,7 +6,7 @@
 pro goes_read_kev_proton, time_range, probe=probe, errmsg=errmsg, energy=energy, pitch_angle=pitch_angle
 
     goes_init
-    !goes.local_data_dir = join_path([default_local_root(),'data','goes'])
+    !goes.local_data_dir = join_path([default_local_root(),'goes'])
     goes_lib
 
     pre0 = 'g'+probe+'_'

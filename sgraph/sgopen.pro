@@ -18,8 +18,9 @@
 ;   2016-03-21, Sheng Tian, document.
 ;-
 
-pro sgopen, id0, xsize = xsize, ysize = ysize, cm = cm, inch = inch, $
-    magnify = magc0, background = bgc0, xchsz=xchsz,ychsz=ychsz, _extra = extra
+pro sgopen, id0, size=fig_size, xsize=xsize, ysize=ysize, cm=cm, inch=inch, $
+    magnify=magc0, background=bgc0, $
+    xchsz=xchsz, ychsz=ychsz, hsize=hsize, _extra=extra
     
     compile_opt idl2
     
@@ -45,6 +46,10 @@ pro sgopen, id0, xsize = xsize, ysize = ysize, cm = cm, inch = inch, $
     ; canvas size, in double, in pixel.
     if n_elements(xsize) eq 0 then xsz = !d.x_size else xsz = double(xsize)
     if n_elements(ysize) eq 0 then ysz = !d.y_size else ysz = double(ysize)
+    if n_elements(fig_size) eq 2 then begin
+        xsz = fig_size[0]
+        ysz = fig_size[1]
+    endif
     
     
     ; convert to pixel from cm or inch.
@@ -186,6 +191,9 @@ pro sgopen, id0, xsize = xsize, ysize = ysize, cm = cm, inch = inch, $
     
     xchsz = double(!d.x_ch_size)/!d.x_size
     ychsz = double(!d.y_ch_size)/!d.y_size
+    
+    hsize0 = 6
+    hsize = hsize0*mode.char[0]/wmode.char[0]
 
 end
 

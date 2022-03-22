@@ -24,9 +24,9 @@ pro polar_read_cdaweb_hydra, time, id=datatype, probe=probe, $
 
 
 ;---Check inputs.
-    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'data','polar','hydra'])
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'polar','hydra'])
     if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/polar/hydra'
-    if n_elements(version) eq 0 then version = '.*'
+    if n_elements(version) eq 0 then version = 'v[0-9]{2}'
 
 
 ;---Init settings.

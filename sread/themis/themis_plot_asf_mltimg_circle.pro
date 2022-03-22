@@ -1,18 +1,19 @@
 ;+
-; Generate a movie for asf on mlt/mlat. The circle version.
+; Plot asf on mlt/mlat. The circle version.
+; zrange=. The zrange (color) for auroral images.
 ;-
 
-pro themis_gen_asf_mltimg_movie_circle, time_range, filename=movie_file, $
-    mlt_range=mlt_range, mlat_range=mlat_range, test=test, errmsg=errmsg, _extra=ex
-
+pro themis_plot_asf_mltimg_circle, time_range, sites=sites, $
+    mlt_range=mlt_range, zrange=zrange
+    
+    
+test = 1
 
     errmsg = ''
-    if n_elements(movie_file) eq 0 then return
-    if n_elements(time_range) ne 2 then return
 
     mltimg_var = 'thg_mltimg'
     if check_if_update(mltimg_var,time_range) then $
-        themis_read_mltimg, time_range, _extra=ex
+        themis_read_mltimg, time_range, sites=sites, _extra=ex
     get_data, mltimg_var, times, mltimg
     mlt_bins = get_setting(mltimg_var, 'mlt_bins')
     mlat_bins = get_setting(mltimg_var, 'mlat_bins')
@@ -83,8 +84,8 @@ pro themis_gen_asf_mltimg_movie_circle, time_range, filename=movie_file, $
     cbpos = tpos & cbpos[[0,2]] = tpos[2]+xchsz*[1,2]
     reverse_ct = 0
     ct = 57 ; blue.
-    zrange = [0,700]
-    ztitle = 'Photon Count (#)'
+    if n_elements(zrange) eq 0 then zrange = [0,300]
+    ztitle = 'Norm. Count (#)'
 
     xtickv0 = [0.,6,12,18]
     xtickv = xtickv0/24*2*!dpi
@@ -156,25 +157,13 @@ pro themis_gen_asf_mltimg_movie_circle, time_range, filename=movie_file, $
         fig_files[time_id] = fig_file
     endforeach
 
-;---Gen movie.
-    spic2movie, fig_files, movie_file
-    foreach fig_file, fig_files do file_delete, fig_file
-    file_delete, fig_dir
-
 end
 
-test_file = join_path([homedir(),'test_asf.mp4'])
+time_range = time_double(['2007-09-23/09:24','2007-09-23/09:25'])
+sites = ['kian','inuv','fsmi','tpas','gill']
+
 time_range = time_double(['2016-10-13/12:00','2016-10-13/13:00'])
-sites = ['mcgr','gako','whit']
-min_elevs = [5,5,5]
-mlat_range = [55,70]
-mlon_range = !null
-merge_method = 'merge_elev'
+sites = ['gako']
 
-site_infos = themis_read_mlonimg_default_site_info(sites)
-foreach min_elev, min_elevs, ii do site_infos[ii].min_elev = min_elev
-
-themis_gen_asf_mltimg_movie_circle, time_range, sites=sites, site_infos=site_infos, $
-    mlon_range=mlon_range, mlat_range=mlat_range, merge_method=merge_method, test=0, $
-    filename=test_file
+themis_plot_asf_mltimg_circle, time_range, sites=sites
 end

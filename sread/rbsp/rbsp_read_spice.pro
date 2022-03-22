@@ -198,7 +198,7 @@ stop
 
 probes = ['a']
 secofday = constant('secofday')
-local_root = join_path([default_local_root(),'data','rbsp'])
+local_root = join_path([default_local_root(),'rbsp'])
 foreach probe, probes do begin
     rbspx = 'rbsp'+probe
     local_path = [local_root,rbspx,'spice_product_v08','YYYY']
