@@ -1,11 +1,13 @@
 ;+
 ; Convert a vector from HOR to GEO.
+; HOR is [azim,elev,dis] in spherical coord and can be converted to xyz.
+; HOR's origin is specified by glat0 and glon0, not from the earth's center.
 ;
 ; vec0. An array in [3] or [n,3]. In GSM, in any unit.
 ; times. An array of UT sec, in [n].
 ; glat0. Required input. An array in [n].
 ; glon0. Required input. An array in [n].
-; degrre. A boolean sets glat/glon in degree.
+; degree. A boolean sets glat/glon in degree.
 ;-
 
 function geo2hor, vec0, glat0, glon0, degree=degree

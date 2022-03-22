@@ -1,5 +1,7 @@
 ;+
 ; Convert a vector from HOR to GEO.
+; HOR is [azim,elev,dis] in spherical coord and can be converted to xyz.
+; HOR's origin is specified by glat0 and glon0, not from the earth's center.
 ;
 ; vec0. An array in [3] or [n,3]. In GSM, in any unit.
 ; times. An array of UT sec, in [n].
