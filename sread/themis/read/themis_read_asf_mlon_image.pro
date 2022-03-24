@@ -65,6 +65,7 @@ pro themis_read_asf_mlon_image, input_time_range, sites=sites, min_elev=min_elev
     common_times = make_bins(time_range+[0,-1]*time_step, time_step)
     ntime = n_elements(common_times)
     mlon_images = fltarr([ntime,image_size])
+    illuminated_pixels = fltarr(image_size)
 
     foreach site, sites do begin
         weight = merge_weight[site]
@@ -92,6 +93,7 @@ pro themis_read_asf_mlon_image, input_time_range, sites=sites, min_elev=min_elev
         
         index = (uts-common_times[0])/time_step
         mlon_images[index,crop_xrange[0]:crop_xrange[1],crop_yrange[0]:crop_yrange[1]] += images
+        illuminated_pixels[crop_xrange[0]:crop_xrange[1],crop_yrange[0]:crop_yrange[1]] += weight_crop
     endforeach
 
     var = 'thg_asf_mlon_image'
@@ -99,6 +101,8 @@ pro themis_read_asf_mlon_image, input_time_range, sites=sites, min_elev=min_elev
     mlon_image_info = mlon_image_info()
     mlon_image_info['display_type'] = 'image'
     mlon_image_info['unit'] = 'Count #'
+    mlon_image_info['min_elev'] = min_elev
+    mlon_image_info['illuminated_pixels'] = illuminated_pixels ne 0
     add_setting, var, smart=1, mlon_image_info
 
 end

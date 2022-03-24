@@ -28,6 +28,21 @@ pro themis_read_asf, input_time_range, site=site, errmsg=errmsg
     if ntime eq 1 then raw_images = reform(raw_images, [1,size(raw_images,/dimensions)])
     raw_images = float(raw_images)  ; It's crucial to cast uint to float.
     image_size = size(reform(raw_images[0,*,*]),dimensions=1)
+    
+    ; Sometimes times are not uniform.
+    time_step = 3
+    common_times = make_bins(minmax(times),time_step, inner=1)
+    ncommon_time = n_elements(common_times)
+    if ncommon_time ne ntime then begin
+        images = fltarr([ncommon_time,image_size])
+        for ii=0,image_size[0]-1 do begin
+            for jj=0,image_size[1]-1 do begin
+                images[*,ii,jj] = interpol(raw_images[*,ii,jj],times, common_times)
+            endfor
+        endfor
+        raw_images = temporary(images)
+        times = temporary(common_times)
+    endif
 
     ; Save the raw image.
     store_data, asf_var, times, raw_images

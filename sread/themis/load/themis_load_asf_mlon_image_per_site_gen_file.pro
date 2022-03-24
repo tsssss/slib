@@ -12,7 +12,7 @@ pro themis_load_asf_mlon_image_per_site_gen_file, time, site=site, filename=file
 
 ;---Load MLon image and calibrate the count.
 ;   Calibration needs a longer time range to be perfect.
-    pad_time = 1800d*0.5
+    pad_time = 5*60
     data_time_range = time_range+[-1,1]*pad_time
     ; Read asf to test data_time_range.
     themis_read_asf, data_time_range, site=site, errmsg=errmsg
@@ -22,20 +22,25 @@ pro themis_load_asf_mlon_image_per_site_gen_file, time, site=site, filename=file
     time_step = 3d
     min_time = min(times)
     max_time = max(times)
-    ; This means data starts in the current hour.
-    if min_time gt time_range[0] then data_time_range = time_range+[-1,2]*pad_time
-    ; This means data ends in the current hour.
-    if max_time lt time_range[1] then data_time_range = time_range+[-2,1]*pad_time
+    if min_time lt time_range[0] and max_time gt time_range[1] then begin
+        ; This means we have a full hour of data.
+    endif else begin
+        ; This means data starts in the current hour.
+        if min_time gt time_range[0] then data_time_range = time_range+[-pad_time,1800d]
+        ; This means data ends in the current hour.
+        if max_time lt time_range[1] then data_time_range = time_range-[1800d,pad_time]
+        ; Reload with the new time range.
+        themis_read_asf, data_time_range, site=site, errmsg=errmsg
+    endelse
     
-    themis_calc_asf_mlon_image_per_site, data_time_range, site=site, errmsg=errmsg
+    ; Calibrate brightness before mapping works better.
+    asf_cal_var = asf_var+'_cal'
+    themis_asi_cal_brightness, asf_var, newname=asf_cal_var
+    themis_calc_asf_mlon_image_per_site, asf_cal_var, errmsg=errmsg
     if errmsg ne '' then return
+
     mlon_image_var = 'thg_'+site+'_mlon_image'
-    get_data, mlon_image_var, times
-    cal_mlon_image_var = mlon_image_var+'_norm'
-    themis_asi_cal_brightness, mlon_image_var, newname=cal_mlon_image_var
-
-
-    get_data, cal_mlon_image_var, times, mlon_images, limits=lim
+    get_data, mlon_image_var, times, mlon_images, limits=lim
     index = lazy_where(times, '[)', time_range, count=ntime)
     if ntime eq 0 then begin
         errmsg = 'Inconsistency ...'

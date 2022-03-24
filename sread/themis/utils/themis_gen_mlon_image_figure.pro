@@ -28,25 +28,27 @@ function themis_gen_mlon_image_figure, mlon_image_var, $
 ;---Get the cropping solution.
     if n_elements(crop_method) eq 0 then crop_method = 'auto'
     if crop_method eq 'auto' then begin
-        mlon_range = [-100d,20]
-        mlat_range = [50d,90]
-;        flags = reform(lim.pixel_mlon)
-;        index = where(flags ne 0, count)
-;        if count eq 0 then begin
-;            errmsg = 'No illuminated pixels ...'
-;            return, ''
-;        endif
-;        mlon_range = minmax(lim.pixel_mlon[index])
-;        mlat_range = minmax(lim.pixel_mlat[index])
-;        mlon_range = [floor(mlon_range[0]),ceil(mlon_range[1])]
-;        mlon_step = 5d
-;        mlon_range = [floor(mlon_range[0]/mlon_step)*mlon_step,ceil(mlon_range[1]/mlon_step)*mlon_step]
+;        mlon_range = [-100d,20]
+;        mlat_range = [50d,90]
+        index = where(lim.illuminated_pixels ne 0)
+        mlon_range = minmax(lim.pixel_mlon[index])
+        mlat_range = minmax(lim.pixel_mlat[index])
+        mlon_range = [floor(mlon_range[0]),ceil(mlon_range[1])]
+        mlon_step = 5d
+        mlon_range = [floor(mlon_range[0]/mlon_step)*mlon_step,ceil(mlon_range[1]/mlon_step)*mlon_step]
     endif
     if n_elements(mlat_range0) eq 2 then mlat_range = mlat_range0
     if n_elements(mlon_range0) eq 2 then mlon_range = mlon_range0
 
+;---Rotate mlon image to be symmetric around -y.
+    mlon_adjust = -mean(mlon_range)
+
     pixel_mlon = lim.pixel_mlon
     pixel_mlat = lim.pixel_mlat
+    pixel_mlon = rot(pixel_mlon, mlon_adjust)
+    pixel_mlat = rot(pixel_mlat, mlon_adjust)
+    for ii=0,ntime-1 do mlon_images[ii,*,*] = rot(reform(mlon_images[ii,*,*]), mlon_adjust)
+
     index = where(pixel_mlon ge mlon_range[0] and pixel_mlon le mlon_range[1] $
         and pixel_mlat ge mlat_range[0] and pixel_mlat le mlat_range[1], complement=index_outside)
     
@@ -62,7 +64,7 @@ function themis_gen_mlon_image_figure, mlon_image_var, $
     mlat_step = 10d
     mlat_tickv = make_bins(mlat_range, mlat_step, inner=1)
     rr_tickv = (lim.mlat_range[1]-mlat_tickv)/(lim.mlat_range[1]-lim.mlat_range[0])
-    tt_range = (mlon_range)*constant('rad')
+    tt_range = (mlon_range-mlon_adjust)*constant('rad')
     rr_range = (lim.mlat_range[1]-mlat_range)/(lim.mlat_range[1]-lim.mlat_range[0])
     nang = round(total(tt_range*[-1,1])*constant('deg')/360*60)>20
     angs = smkarthm(tt_range[0],tt_range[1],nang,'n')
@@ -121,6 +123,7 @@ function themis_gen_mlon_image_figure, mlon_image_var, $
         
         ; Draw ticks and tickname.
         foreach tt, tt_tickv, ii do begin
+            tt -= mlon_adjust*constant('rad')
             tx = rr_range*cos(tt)
             ty = rr_range*sin(tt)
             oplot, tx,ty, linestyle=tick_linestyle, color=tick_color

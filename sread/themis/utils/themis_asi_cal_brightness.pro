@@ -2,12 +2,13 @@
 ; Calibrate the background count for given asf image.
 ;-
 
-function calc_baseline, asi_raw, width
+function calc_baseline, asi_raw, window, times
 
-    ; Truncate data into sectors of the wanted width
+    ; Truncate data into sectors of the wanted window
     nframe = n_elements(asi_raw)
-    nx = floor(nframe/width)
-    sec_pos = findgen(nx)/(nx-1)*(nframe-1)
+    sec_times = make_bins(minmax(times), window, inner=1)
+    time_step = 3
+    sec_pos = (sec_times-times[0])/time_step
     nsec = n_elements(sec_pos)-1
     frames = dindgen(nframe)
 
@@ -19,25 +20,38 @@ function calc_baseline, asi_raw, width
         ;xxs[kk] = sec_pos[kk]+index  ; This causes weird result.
         xxs[kk] = (sec_pos[kk]+sec_pos[kk+1])*0.5
     endfor
-    ; Add sample points at the beginning and end of the raw data.
-    tx = 0
-    ty = min([yys[tx],asi_raw[tx]])
-    xxs = [tx,xxs]
+;    ; Add sample points at the beginning and end of the raw data.
+;    tx = 0
+;    ty = min([yys[tx],asi_raw[tx]])
+;    xxs = [tx,xxs]
+;    yys = [ty,yys]
+;    tx = -1
+;    ty = min([yys[tx],asi_raw[tx]])
+;    xxs = [xxs,nsec+tx]
+;    yys = [yys,ty]
+    txs = frames[sec_pos[0]:sec_pos[1]]
+    tys = asi_raw[sec_pos[0]:sec_pos[1]]
+    res = linfit(txs,tys)
+    ty = (yys[0]-(xxs[0]-0)*res[1])>min(tys)
+    xxs = [0,xxs]
     yys = [ty,yys]
-    tx = -1
-    ty = min([yys[tx],asi_raw[tx]])
-    xxs = [xxs,nsec+tx]
+    
+    txs = frames[sec_pos[-2]:sec_pos[-1]]
+    tys = asi_raw[sec_pos[-2]:sec_pos[-1]]
+    res = linfit(txs,tys)
+    ty = (yys[-1]+(nframe-1-xxs[-1])*res[1])>min(tys)
+    xxs = [xxs,nframe-1]
     yys = [yys,ty]
 
     ; Smooth after interpolation to make the background continuous.
-    time_bg = smooth(interpol(yys,xxs,frames), width*0.5, edge_mirror=1)
+    time_bg = smooth(interpol(yys,xxs,frames), window*0.5, edge_mirror=1)
     return, time_bg
 
 end
 
 
-; sample width does not significantly affect algorithm speed.
-pro themis_asi_cal_brightness, asf_var, newname=newname, sample_widths=sample_widths
+; sample window does not significantly affect algorithm speed.
+pro themis_asi_cal_brightness, asf_var, newname=newname, sample_windows=sample_windows
 
     if n_elements(newname) eq 0 then newname = asf_var+'_norm'
     get_data, asf_var, times, imgs_raw, limits=lim
@@ -45,58 +59,76 @@ pro themis_asi_cal_brightness, asf_var, newname=newname, sample_widths=sample_wi
     nframe = n_elements(times)
     max_count = 65535
 
-;---Mapping the count to wanted width.
+;---Mapping the count to wanted window.
     counts = findgen(max_count+1)
-    widths = (1-tanh((counts-1.2e4)/1e4))*0.5*(600-3)+3
-;    widths = (1-tanh((counts-1.5e4)/0.5e4))*0.5*(600-3)+3    
-;    adaptive_widths = widths[imgs_raw]
+    windows = (1-tanh((counts-1.2e4)/1e4))*0.5*(600-3)+3
+
 
 ;---Calculate a smooth background to extract fast moving structures.
-    if n_elements(sample_widths) eq 0 then sample_widths = [600d,250,50,10,1]
-    nsample_width = n_elements(sample_widths)
-    sample_bgs = fltarr(nframe,nsample_width)
+    if n_elements(sample_windows) eq 0 then sample_windows = [600d,50,10,1]*3   ; sec.
+    data_is_short = nframe le sample_windows[1]*2/3
+    nsample_window = n_elements(sample_windows)
+    sample_bgs = fltarr(nframe,nsample_window)
     imgs_bg = imgs_raw
 
-    if nframe le max(sample_widths) then begin
-        for ii=0,image_size[0]-1 do begin
-            for jj=0,image_size[1]-1 do begin
-                bg = imgs_raw[*,ii,jj]
-                imgs_bg[*,ii,jj] = min(bg)
-            endfor
-        endfor
-    endif else begin
-        for ii=0,image_size[0]-1 do begin
-            for jj=0,image_size[1]-1 do begin
-                bg = imgs_raw[*,ii,jj]
-                bg_min = min(bg)
-                if bg_min eq max(bg) then begin
-                    imgs_bg[*,ii,jj] = bg_min
-                    continue
-                endif
+    pixel_elev = lim.pixel_elev
+    edge_indices = where(finite(pixel_elev,nan=1) or pixel_elev le 0, $
+        complement=center_indices, nedge_index)
+    max_sample_window = max(sample_windows)
+    
+    imgs_edge = fltarr([nframe,nedge_index])
+    foreach time, times, time_id do begin
+        timg = reform(imgs_raw[time_id,*,*])
+        imgs_edge[time_id,*] = timg[edge_indices]
+    endforeach
+    bg_edge = median(imgs_edge)
 
-                ; Calculate the backgrounds at sample width.
-                for kk=0,nsample_width-1 do begin
-                    wd = sample_widths[kk]
-                    if wd eq 600 then begin
-                        sample_bgs[*,kk] = bg_min
-                        continue
-                    endif else if wd eq 1 then begin
-                        sample_bgs[*,kk] = bg
-                    endif else begin
-                        sample_bgs[*,kk] = calc_baseline(bg, wd)
-                    endelse
-                endfor
 
-                ; Calculate the background at the wanted width.
-                relative_count = round(sample_bgs[*,-2])<max_count;-sample_bgs[*,0])
-                for kk=0,nframe-1 do begin
-;                   wd = adaptive_widths[kk,ii,jj]*0.5
-                    wd = widths[relative_count[kk]]
-                    imgs_bg[kk,ii,jj] = interpol(sample_bgs[kk,*],sample_widths,wd, quadratic=1)
-                endfor
-            endfor
+    
+;---Process each pixel.
+    foreach center_index, center_indices do begin
+        tmp = array_indices(image_size, dimensions=1, center_index)
+        ii = tmp[0]
+        jj = tmp[1]
+        
+        bg = imgs_raw[*,ii,jj]
+        index = sort(bg)
+        bg_min = min(bg[index[nframe*0.01]])
+        if data_is_short then begin
+            imgs_bg[*,ii,jj] = bg_edge
+            continue
+        endif
+        
+        if bg_min eq max(bg) then begin
+            imgs_bg[*,ii,jj] = bg_edge
+            continue
+        endif
+
+        ; Calculate the backgrounds at sample window.
+        for kk=0,nsample_window-1 do begin
+            wd = sample_windows[kk]
+            if wd eq max_sample_window then begin
+                sample_bgs[*,kk] = bg_edge
+                continue
+            endif else if wd eq 1 then begin
+                sample_bgs[*,kk] = bg
+            endif else begin
+                sample_bgs[*,kk] = calc_baseline(bg, wd, times)
+            endelse
         endfor
-    endelse
+
+        ; Calculate the background at the wanted window.
+        relative_count = round(sample_bgs[*,-2])<max_count;-sample_bgs[*,0])
+        for kk=0,nframe-1 do begin
+            wd = windows[relative_count[kk]]
+            imgs_bg[kk,ii,jj] = interpol(sample_bgs[kk,*],sample_windows,wd, quadratic=0)
+        endfor
+
+;        plot, bg
+;        oplot, imgs_bg[*,ii,jj]
+;        oplot, !x.crange, bg_min+[0,0], linestyle=1
+;        stop
+    endforeach
     
     index = where(imgs_raw eq max_count*0.8, count)
     if count ne 0 then imgs_bg[index] = imgs_raw[index]
@@ -135,15 +167,18 @@ test_time = '2008-01-19/07:04'
 ;
 time_range = time_double(['2013-03-17/07:00','2013-03-17/08:00'])   ; garbrielse's example
 site = 'gako'
+time_range = time_double(['2013-03-17/05:00','2013-03-17/06:00'])   ; garbrielse's example
+site = 'gako'
 
 
-asi_var = 'thg_'+site+'_asf'
-asi_norm_var = asi_var+'_norm'
-if check_if_update(asi_var, time_range) then begin
+
+asf_var = 'thg_'+site+'_asf'
+asi_norm_var = asf_var+'_norm'
+if check_if_update(asf_var, time_range) then begin
     themis_read_asf, time_range, site=site
 endif
 tic
-themis_asi_cal_brightness, asi_var, newname=asi_norm_var
+themis_asi_cal_brightness, asf_var, newname=asi_norm_var
 toc
 get_data, asi_norm_var, times, imgs_cal
 end
