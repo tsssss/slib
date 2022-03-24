@@ -55,5 +55,5 @@ function diskdir, disk, trailing_slash = trailing_slash, errmsg=errmsg
 
 end
 
-print, diskdir('Research')
+print, diskdir('data')
 end
