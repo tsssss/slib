@@ -2,7 +2,7 @@
 ; Read GOES position.
 ;-
 
-pro goes_read_orbit, time, probe=probe, errmsg=errmsg, _extra=ex
+pro goes_read_orbit, time, probe=probe, errmsg=errmsg, coord=coord, _extra=ex
 
     pre0 = 'g'+probe+'_'
     dt = 60.0
@@ -35,12 +35,19 @@ pro goes_read_orbit, time, probe=probe, errmsg=errmsg, _extra=ex
     goes_read_orbit_cdaweb, the_time, probe=probe, coord='gsm', errmsg=errmsg
     if errmsg ne '' then goes_read_ssc, the_time, id='pos', probe=probe, errmsg=errmsg
 
-    var = pre0+'r_gsm'
+    if n_elements(coord) eq 0 then coord = 'gsm'
+    var = pre0+'r_'+coord
+    if coord ne 'gsm' then begin
+        get_data, pre0+'r_gsm', times, r_gsm, limits=lim
+        r_coord = cotran(r_gsm, times, 'gsm2'+coord)
+        store_data, var, times, r_coord, limits=lim
+    endif
+    
     add_setting, var, /smart, {$
         display_type: 'vector', $
         unit: 'Re', $
         short_name: 'R', $
-        coord: 'GSM', $
+        coord: strupcase(coord), $
         coord_labels: constant('xyz')}
 
     uniform_time, var, dt, errmsg=errmsg

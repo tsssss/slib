@@ -7,7 +7,8 @@
 ; Need spedas to run.
 ;-
 ;
-pro goes_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg, _extra=ex
+pro goes_read_bfield, utr0, probe=probe, coord=coord, $
+    resolution=resolution, errmsg=errmsg, _extra=ex
 
     catch, err
     if err ne 0 then begin
@@ -34,13 +35,18 @@ pro goes_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg, _
     endif
     
     pre0 = 'g'+probe+'_'
-    
-    bvar = pre0+'b_gsm'
+    if n_elements(coord) eq 0 then coord = 'gsm'
+    bvar = pre0+'b_'+coord
+    if coord ne 'gsm' then begin
+        get_data, pre0+'b_gsm', times, b_gsm, limits=lim
+        b_coord = cotran(b_gsm, times, 'gsm2'+coord)
+        store_data, bvar, times, b_coord, limits=lim
+    endif
     add_setting, bvar, /smart, {$
         display_type: 'vector', $
         unit: 'nT', $
         short_name: 'B', $
-        coord: 'GSM', $
+        coord: strupcase(coord), $
         coord_labels: ['x','y','z']}
         
     ;uniform_time, bvar, dt
