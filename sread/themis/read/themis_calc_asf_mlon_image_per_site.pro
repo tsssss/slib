@@ -24,6 +24,7 @@ pro themis_calc_asf_mlon_image_per_site, asf_var, errmsg=errmsg, no_crop=no_crop
     site = strlowcase(lim.site)
     mlon_images = mlon_image_map_old2new(asf_images, site=site, crop=crop)
     pixel_elev = mlon_image_map_old2new(lim.pixel_elev, site=site, crop=crop)
+    pixel_azim = mlon_image_map_old2new(lim.pixel_azim, site=site, crop=crop)
 
     mlon_image_info = mlon_image_info()
     image_size = mlon_image_info.image_size
@@ -55,9 +56,13 @@ pro themis_calc_asf_mlon_image_per_site, asf_var, errmsg=errmsg, no_crop=no_crop
         'unit', 'Count #', $
         'image_size', image_size, $ ; image size of the mlon image.
         'image_pos', image_pos, $   ; image's lower left corner in the overall image.
+        'site', lim.site, $
+        'asc_glon', lim.asc_glon, $
+        'asc_glat', lim.asc_glat, $
         'pixel_mlon', pixel_mlon, $
         'pixel_mlat', pixel_mlat, $
         'pixel_elev', pixel_elev, $
+        'pixel_azim', pixel_azim, $
         'pixel_xpos', pixel_xpos, $
         'pixel_ypos', pixel_ypos, $
         'crop_xrange', crop_xrange, $

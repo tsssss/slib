@@ -38,6 +38,12 @@ pro themis_load_asf_mlon_image_per_site_gen_file, time, site=site, filename=file
     themis_asi_cal_brightness, asf_var, newname=asf_cal_var
     themis_calc_asf_mlon_image_per_site, asf_cal_var, errmsg=errmsg
     if errmsg ne '' then return
+    
+;    ; Calibrate brightness after mapping runs much faster.
+;    themis_calc_asf_mlon_image_per_site, asf_var, errmsg=errmsg
+;    mlon_image_var = 'thg_'+site+'_mlon_image'
+;    themis_asi_cal_brightness, mlon_image_var, newname=mlon_image_var
+;    if errmsg ne '' then return
 
     mlon_image_var = 'thg_'+site+'_mlon_image'
     get_data, mlon_image_var, times, mlon_images, limits=lim
@@ -102,6 +108,15 @@ pro themis_load_asf_mlon_image_per_site_gen_file, time, site=site, filename=file
         'var_type', 'metadata', $
         'unit', 'deg', $
         'var_notes', 'elevation of each pixel' )
+    cdf_save_var, var, filename=file, value=val, save_as_one=1
+    cdf_save_setting, vatts, varname=var, filename=file
+    
+    var = 'pixel_azim'
+    val = float(lim.pixel_azim)
+    vatts = dictionary($
+        'var_type', 'metadata', $
+        'unit', 'deg', $
+        'var_notes', 'azimuth of each pixel' )
     cdf_save_var, var, filename=file, value=val, save_as_one=1
     cdf_save_setting, vatts, varname=var, filename=file
 

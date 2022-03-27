@@ -74,7 +74,7 @@ function themis_gen_mlt_image_figure, mlt_image_var, $
     rr_tickv = (lim.mlat_range[1]-mlat_tickv)/(lim.mlat_range[1]-lim.mlat_range[0])
     tt_range = (mlt_range*15-90)*constant('rad')
     rr_range = (lim.mlat_range[1]-mlat_range)/(lim.mlat_range[1]-lim.mlat_range[0])
-    nang = round(tt_range*constant('deg')/360*60)>20
+    nang = round(total(tt_range*[-1,1])*constant('deg')/360*60)>20
     angs = smkarthm(tt_range[0],tt_range[1],nang,'n')
     
 ;test = 1

@@ -2,8 +2,8 @@
 ; Return the moon's elevation at certain glon and glat. 
 ; 
 ; time. Unix time.
-; glon. GLon in rad.
-; glat. GLat in rad.
+; glon. GLon in deg.
+; glat. GLat in deg.
 ; azimuth=. Return azimuth.
 ; degree=. A boolean. Set if glon,glat are in degree and return elev and azimuth in degree.
 ; 
@@ -20,9 +20,7 @@ function moon_elev, time, glon0, glat0, azimuth=azm, degree=degree
 
     ; glat/glon.
     glat = glat0 & glon = glon0
-    if keyword_set(degree) then begin
-        glat = glat*rad & glon = glon*rad
-    endif
+    glat = glat*rad & glon = glon*rad
 
     ; hour angle tau in rad, eqn (3.8).
     gmst = gmst(time, radian=1)     ; gmst in rad.
@@ -36,12 +34,15 @@ function moon_elev, time, glon0, glat0, azimuth=azm, degree=degree
     
     ; convert from earth's center to the required location on earth's surface.
     re = constant('re')
-    r_moon = cv_coord(from_sphere=[tau,dec,dis/re], to_rect=1, double=1)
+    r_moon_sphere = transpose([[tau],[dec],[dis/re]])
+    r_moon = transpose(cv_coord(from_sphere=r_moon_sphere, to_rect=1, double=1))
     r_ground = cv_coord(from_sphere=[glon,glat,1], to_rect=1, double=1)
-    equ = transpose(sunitvec(r_moon-r_ground))
-    hor = equ & srotate, hor,-(!dpi*0.5-glat), 1
-    azm = atan(hor[1],hor[0])+!dpi  ; azimuth
-    alt = asin(hor[2])              ; altitude in rad.
+    for ii=0,2 do r_moon[*,ii] -= r_ground[ii]
+    equ = sunitvec(r_moon)
+    hor = equ
+    srotate, hor,-(!dpi*0.5-glat), 1
+    azm = atan(hor[*,1],hor[*,0])+!dpi  ; azimuth
+    alt = asin(hor[*,2])              ; altitude in rad.
     
     ; refraction, https://en.wikipedia.org/wiki/Atmospheric_refraction.
     r = 1.02/(tan(alt+10.3/(alt*deg+5.11))) ; in minutes of arc

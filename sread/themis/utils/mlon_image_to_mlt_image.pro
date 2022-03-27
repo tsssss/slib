@@ -17,14 +17,13 @@ pro mlon_image_to_mlt_image, mlon_image_var, to=mlt_image_var, errmsg=errmsg
     if ntime eq 1 and times[0] eq 0 then return
 
     midn_mlons = themis_asi_midn_mlon(times)
-    rotation_angles = -midn_mlons  ; mlon=0 is along positive x, need a further 90 deg to move mlt=0 along negative y.
+    rotation_angles = midn_mlons+90  ; mlon=0 is along positive x, need a further 90 deg to move mlt=0 along negative y.
     mlt_images = temporary(mlon_images)
     for ii=0,ntime-1 do begin
        mlt_images[ii,*,*] = rot(reform(mlt_images[ii,*,*]), rotation_angles[ii])
     endfor
 
     store_data, mlt_image_var, times, mlt_images, limits=lim
-
     mlt_image_info = mlt_image_info()
     options, mlt_image_var, 'mlt_range', mlt_image_info.mlt_range
     options, mlt_image_var, 'pixel_mlt', mlt_image_info.pixel_mlt
