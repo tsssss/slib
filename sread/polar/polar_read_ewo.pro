@@ -12,7 +12,7 @@ pro polar_read_ewo, time, errmsg=errmsg, $
     if n_elements(mlat_range) ne 2 then mlat_range = [60d,70]
     if n_elements(mlt_range) ne 2 then mlt_range = [-1d,1]*6
 
-    polar_read_mltimg, time, errmsg=errmsg
+    polar_read_mlt_image, time, errmsg=errmsg
     if errmsg ne '' then return
 
     bin_size = 0.25d

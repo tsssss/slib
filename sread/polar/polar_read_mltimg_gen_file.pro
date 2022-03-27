@@ -2,7 +2,7 @@
 ; Read Polar MLT image.
 ;-
 
-pro polar_read_mltimg_gen_file, time, $
+pro polar_read_mlt_image_gen_file, time, $
     height=height, minlat=minlat, $
     filename=file, errmsg=errmsg, _extra=extra
 
@@ -215,5 +215,5 @@ end
 time_range = time_double(['2001-10-22/11:00','2001-10-22/11:05'])
 file = join_path([homedir(),'test','test_polar_mltimg.cdf'])
 file_delete, file, allow_nonexist=1
-polar_read_mltimg_gen_file, time_range, filename=file
+polar_read_mlt_image_gen_file, time_range, filename=file
 end
