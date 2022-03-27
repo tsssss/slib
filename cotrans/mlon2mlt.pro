@@ -4,7 +4,7 @@
 ; 
 ; mlon. An array of any dimension. MLon in deg.
 ; radian. A boolean. Set if mlon is in radian.
-; time. A time in UT sec.
+; time. A time in unix time in sec.
 ; 
 ; The program works for either mlon is an array and time is a number,
 ; or mlon is a number and time is an array.
