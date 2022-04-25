@@ -1,10 +1,13 @@
 ;+
 ; Return the mlon image info.
+; 
+; half_size0. The image is 2*half_size0+1.
 ;-
 
-function mlon_image_info
+function mlon_image_info, half_size0
 
-    half_size = [1d,1]*250
+    if n_elements(half_size0) eq 0 then half_size0 = 250
+    half_size = [1d,1]*half_size0
     image_size = half_size*2+1  ; odd number places the pole at the center.
     mlat_range = [50d,90]
     mlon_range = [-1,1]*180

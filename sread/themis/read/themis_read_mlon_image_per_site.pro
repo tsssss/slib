@@ -30,23 +30,6 @@ pro themis_read_mlon_image_per_site, input_time_range, site=site, thumbnail=thum
         settings[var] = cdf_read_var(var, filename=files[0])
     endforeach
     add_setting, mlon_image_var, smart=1, settings
-    
-;    get_data, mlon_image_var, times, mlon_images
-;    pixel_elev = settings.pixel_elev
-;    pixel_azim = settings.pixel_azim
-;    image_size = settings.image_size
-;    foreach time, times, time_id do begin
-;        mlon_image = reform(mlon_images[time_id,*,*])
-;        index = where(mlon_image eq 0, count)
-;        if count eq 0 then continue
-;        smooth_image = smooth(mlon_image, image_size*0.1, edge_zero=1)
-;        mlon_image[index] = smooth_image[index]
-;        mlon_images[time_id,*,*] = mlon_image
-;        stop
-;    endforeach
-    
-    
-;    stop
 
 end
 

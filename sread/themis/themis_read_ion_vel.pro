@@ -1,8 +1,10 @@
 ;+
 ;-
-pro themis_read_ion_vel, time, probe=probe, resolution=resolution, errmsg=errmsg
+pro themis_read_ion_vel, time, probe=probe, $
+    resolution=resolution, coord=coord, errmsg=errmsg
 
     pre0 = 'th'+probe+'_'
+    if n_elements(coord) eq 0 then coord = 'gsm'
     resolution = (keyword_set(keyword))? strlowcase(resolution): '3sec'
     case resolution of
         '3sec': begin
@@ -22,11 +24,17 @@ pro themis_read_ion_vel, time, probe=probe, resolution=resolution, errmsg=errmsg
         data[index] = !values.d_nan
         store_data, var, times, data
     endif
+    if coord ne 'gsm' then begin
+        get_data, var, times, vec
+        vec = cotran(vec, times, 'gsm2'+coord)
+        var = pre0+'u_'+coord
+        store_data, var, times, vec
+    endif
     add_setting, var, /smart, {$
         display_type: 'vector', $
         unit: 'km/s', $
         short_name: 'U!S!Uion!N!R', $
-        coord: 'GSM', $
+        coord: strupcase(coord), $
         coord_labels: ['x','y','z'], $
         colors: sgcolor(['red','green','blue'])}
 

@@ -151,7 +151,7 @@ function themis_gen_mlon_image_figure, mlon_image_var, $
         tx = tpos[0]
         ty = tpos[1]
         msg = time_string(time, tformat='YYYY-MM-DD/hh:mm:ss')
-        xyouts, tx,ty,msg, normal=1
+        xyouts, tx,ty,msg, normal=1, color=tick_color
         
         ty = tpos[1]+ychsz
         msg = 'MLon-MLat'

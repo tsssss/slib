@@ -21,7 +21,7 @@ mlon_image_var = 'thg_asf_mlon_image'
 if check_if_update(mlon_image_var) then $
     themis_read_asf_mlon_image, time_range, sites=sites, min_elev=min_elev, merge_method=merge_method
 
-movie_file = join_path([homedir(),'test','test_asf_mlon_movie.mp4'])
+movie_file = join_path([homedir(),'test','asf_mlon_movie_2013_0317_v02.mp4'])
 themis_gen_mlon_image_movie, mlon_image_var, filename=movie_file, $
-    time_step=600d, mlat_range=[55,90], mlon_range=[-120,20], fig_xsize=6, zrange=[0,2e3]
+    time_step=600d, mlat_range=[55,90], mlon_range=[-120,20], fig_xsize=6, zrange=[0,2e3], ct=0
 end

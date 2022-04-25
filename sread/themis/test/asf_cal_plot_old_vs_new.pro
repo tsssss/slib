@@ -2,15 +2,33 @@
 ; Plot ASI images before and after the calibration.
 ;-
 
-test = 0
+test = 1
 
 event_list = list()
+
+;event_list.add, dictionary($
+;    'site', 'inuv', $
+;    'time', '2008-02-15/07:49:12', $
+;    'pixels', list([75,60],[65,90]), $
+;    'pixel_labels', ['moon','streamer'] )
+event_list.add, dictionary($
+    'site', 'gako', $
+    'time', '2016-10-13/12:10', $
+    'pixels', list([190,64]), $
+    'pixel_labels', ['stable arc'] )
+event_list.add, dictionary($
+    'site', 'gako', $
+    'time', '2013-03-17/07:50', $
+    'pixels', list([30,100]), $
+    'pixel_labels', ['moon'] )
 event_list.add, dictionary($
     'site', 'inuv', $
-    'time', '2008-02-15/07:49:12', $
-    'pixels', list([75,60],[65,90]), $
+    'time', '2008-01-19/07:16', $
+    'pixels', list([140d,60],[130,160]), $
+    'pixels', list([140d,60],[130,160]), $
     'pixel_labels', ['moon','streamer'] )
 
+    
 ;event_list.add, dictionary($
 ;    'site', 'gako', $
 ;    'time', '2016-10-13/12:10', $
@@ -35,7 +53,7 @@ foreach event, event_list do begin
 endforeach
 ypads = ypads[0:-2]
 margins = [1,3,2,4]
-poss = panel_pos(pansize=[1,1]*2, panid=0, $
+poss = panel_pos(pansize=[1,1]*1.5, panid=0, $
     xpans=[1,1,1], ypans=ypans, xpad=0.5, ypads=ypads, fig_size=fsz, margins=margins)
 zrange_raw = [0d,65535]
 zrange_cal = [0d,10000]
@@ -93,6 +111,7 @@ foreach event, event_list, event_id do begin
     asf_cal_var = asf_var+'_cal'
     if check_if_update(asf_cal_var, time_range) then themis_asi_cal_brightness, asf_var, newname=asf_cal_var
     get_data, asf_cal_var, times, imgs_cal
+    
 
 ;---Draw 2d raw image.
     img_raw = reform(imgs_raw[time_id,*,*])
@@ -171,7 +190,7 @@ foreach event, event_list, event_id do begin
     yminor = 4
     ytickv = make_bins(yrange,ystep, inner=1)
     yticks = n_elements(ytickv)-1
-    ytitle = 'Raw count (#)'
+    ytitle = 'Raw !Ccount (#)'
 
 
 ;---Draw counts.

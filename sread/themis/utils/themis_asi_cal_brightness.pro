@@ -48,7 +48,7 @@ pro themis_asi_cal_brightness, asf_var, newname=newname
     get_data, asf_var, times, imgs_raw, limits=lim
     image_size = double(size(reform(imgs_raw[0,*,*]), dimensions=1))
     nframe = n_elements(times)
-
+    time_step = 3d
 
 ;---Calculate the background of edge pixels.    
     deg = constant('deg')
@@ -61,15 +61,35 @@ pro themis_asi_cal_brightness, asf_var, newname=newname
     center_indices_2d = fltarr(ncenter_index,2)
     center_indices_2d[*,0] = center_indices mod image_size[0]
     center_indices_2d[*,1] = (center_indices-center_indices_2d[*,0])/image_size[0]
+    
 
-    imgs_edge = fltarr([nframe,nedge_index])
-    foreach time, times, time_id do begin
-        timg = reform(imgs_raw[time_id,*,*])
-        imgs_edge[time_id,*] = timg[edge_indices]
-    endforeach
-    bg_edge = median(imgs_edge)
-       
+;---A minimum background per pixel.
+    imgs_bg = fltarr([nframe])
+    tmp = reform(imgs_raw,[nframe,product(image_size)])
+    for ii=0,nframe-1 do begin
+        imgs_bg[ii] = min(tmp[ii,center_indices])
+    endfor
+    width_slow = 60
+    imgs_bg = smooth(imgs_bg,width_slow, nan=1, edge_mirror=1)
+    imgs_bg0 = fltarr([nframe,image_size])
+    for ii=0,nframe-1 do imgs_bg0[ii,*,*] = imgs_bg[ii]
 
+    
+;---Remove fast varying signals.
+    window_slow = width_slow*time_step
+    imgs_slow = imgs_raw
+    for index_id=0,ncenter_index-1 do begin
+        ii = center_indices_2d[index_id,0]
+        jj = center_indices_2d[index_id,1]
+        imgs_slow[*,ii,jj] = calc_baseline(imgs_slow[*,ii,jj], window_slow, times)
+    end
+    
+    
+;---Prepare adpative window.
+    sample_windows = [1,width_slow,600]*3
+    nsample_window = n_elements(sample_windows)
+    
+    
 ;---Calculate the moon's elevation and azimuth.
     site_glon = lim.asc_glon
     site_glat = lim.asc_glat
@@ -91,44 +111,13 @@ pro themis_asi_cal_brightness, asf_var, newname=newname
         moon_angles[*,center_index] = acos(moon_xpos*pixel_xpos+moon_ypos*pixel_ypos+moon_zpos*pixel_zpos)
     endforeach
     moon_angles = reform(moon_angles,[nframe,image_size])*deg
-;    moon_weight = 0.5-tanh((moon_angles-35)/7.5)*0.5
-    moon_weight = exp((10-moon_angles)/5)+1 ; decays to 1.
-    
-    
-;---Prepare adpative window.
-    max_count = 65535
-    sample_windows = [1,60,600]*3
-    nsample_window = n_elements(sample_windows)
-    
-;---Remove fast moving signals.
-    window_fast = 3*60d ; sec.
-    imgs_slow = imgs_raw
-    for index_id=0,ncenter_index-1 do begin
-        ii = center_indices_2d[index_id,0]
-        jj = center_indices_2d[index_id,1]
-        imgs_slow[*,ii,jj] = calc_baseline(imgs_slow[*,ii,jj], window_fast, times)
-    end
-    
-;---A minimum background per pixel.
-    img_bg = fltarr(image_size)
-    for index_id=0,ncenter_index-1 do begin
-        ii = center_indices_2d[index_id,0]
-        jj = center_indices_2d[index_id,1]
-        img_bg[ii,jj] = min(imgs_raw[*,ii,jj])
-    end
-    img_bg = smooth(img_bg, image_size*0.1, edge_mirror=1)
-    
-    imgs_bg0 = fltarr([nframe,image_size])
-    for index_id=0,ncenter_index-1 do begin
-        ii = center_indices_2d[index_id,0]
-        jj = center_indices_2d[index_id,1]
-        imgs_bg0[*,ii,jj] = img_bg[ii,jj]
-    end
+    moon_weight = exp((2.5-moon_angles)/2.5)*2+1 ; decays to 1.
 
     
 ;---Calulate the background of imgs_slow.
+    max_count = 65535
     norm_count = round(imgs_slow*moon_weight)<max_count
-    norm_windows = (1-tanh((norm_count-0.5e4)/2.5e4))*0.5*(600-3)+3 ; in [n,m,n].
+    norm_windows = exp((max_count-norm_count+1e4)/1e4)*2+3
     
     index = where(norm_windows ge sample_windows[1], count, complement=index2, ncomplement=count2)
     imgs_bg = fltarr([nframe,image_size])
@@ -141,7 +130,23 @@ pro themis_asi_cal_brightness, asf_var, newname=newname
         imgs_bg[index2] = weights*imgs_slow[index2]+(1-weights)*imgs_raw[index2]
     endif
     
-    store_data, newname, times, imgs_raw-imgs_bg, limits=lim
+    imgs_cal = imgs_raw-imgs_bg
+    imgs_cal = reform(imgs_cal,[nframe,product(image_size)])
+    bg0 = fltarr(nframe)
+    for kk=0,nframe-1 do begin
+        index = where(moon_angles[kk,*,*] ge 40, count)
+        tmp = imgs_cal[kk,index]
+        tmp = tmp[sort(tmp)]
+        bg0[kk] = tmp[0.1*count]
+    endfor
+    bg0 = smooth(bg0,width_slow,nan=1,edge_mirror=1)
+    imgs_cal = reform(imgs_cal,[nframe,image_size])
+    for kk=0,nframe-1 do begin
+        imgs_cal[kk,*,*] -= bg0[kk]
+    endfor
+    imgs_cal >= 0
+    
+    store_data, newname, times, imgs_cal, limits=lim
 end
 
 

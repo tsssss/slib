@@ -3,10 +3,10 @@
 ; midnight is along -y.
 ;-
 
-function mlt_image_info
+function mlt_image_info, half_size0
 
     ; We modifies mlon_image_info to get mlt_image_info.
-    mlon_image_info = mlon_image_info()
+    mlon_image_info = mlon_image_info(half_size0)
     xxs = mlon_image_info.pixel_xpos
     yys = mlon_image_info.pixel_ypos
     tts = atan(yys,xxs)

@@ -2,7 +2,7 @@
 ; Calculate the lower envelope for the time series at a certain pixel.
 ;-
 
-test = 0
+test = 1
 
 event_list = list()
 event_list.add, dictionary($

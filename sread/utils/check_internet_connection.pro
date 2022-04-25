@@ -27,7 +27,7 @@ function check_internet_connection, url0, port=port, timeout=timeout
 
 end
 
-print, check_internet_connection('https://cdaweb.sci.gsfc.nasa.gov/pub/data/rbsp/rbspb/l1/efw/mscb1/2016/')
+print, check_internet_connection('https://cdaweb.gsfc.nasa.gov/pub/data/rbsp/rbspb/l1/efw/mscb1/2016/')
 print, check_internet_connection('http://themis.ssl.berkeley.edu/data/themis/thg/l2/asi/cal')
 print, check_internet_connection('https://themis.ssl.berkeley.edu/data/themis/thg/l2/asi/cal')
 end

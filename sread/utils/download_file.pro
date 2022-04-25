@@ -109,8 +109,8 @@ end
 
 urls = list()
 ; https.
-;urls.add, 'https://cdaweb.sci.gsfc.nasa.gov/pub/data/rbsp/rbspa/l3/efw/2016/rbspa_efw-l3_20160101_v01.cdf'
-;urls.add, 'https://cdaweb.sci.gsfc.nasa.gov/pub/data/rbsp/rbspa/l1/efw/mscb1/2019/rbspa_l1_mscb1_20190308_v02.cdf'
+;urls.add, 'https://cdaweb.gsfc.nasa.gov/pub/data/rbsp/rbspa/l3/efw/2016/rbspa_efw-l3_20160101_v01.cdf'
+;urls.add, 'https://cdaweb.gsfc.nasa.gov/pub/data/rbsp/rbspa/l1/efw/mscb1/2019/rbspa_l1_mscb1_20190308_v02.cdf'
 ; http.
 urls.add, 'https://cdaweb.gsfc.nasa.gov/pub/data/rbsp/rbspa/l3/emfisis/magnetometer/4sec/gsm/2012/test'
 ;urls.add, 'http://themis.ssl.berkeley.edu/data/rbsp/rbspb/l1/vb1/2015/rbspb_l1_vb1_20150309_v02.cdf'

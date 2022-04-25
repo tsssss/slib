@@ -20,6 +20,7 @@ pro themis_read_ion_en_spec, time, probe=probe, errmsg=errmsg
         'display_type', 'spec', $
         'unit', 'eV/cm!U2!N-s-sr-eV', $
         ;'unit', '1/cm!U2!N-s-sr-keV', $
+        'color_table', 33, $
         'ytitle', 'Energy (eV)', $
         'zlog', 1, $
         'zrange', [1e3,1e7], $

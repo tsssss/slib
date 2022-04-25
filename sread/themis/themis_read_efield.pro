@@ -22,11 +22,11 @@ pro themis_read_efield, time, probe=probe, resolution=resolution, coord=coord, e
     if n_elements(coord) eq 0 then coord = 'gsm'
 
     ; read 'thx_e_gsm'
-    themis_read_efi, time, id='l2%'+type, probe=probe, coord=coord, errmsg=errmsg
+    themis_read_efi, time, id='l2%'+type, probe=probe, coord='gsm', errmsg=errmsg
     if errmsg ne '' then return
     
-    var = pre0+'e_'+coord
-    rename_var, pre0+type+'_dot0_'+coord, to=var
+    var = pre0+'e_gsm'
+    rename_var, pre0+type+'_dot0_gsm', to=var
     
     get_data, var, times, edata
     ntime = n_elements(times)
@@ -34,6 +34,13 @@ pro themis_read_efield, time, probe=probe, resolution=resolution, coord=coord, e
     if ntime ne ndata then begin
         errmsg = handle_error('Inconsistant data and time ...')
         return
+    endif
+    
+    if coord ne 'gsm' then begin
+        get_data, var, times, vec
+        vec = cotran(vec, times, 'gsm2'+coord)
+        var = pre0+'e_'+coord
+        store_data, var, times, vec
     endif
     
     add_setting, var, /smart, {$

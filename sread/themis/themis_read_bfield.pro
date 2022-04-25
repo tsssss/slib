@@ -4,11 +4,12 @@
 ; Read Themis B field in GSM. Default is 3 sec.
 ;+
 ;
-pro themis_read_bfield, time, probe=probe, resolution=resolution, errmsg=errmsg, _extra=ex
+pro themis_read_bfield, time, probe=probe, resolution=resolution, coord=coord, errmsg=errmsg, _extra=ex
 
     errmsg = ''
     pre0 = 'th'+probe+'_'
 
+    if n_elements(coord) eq 0 then coord = 'gsm'
     ;resolution = (keyword_set(resolution))? strlowcase(resolution): '3sec'
     resolution = (keyword_set(resolution))? strlowcase(resolution): '3sec'
     case resolution of
@@ -62,11 +63,17 @@ pro themis_read_bfield, time, probe=probe, resolution=resolution, errmsg=errmsg,
         store_data, var, times, bgsm
     endif
 
+    if coord ne 'gsm' then begin
+        get_data, var, times, vec
+        vec = cotran(vec, times, 'gsm2'+coord)
+        var = pre0+'b_'+coord
+        store_data, var, times, vec
+    endif
     add_setting, var, /smart, {$
         display_type: 'vector', $
         unit: 'nT', $
         short_name: 'B', $
-        coord: 'GSM', $
+        coord: strupcase(coord), $
         coord_labels: ['x','y','z']}
 
     uniform_time, var, dt
