@@ -29,7 +29,7 @@ pro omni_read, time, id=datatype, $
 ;---Check inputs.
     sync_threshold = 86400*365.25
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'omni','omni_cdaweb'])
-    if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.sci.gsfc.nasa.gov/pub/data/omni/omni_cdaweb'
+    if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/omni/omni_cdaweb'
     if n_elements(version) eq 0 then version = 'v[0-9]{2}'
     if n_elements(resolution) eq 0 then resolution = '1min'
 
