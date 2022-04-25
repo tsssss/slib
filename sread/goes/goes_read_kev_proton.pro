@@ -5,6 +5,8 @@
 
 pro goes_read_kev_proton, time_range, probe=probe, errmsg=errmsg, energy=energy, pitch_angle=pitch_angle
 
+    errmsg = ''
+    
     goes_init
     !goes.local_data_dir = join_path([default_local_root(),'goes'])
     goes_lib
@@ -22,6 +24,10 @@ pro goes_read_kev_proton, time_range, probe=probe, errmsg=errmsg, energy=energy,
     vars = pre0+'magpd_'+string(energy_bins,format='(I0)')+'keV_dtc_uncor_flux'
     get_data, vars[0], times
     ntime = n_elements(times)
+    if ntime eq 1 and times[0] eq 0 then begin
+        errmsg = 'No data ...'
+        return
+    endif
     flux = fltarr(ntime,nenergy_bin)
     frac_total_sa = 18.*!pi*(1-cos(15*!dtor))/(4*!pi) ;for all 9 telescopes, sr
     for ii=0,nenergy_bin-1 do begin
@@ -53,7 +59,7 @@ pro goes_read_kev_proton, time_range, probe=probe, errmsg=errmsg, energy=energy,
 
     ; Save data.
     yrange = 10d^ceil(alog10(minmax(flux)))
-    tvar = pre0+'kev_h_flux'
+    tvar = pre0+'kev_p_flux'
     store_data, tvar, times, flux, energy_bins
     add_setting, tvar, /smart, {$
         display_type: 'list', $

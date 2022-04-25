@@ -33,6 +33,7 @@ pro goes_read_bfield, utr0, probe=probe, coord=coord, $
     if errmsg ne '' then begin
         goes_read_fgm, utr0, probe=probe, coord='gsm', id=resolution, errmsg=errmsg, _extra=ex
     endif
+    if errmsg ne '' then return
     
     pre0 = 'g'+probe+'_'
     if n_elements(coord) eq 0 then coord = 'gsm'
