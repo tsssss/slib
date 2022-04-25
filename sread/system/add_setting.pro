@@ -95,8 +95,8 @@ pro add_setting, var, settings, smart=smart
             'spec': begin
                 options, var, 'spec', 1
                 options, var, 'no_interp', 1
-                options, var, 'ylog', 1
-                options, var, 'zlog', 1
+                ;options, var, 'ylog', 1
+                ;options, var, 'zlog', 1
                 
                 ; use unit to init ztitle.
                 unit = get_setting(var, 'unit', exist)

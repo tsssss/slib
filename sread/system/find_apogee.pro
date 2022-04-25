@@ -2,13 +2,13 @@
 ; Find the apogee using the given r_gsm data.
 ;
 ; posvar. A string of the variable saves r_gsm.
-; apogee_times. An array of the apogee times.
+; times. An array of the apogee times.
 ; period. A number, output, orbital period in sec.
 ; apogee. A number, output, the mean apogee distance.
 ; more_vars. An array of string, input, filter these variables to the time of apogees.
 ;-
 
-pro find_apogee, posvar, period=period, apogee=apogee, apogee_times=apogee_times, more_vars=mvars
+pro find_apogee, posvar, period=period, apogee=apogee, times=apogee_times, more_vars=mvars
 
     if n_elements(posvar) eq 0 then message, 'no pos info ...'
     get_data, posvar, uts, pos, limits=lim

@@ -20,6 +20,6 @@ pro append_data, var, times, data, limits=lim
             old_times = [temporary(old_times[index]),times]
             old_data = [temporary(old_data[index,*,*,*,*,*,*,*]),data]
         endelse
-        store_data, var, old_times, old_data, limits=lim
+        store_data, var, old_times, old_data, old_value, limits=lim
     endelse
 end

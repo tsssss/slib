@@ -124,6 +124,8 @@ function prepare_files, request=request, errmsg=errmsg, $
         valid_range = request.valid_range
         if n_elements(valid_range) eq 1 then valid_range = [valid_range, systime(1)]
         valid_range = minmax(valid_range)
+        ; Need to accomodate to cadence.
+        valid_range = [time_floor(valid_range[0],cadence),time_ceil(valid_range[1],cadence)]
         lprmsg, '    Valid range: '+strjoin(time_string(valid_range),' to ')
 
         valid_files = list()
