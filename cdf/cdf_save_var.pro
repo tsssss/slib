@@ -41,8 +41,7 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
         file = cdf0
         path = fgetpath(file)
         if file_test(file) eq 0 then begin
-            if file_test(path,/directory) eq 0 then file_mkdir, path
-            cdfid = cdf_create(file)
+            cdf_touch, file
         endif else cdfid = cdf_open(file)
     endif else cdfid = cdf0
     if keyword_set(compress) then cdf_compression, cdfid, set_gzip_level=compress
@@ -64,7 +63,7 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
     ; Get the data size.
     nrec = n_elements(vals)
     data_dims = size(vals,/dimensions)
-    ndata_dim = n_elements(data_dims)
+    data_ndim = n_elements(data_dims)
 
     ; Strings are special.
     numelem = 1
@@ -76,10 +75,10 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
     ; Assume data in [nrec,dims], the convension used in tplot.
     if keyword_set(save_as_is) then begin
         dimensions = data_dims
-    endif else if ndata_dim gt 1 then dimensions = data_dims[1:*]
+    endif else if data_ndim gt 1 then dimensions = data_dims[1:*]
     ; Scalar does not have dimension.
     if nrec eq 1 then dimensions = !null
-    if ndata_dim eq 1 then dimensions = !null
+    if data_ndim eq 1 then dimensions = !null
     if n_elements(dimensions) ne 0 then begin
         ndimension = n_elements(dimensions)
         dimvary = bytarr(ndimension)+1

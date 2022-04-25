@@ -40,7 +40,7 @@ function cdf_read_var, var, range=range, filename=cdf0, errmsg=errmsg
     cdf_control, cdfid, variable=the_var, get_var_info=varinfo
     varinq = cdf_varinq(cdfid, the_var, zvariable=iszvar)
     if ~iszvar then begin
-        cdfinq = cdf_inquire(cdf0)
+        cdfinq = cdf_inquire(cdfid)
         varinq = create_struct('dim', cdfinq.dim, varinq)
     endif
     nrec = varinfo.maxrec
