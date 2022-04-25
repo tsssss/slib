@@ -2,8 +2,9 @@
 ; Read spacecraft potential in V.
 ;-
 
-pro polar_read_vsc, time_range, errmsg=errmsg
+pro polar_read_vsc, input_time_range, errmsg=errmsg
 
+    time_range = time_double(input_time_range)
     files = polar_load_ebv(time_range, errmsg=errmsg)
     if errmsg ne '' then return
 
@@ -16,6 +17,7 @@ pro polar_read_vsc, time_range, errmsg=errmsg
         'in_vars', in_vars, $
         'out_vars', out_vars )
     read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
+    if errmsg ne '' then return
 
     vsc_uvw_var = 'po_vsc_uvw'
     get_data, vsc_uvw_var, times, vsc_uvw

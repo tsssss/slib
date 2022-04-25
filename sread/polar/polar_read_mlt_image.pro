@@ -1,8 +1,10 @@
 ;+
 ; Read Polar MLT image.
+;
+; input_time_range. Input time range in unix time or string.
 ;-
 
-pro polar_read_mlt_image, time, errmsg=errmsg, $
+pro polar_read_mlt_image, input_time_range, errmsg=errmsg, $
     local_root=local_root, version=version, renew_file=renew_file, _extra=extra
 
     compile_opt idl2
@@ -11,14 +13,14 @@ pro polar_read_mlt_image, time, errmsg=errmsg, $
 
 ;---Check inputs.
     sync_threshold = 0
-    if n_elements(local_root) eq 0 then local_root = join_path([diskdir('data'),'polar'])
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'sdata','polar'])
     if n_elements(version) eq 0 then version = 'v01'
-
+    time_range = time_double(input_time_range)
 
 ;---Init settings.
     valid_range = time_double(['1996-03-20/00:00','2008-04-16/24:00'])
-    base_name = 'po_uvi_mltimg_%Y_%m%d_'+version+'.cdf'
-    local_path = [local_root,'uvi','mltimg','%Y']
+    base_name = 'po_uvi_mlt_image_%Y_%m%d_'+version+'.cdf'
+    local_path = [local_root,'uvi','mlt_image','%Y']
 
     request = dictionary($
         'pattern', dictionary($
@@ -29,14 +31,14 @@ pro polar_read_mlt_image, time, errmsg=errmsg, $
         'extension', fgetext(base_name), $
         'var_list', list($
             dictionary($
-                'in_vars', ['mltimg'], $
-                'out_vars', ['po_mltimg'], $
+                'in_vars', ['mlt_image'], $
+                'out_vars', ['po_mlt_image'], $
                 'time_var_name', 'ut_sec', $
                 'time_var_type', 'unix')))
 
 ;---Find files, read variables, and store them in memory.
     files = prepare_files(request=request, errmsg=errmsg, local_files=files, $
-        file_times=file_times, time=time, nonexist_files=nonexist_files)
+        file_times=file_times, time=time_range, nonexist_files=nonexist_files)
     if n_elements(nonexist_files) ne 0 then begin
         foreach file, request.nonexist_files do begin
             file_time = file.file_time
@@ -44,7 +46,7 @@ pro polar_read_mlt_image, time, errmsg=errmsg, $
             polar_read_mlt_image_gen_file, file_time, filename=local_file
         endforeach
         files = prepare_files(request=request, errmsg=errmsg, local_files=files, $
-            file_times=file_times, time=time, nonexist_files=nonexist_files)
+            file_times=file_times, time=time_range, nonexist_files=nonexist_files)
     endif
     if n_elements(files) eq 0 then begin
         errmsg = 'Not enough info for MLT image ...'
@@ -52,17 +54,17 @@ pro polar_read_mlt_image, time, errmsg=errmsg, $
     endif
 
 ;---Read data from files and save to memory.
-    read_files, time, files=files, request=request
+    read_files, time_range, files=files, request=request
 
-    mlt_bins = cdf_read_var('mlt_bins', filename=files[0])
-    mlat_bins = cdf_read_var('mlat_bins', filename=files[0])
+    pixel_mlt = cdf_read_var('pixel_mlt', filename=files[0])
+    pixel_mlat = cdf_read_var('pixel_mlat', filename=files[0])
     
-    imgsz = (size(mlt_bins,dimensions=1))[0]
-    mltimg_size = [imgsz,imgsz]
+    imgsz = (size(pixel_mlt,dimensions=1))[0]
+    mlt_image_size = [imgsz,imgsz]
     mlt_range = [-1,1]*12d
-    minlat = 50d
-    maxlat = 90d
-    mlat_range = [minlat,maxlat]
+    mlat_range = [50d,90]
+    minlat = mlat_range[0]
+    maxlat = mlat_range[1]
     ; Pixel x and y coord, in [0,1].
     xx_bins = (dblarr(imgsz)+1) ## smkarthm(0,1,imgsz,'n')
     yy_bins = transpose(xx_bins)
@@ -80,20 +82,28 @@ pro polar_read_mlt_image, time, errmsg=errmsg, $
     if count ne 0 then mlt_bin_centers[index] += 24
     index = where(mlt_bin_centers gt 12, count)
     if count ne 0 then mlt_bin_centers[index] -= 24
-    mlt_bins = mlt_bin_centers
-    mlat_bins = mlat_bin_centers
+    pixel_mlt = mlt_bin_centers
+    pixel_mlat = mlat_bin_centers
     
-    store_data, 'po_mltimg', limits={$
-        mlt_bins: mlt_bins, $
-        mlat_bins: mlat_bins }
+    store_data, 'po_mlt_image', limits={$
+        pixel_mlt: pixel_mlt, $
+        pixel_mlat: pixel_mlat }
 
 end
 
+
+time_range = time_double(['2008-01-19:06:00','2008-01-19/09:00'])
+polar_read_mlt_image, time_range
+get_data, 'po_mlt_image', times, img
+sgopen, 0, size=[500,500]
+sgtv, bytscl(reform(img[170,*,*])), ct=49, position=[0,0,1,1]
+stop
+
 time_range = time_double(['2001-10-22','2001-10-23'])
 polar_read_mlt_image, time_range
-get_data, 'po_mltimg', times, img
+get_data, 'po_mlt_image', times, img
 ntime = n_elements(times)
-img_size = size(img[0,*,*],dimensions=1)
+image_size = size(img[0,*,*],dimensions=1)
 
 min_vals = fltarr(ntime)+!values.f_nan
 max_vals = fltarr(ntime)+!values.f_nan
@@ -105,7 +115,7 @@ for time_id=0,ntime-1 do begin
     timg = reform(img[time_id,*,*])
     index = where(timg gt 0, count)
     if count eq 0 then continue
-    tmp = where(timg[*,0:img_size[1]/2] gt 0, night_count)
+    tmp = where(timg[*,0:image_size[1]/2] gt 0, night_count)
     timg = timg[index]
     counts[time_id] = count
     night_counts = night_count
@@ -117,8 +127,8 @@ endfor
 
 ct = 40
 top = 254
-fig_xsize = img_size[0]*2
-fig_ysize = img_size[1]*2
+fig_xsize = image_size[0]*2
+fig_ysize = image_size[1]*2
 
 min_count = 5e3
 min_stddev_val = 20

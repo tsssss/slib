@@ -16,7 +16,7 @@ pro polar_read_ssc, time, id=datatype, $
     sync_threshold = 0
     if n_elements(probe) eq 0 then probe = 'x'
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'polar','orbit'])
-    if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.sci.gsfc.nasa.gov/pub/data/polar/orbit'
+    if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/polar/orbit'
     if n_elements(version) eq 0 then version = 'v[0-9]{2}'
 
 ;---Init settings.
