@@ -30,7 +30,7 @@ function rbsp_load_spice, input_time_range, probe=probe, id=datatype, $
     valid_range = rbsp_efw_phasef_get_valid_range('spice', probe=probe)
     rbspx = 'rbsp'+probe
     base_name = rbspx+'_spice_products_%Y%m%d_'+version+'.cdf'
-    local_path = [local_root,rbspx,'spice_var','%Y']
+    local_path = [local_root,rbspx,'ephemeris','efw-ephem','%Y']
     remote_path = [remote_root,rbspx,'ephemeris','efw-ephem','%Y']
     request = dictionary($
         'pattern', dictionary($

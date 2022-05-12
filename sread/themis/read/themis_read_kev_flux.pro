@@ -1,15 +1,18 @@
 ;+
 ; Read high energy electron and ion fluxes.
+; 
+; id=. 'e' or 'p' or ['e','p'].
 ;-
-function themis_read_kev_flux, input_time_range, probe=probe, $
-    errmsg=errmsg, get_name=get_name, no_spec=no_spec
+function themis_read_kev_flux, input_time_range, probe=probe, id=datatype, $
+    errmsg=errmsg, get_name=get_name, no_spec=no_spec, energy_range=energy_range
 
     time_range = time_double(input_time_range)
     files = themis_load_sst(time_range, probe=probe, errmsg=errmsg)
     if errmsg ne '' then return, ''
 
     prefix = 'th'+probe+'_'
-    vars = prefix+['e','p']+'_flux'
+    if n_elements(datatype) eq 0 then datatype = ['e','p']
+    vars = prefix+datatype+'_flux'
     if keyword_set(get_name) then return, vars
 
     var_list = list()
@@ -34,14 +37,22 @@ function themis_read_kev_flux, input_time_range, probe=probe, $
     foreach var, vars do begin
         get_data, var, times, flux
         get_data, var+'_energy', times, energy
-        index = where(finite(energy[0,*]),nenergy)
+        energy = reform(energy[0,*])*1e-3   ; assumes energy bins are time independent. True or not??
+        index = where(finite(energy),nenergy)
         if nenergy eq 0 then message, 'inconsistency ...'
-        energy = energy[*,index]*1e-3
+        energy = energy[index]
         flux = flux[*,index]
+        ; energy range.
+        if n_elements(energy_range) eq 2 then begin
+            index = lazy_where(energy, '[]', energy_range, count=nenergy)
+            if nenergy eq 0 then return, ''
+            energy = energy[index]
+            flux = flux[*,index]
+        endif
         for ii=0,nenergy-1 do flux[*,ii] /= energy[ii]
         short_name = (var eq prefix+'e_flux')? 'e-': 'H+'
         if keyword_set(no_spec) then begin
-            store_data, var, times, flux, reform(energy[0,*])
+            store_data, var, times, flux, energy
             add_setting, var, smart=1, dictionary($
                 'display_type', 'list', $
                 'unit', '#/cm!U-2!N-s-sr-keV', $
@@ -50,7 +61,7 @@ function themis_read_kev_flux, input_time_range, probe=probe, $
                 'color_table', ct, $
                 'value_unit', 'keV' )
         endif else begin
-            store_data, var, times, flux, reform(energy[0,*])
+            store_data, var, times, flux, energy
             add_setting, var, smart=1, dictionary($
                 'display_type', 'spec', $
                 'unit', '#/cm!U-2!N-s-sr-keV', $

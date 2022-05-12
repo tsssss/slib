@@ -10,7 +10,7 @@
 
 pro rbsp_read_spice_var, time, probe=probe, $
     version=version, local_root=local_root, remote_root=remote_root, $
-    time_tag_offset=time_tag_offset
+    time_tag_offset=time_tag_offset, errmsg=errmsg
 
     compile_opt idl2
     on_error, 0

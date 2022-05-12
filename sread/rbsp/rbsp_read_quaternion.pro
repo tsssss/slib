@@ -9,7 +9,8 @@ pro rbsp_read_quaternion, time, probe=probe, errmsg=errmsg
     errmsg = ''
 
     ; read 'q_uvw2gse'.
-    rbsp_read_spice, time, id='quaternion', probe=probe, errmsg=errmsg
+;    rbsp_read_spice, time, id='quaternion', probe=probe, errmsg=errmsg
+    rbsp_efw_read_spice_var, time, probe=probe, errmsg=errmsg
     if errmsg ne '' then return
 
     coord = 'gse'
