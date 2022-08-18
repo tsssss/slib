@@ -42,7 +42,8 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
         path = fgetpath(file)
         if file_test(file) eq 0 then begin
             cdf_touch, file
-        endif else cdfid = cdf_open(file)
+        endif
+        cdfid = cdf_open(file)
     endif else cdfid = cdf0
     if keyword_set(compress) then cdf_compression, cdfid, set_gzip_level=compress
 
