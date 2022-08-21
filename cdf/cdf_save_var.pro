@@ -8,12 +8,11 @@
 ; settings=. A dictionary of the settings for vatt.
 ; compress=. A number sets the compress level, 0-9?
 ; cdf_type=. A string specifies the cdf_type.
-; save_as_is=. A boolean to suppress smart guess on dimensions.
 ; save_as_one=. A boolean to save value as a whole, i.e., nrec=1. Used to save metadata.
 ;-
 pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
     compress=compress, cdf_type=cdf_type, $
-    save_as_is=save_as_is, save_as_one=save_as_one
+    save_as_one=save_as_one
 
     compile_opt idl2
     catch, error
@@ -50,18 +49,15 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
 
 
 ;---Save data. Needs to know cdf_type, numelem, dimensions
-    vals = temporary(data)
-
-    ; Delete existing var b/c dimension/rec/settings could be inconsistent.
-    has_data = n_elements(vals)
     has_var = cdf_has_var(the_var, filename=cdfid)
     if has_var then cdf_del_var, the_var, filename=cdfid
 
     ; Get the cdf_type.
-    var_type = keyword_set(cdf_type)? cdf_type: scdffmidltype(size(vals[0],/type))
+    var_type = keyword_set(cdf_type)? cdf_type: scdffmidltype(size(data[0],/type))
     extra = create_struct(var_type,1)
 
     ; Get the data size.
+    vals = transpose(temporary(data))
     nrec = n_elements(vals)
     data_dims = size(vals,/dimensions)
     data_ndim = n_elements(data_dims)
@@ -73,35 +69,27 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
     endif
 
     ; Get the dimensions.
-    ; Assume data in [nrec,dims], the convension used in tplot.
-    if keyword_set(save_as_is) then begin
-        dimensions = data_dims
-    endif else if data_ndim gt 1 then dimensions = data_dims[1:*]
-    ; Scalar does not have dimension.
-    if nrec eq 1 then dimensions = !null
-    if data_ndim eq 1 then dimensions = !null
-    if n_elements(dimensions) ne 0 then begin
-        ndimension = n_elements(dimensions)
-        dimvary = bytarr(ndimension)+1
-    endif
-    ; CDF assumes [dims,nrec].
-    transpose_val = 1
-    if keyword_set(save_as_is) then transpose_val = 0
-    if keyword_set(save_as_one) then transpose_val = 0
-    if n_elements(dimensions) eq 0 then transpose_val = 0
-    if transpose_val then vals = transpose(vals, shift(indgen(ndimension+1),-1))
-    ; Sometimes we need to save all data as nrec=1.
-    if keyword_set(save_as_one) then begin
-        dimensions = data_dims
-        ndimension = n_elements(dimensions)
-        dimvary = bytarr(ndimension)+1
-        extra = create_struct('REC_NOVARY', 1, extra)
-    endif
+    ; Original data is in [nrec,dims], the convension used in tplot.
+    ; However, we transposed it, so vals is in [dims, nrec].
+    rec_vary = 1
+    if data_ndim eq 1 then rec_vary = 0
+    if data_dims[-1] eq 1 then rec_vary = 0
+    if keyword_set(save_as_one) then rec_vary = 0
+    
+    if rec_vary then begin
+        if data_ndim > 1 then begin
+            dimensions = data_dims[0:-2]
+        endif else dimensions = []
+    endif else dimensions = data_dims
+    
+    rec_vary_str = (rec_vary)? 'REC_VARY': 'REC_NOVARY'
+    extra = create_struct(rec_vary_str, 1, extra)
 
     ; Save data.
     if n_elements(dimensions) eq 0 then begin
         tmp = cdf_varcreate(cdfid, the_var, zvariable=1, numelem=numelem, _extra=extra)
     endif else begin
+        dimvary = indgen(n_elements(dimensions))+1
         tmp = cdf_varcreate(cdfid, the_var, dimvary, dimensions=dimensions, zvariable=1, numelem=numelem, _extra=extra)
     endelse
     cdf_varput, cdfid, the_var, vals, zvariable=1

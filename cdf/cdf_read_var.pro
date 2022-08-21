@@ -68,8 +68,9 @@ function cdf_read_var, var, range=range, filename=cdf0, errmsg=errmsg
         cdf_varget, cdfid, the_var, vals, /string, rec_start=rec_min, rec_count=nrec
         ; vals = reform(vals), reform causes problem when concatenate data.
         ; permute dimensions.
-        if nrec ne 1 and size(vals,/n_dimensions) gt 1 then $
-            vals = transpose(vals,shift(indgen(n_elements(varinq.dim)+1),1))
+        vals = transpose(vals)
+;        if nrec ne 1 and size(vals,/n_dimensions) gt 1 then $
+;            vals = transpose(vals,shift(indgen(n_elements(varinq.dim)+1),1))
     endelse
 
     if input_is_file then cdf_close, cdfid
@@ -77,6 +78,24 @@ function cdf_read_var, var, range=range, filename=cdf0, errmsg=errmsg
 
 
 end
+
+fn = '/Users/shengtian/test.cdf'
+skt = cdf_read_skeleton(fn)
+if file_test(fn) then file_delete, fn
+cdf_touch, fn
+data = reform(findgen(120),[10,3,4])
+stop
+
+value = data
+cdf_save_var, 'test_var', value=value, filename=fn
+value = data
+cdf_save_var, 'test_var2', value=value, filename=fn, save_as_one=1
+foreach var, ['test_var','test_var2'] do begin
+    value = cdf_read_var(var, filename=fn)
+    print, size(value,dimensions=1)
+endforeach
+stop
+
 
 var = 'tha_efs_dot0_time'
 fn = '/Users/shengtian/Downloads/tha_l2_efi_20110101_v01.cdf'
