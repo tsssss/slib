@@ -19,7 +19,7 @@ pro themis_read_kev_electron, time_range, probe=probe, errmsg=errmsg, energy=ene
     endif
     energy_bins = energy_bins[index]
     get_data, pre0+'e_flux', times, flux
-    flux = flux[*,index]
+    flux = flux[*,index]>1e-3
     foreach bin, energy_bins, ii do flux[*,ii] /= energy_bins[ii]   ; from eV/(cm^2-s-sr-eV) to #/cm^2-s-sr-keV.
 
     ; Apply energy range.
@@ -59,5 +59,7 @@ pro themis_read_kev_electron, time_range, probe=probe, errmsg=errmsg, energy=ene
 end
 
 time_range = time_double(['2014-08-28/09:30','2014-08-28/11:30'])
-themis_read_kev_electron, time_range, probe='a', energy=[0,1000]
+time_range = time_double(['2017-01-01','2017-01-02'])
+probe = 'e'
+themis_read_kev_electron, time_range, probe=probe, energy=[0,1000]
 end

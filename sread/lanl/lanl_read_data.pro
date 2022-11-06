@@ -127,6 +127,9 @@ end
 
 time = time_double(['2014-08-28/09:00','2014-08-28/11:00'])
 probe = '1991-080'
+
+time = time_double(['2008-01-19/06:00','2008-01-19/09:00'])
+probe = '1989-046'
 datatype = 'sopa'
 lanl_read_data, time, probe=probe, id=datatype
 end

@@ -38,7 +38,7 @@ pro themis_read_sst, time, id=datatype, probe=probe, $
             dictionary($
                 'in_vars', thx+'_'+['psef_en_eflux','psef_en_eflux_yaxis'], $
                 'out_vars', thx+'_'+['e_flux','e_energy'], $
-                'time_var_name', thx+'_psif_time', $
+                'time_var_name', thx+'_psef_time', $
                 'time_var_type', 'unix')))
     type_dispatch['l2%h_kev'] = dictionary($
         'pattern', dictionary($

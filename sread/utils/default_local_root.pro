@@ -11,7 +11,7 @@ function default_local_root, disk
     endif
     
     ; if disk exists, use it.
-    if file_test(disk,directory=1,noexpand_path=1) eq 1 then return, disk
+;    if file_test(disk,directory=1,noexpand_path=1) eq 1 then return, disk
     
     ; it may be just the name of the disk, find its full path.
     dir = diskdir(disk)

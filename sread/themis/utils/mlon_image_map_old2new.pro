@@ -52,7 +52,7 @@ function mlon_image_map_old2new, old_images, site=site, crop=crop
     if reform_old_image then old_images = reform(old_images, old_dims)
     if keyword_set(crop) then begin
         crop_xrange = get_var_data(prefix+'crop_xrange')
-        crop_yrange = get_var_data(prefix+'crop_yrange')
+        crop_yrange = get_var_data(prefix+'crop_yrange')>0
         new_images = new_images[*,crop_xrange[0]:crop_xrange[1],crop_yrange[0]:crop_yrange[1]]
     endif
     if nframe eq 1 then new_images = reform(new_images)

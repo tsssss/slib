@@ -129,7 +129,7 @@ pro themis_gen_j_ver_mltimg_movie, time_range, filename=movie_file, $
     endforeach
 
 ;---Gen movie.
-    spic2movie, fig_files, movie_file
+    spic2movie, plot_files=fig_files, movie_file
     foreach fig_file, fig_files do file_delete, fig_file
     file_delete, fig_dir
 
@@ -139,6 +139,7 @@ end
 time_range = time_double(['2014-08-28/10:00','2014-08-28/11:00'])
 time_range = time_double(['2016-10-13/12:00','2016-10-13/13:00'])
 time_range = time_double(['2013-06-07/03:30','2013-06-07/07:00'])
+time_range = time_double(['2013-03-09/08:40','2013-03-09/09:20'])
 test_file = join_path([homedir(),'test.mp4'])
 themis_gen_j_ver_mltimg_movie, time_range, filename=test_file, test=0
 end

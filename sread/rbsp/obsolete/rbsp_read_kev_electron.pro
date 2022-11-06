@@ -15,7 +15,7 @@ pro rbsp_read_kev_electron, time, probe=probe, errmsg=errmsg, pitch_angle=pitch_
     var = pre0+'kev_e_flux'
     enbins = get_var_data('FEDU_Energy')
     nenbin = n_elements(enbins)
-    enidx = where(finite(enbins), nenbin)
+    enidx = where(finite(enbins) and enbins ge 0, nenbin)
     enbins = enbins[enidx]
 
     get_data, 'FEDU', uts, dat

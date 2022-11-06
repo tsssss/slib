@@ -56,6 +56,8 @@ pro rbsp_read_en_spec, time, probe=probe, errmsg=errmsg, $
             zrange: zrange, $
             species_name: species_name, $
             ytitle: species_name+' Energy (eV)', $
+            ylog: 1, $
+            zlog: 1, $
             short_name: ''}
         if n_elements(the_pitch) ne 0 then begin
             add_setting, en_spec_var, {$

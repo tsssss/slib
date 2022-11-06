@@ -37,7 +37,7 @@ pro themis_read_asf_mlon_image_read_mapping_info_gen_file, input_time_range, $
         old_index_2d = array_indices(old_image_size, old_index_1d, dimensions=1)
         pixel_mlons = corner_mlons[old_index_2d[0]:old_index_2d[0]+1,old_index_2d[1]:old_index_2d[1]+1]
         pixel_mlats = corner_mlats[old_index_2d[0]:old_index_2d[0]+1,old_index_2d[1]:old_index_2d[1]+1]
-        mlon_image_mlonmlat2xy, mlon=pixel_mlons, mlat=pixel_mlats, xpos=pixel_xpos, ypos=pixel_ypos, info=mlon_image_info
+        mlon_image_lonlat2xy, mlon=pixel_mlons, mlat=pixel_mlats, xpos=pixel_xpos, ypos=pixel_ypos, info=mlon_image_info
         ; Round works better than floor.
         xpos_range = minmax(round(pixel_xpos))
         ypos_range = minmax(round(pixel_ypos))

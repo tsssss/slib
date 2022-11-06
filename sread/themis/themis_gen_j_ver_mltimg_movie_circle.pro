@@ -174,5 +174,6 @@ test_file = join_path([homedir(),'test_circ.mp4'])
 time_range = time_double(['2007-03-24/09:00','2007-03-24/11:00'])
 test_file = join_path([homedir(),'weygand_j_ver_mltimg_movie_circ_2007_0324_0900_2007_0324_1100.mp4'])
 
+
 themis_gen_j_ver_mltimg_movie_circle, time_range, filename=test_file, test=0
 end

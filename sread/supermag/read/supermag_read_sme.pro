@@ -123,34 +123,42 @@ pro supermag_read_sme, input_time_range, errmsg=errmsg
 
 end
 
-time_range = ['2016-10-13/05:00','2016-10-14/12:00']
-time_range = ['2014-08-27/00:00','2014-08-29/00:00']
-time_range = ['2014-09-12/00:00','2014-09-14/00:00']
-time_range = ['2017-03-01/00:00','2017-03-03/00:00']
-time_range = ['2017-03-27/00:00','2017-03-29/00:00']
-time_range = ['2009-02-26/00:00','2009-02-27/00:00']
+test_time_range = list()
+test_time_range.add, ['2016-10-13/05:00','2016-10-14/12:00']
+test_time_range.add, ['2014-08-27/00:00','2014-08-29/00:00']
+test_time_range.add, ['2014-09-12/00:00','2014-09-14/00:00']
+test_time_range.add, ['2017-03-01/00:00','2017-03-03/00:00']
+test_time_range.add, ['2017-03-27/00:00','2017-03-29/00:00']
+test_time_range.add, ['2009-02-26/00:00','2009-02-27/00:00']
+test_time_range.add, ['2008-01-19/06:00','2008-01-19/09:00']
+test_time_range.add, ['2008-01-21/07:00','2008-01-21/10:00']
+test_time_range.add, ['2016-08-09/08:00','2016-08-09/12:30']
+test_time_range.add, ['2013-06-06','2013-06-09']
+test_time_range.add, ['2013-03-17','2013-03-18/06:00']
+test_time_range.add, ['2013-04-30','2013-05-03/00:00']
+test_time_range.add, ['2013-05-31/18:00','2013-06-02']
+test_time_range.add, ['2013-06-28/06:00','2013-06-30']
+test_time_range.add, ['2013-10-02','2013-10-03']
+test_time_range.add, ['2013-10-08/18:00','2013-10-10']
+test_time_range.add, ['1998-08-06','1998-08-07']
+test_time_range.add, ['1998-09-24/18:00','1998-09-26']
+test_time_range.add, ['1998-11-13','1998-11-15']
 
-time_range = ['2008-01-19/06:00','2008-01-19/09:00']
-time_range = ['2008-01-21/07:00','2008-01-21/10:00']
+foreach time_range, test_time_range do begin
+	supermag_read_sme, time_range
+	base = 'suvey_plot_for_dst_sme_'+strjoin(time_string(time_range,tformat='YYYY_MMD_hhmm'),'_to_')+'_v01.pdf'
+	plot_file = join_path([googledir(),'works','azim_dp','plots','supermag_sme',base])
+	if keyword_set(test) then plot_file = 0
 
-;time_range = ['2016-08-09/08:00','2016-08-09/12:30']
-;time_range = ['2013-06-06','2013-06-09']
-;time_range = ['2013-03-17','2013-03-18/06:00']
-;time_range = ['2013-04-30','2013-05-03/00:00']
-;time_range = ['2013-05-31/18:00','2013-06-02']
-;time_range = ['2013-06-28/06:00','2013-06-30']
-;time_range = ['2013-10-02','2013-10-03']
-;time_range = ['2013-10-08/18:00','2013-10-10']
-;time_range = ['1998-08-06','1998-08-07']
-;time_range = ['1998-09-24/18:00','1998-09-26']
-;time_range = ['1998-11-13','1998-11-15']
-supermag_read_sme, time_range
+	vars = ['dst','sm_sme','sm_sme2d']
+	nvar = n_elements(vars)
+	sgopen, plot_file, xsize=10, ysize=4
 
+	poss = sgcalcpos(nvar, margins=[12,4,10,2])
+	tplot, vars, position=poss, trange=time_range
 
-vars = ['dst','sm_sme','sm_sme2d']
-nvar = n_elements(vars)
-sgopen, 0, xsize=10, ysize=4
+	if keyword_set(test) then stop
+	sgclose
 
-poss = sgcalcpos(nvar, margins=[12,4,10,2])
-tplot, vars, position=poss, trange=time_range
+endforeach
 end

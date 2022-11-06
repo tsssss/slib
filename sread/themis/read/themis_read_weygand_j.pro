@@ -63,6 +63,28 @@ function themis_read_weygand_j, input_time_range, id=datatype, get_name=get_name
         get_data, j_var, times, jdata, limits=lim
         store_data, j_vars, times, jdata[*,*,*,1], limits=lim
     endif
+
+;---Add more position info.
+    foreach j_var, j_vars do begin
+        get_data, j_var, times, limits=lim
+        glon_bins = lim.glon_bins
+        glat_bins = lim.glat_bins
+        nglon_bin = n_elements(glon_bins)
+        nglat_bin = n_elements(glat_bins)
+        glon_grids = (fltarr(nglat_bin)+1) ## glon_bins
+        glat_grids = glat_bins ## (fltarr(nglon_bin)+1)
+        geo2mag2d, times, glon=glon_grids, glat=glat_grids, $
+            mlon=mlon_grids, mlat=mlat_grids, use_apex=1
+        midn_mlons = themis_asi_midn_mlon(times)
+        add_setting, j_var, dictionary($
+            'glon_grids', glon_grids, $
+            'glat_grids', glat_grids, $
+            'mlon_grids', mlon_grids, $
+            'mlat_grids', mlat_grids, $
+            'midn_mlons', midn_mlons )
+    endforeach
+
+
     return, j_vars
 
 end

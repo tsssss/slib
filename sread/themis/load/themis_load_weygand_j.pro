@@ -9,6 +9,7 @@ function themis_read_weygand_parse_eics, file, glat, glon
     ;   Jy (mA/m, points to geographic east)
 
     nline = file_lines(file)
+    if nline eq 0 then return, !null
     if nline ne 183 then return, !null
     ncol = 4
     data = fltarr(ncol, nline)
@@ -26,6 +27,7 @@ function themis_read_weygand_parse_secs, file, glat, glon
     ; Vertical current: J (A, points to vertical up)
 
     nline = file_lines(file)
+    if nline eq 0 then return, !null
     ncol = 3
     data = fltarr(ncol, nline)
     openr, lun, file, /get_lun
@@ -91,9 +93,11 @@ pro themis_read_weygand_gen_file, file_time, filename=local_file, remote_root=re
 
 
         data = fltarr([nfile,size(tmp,/dimensions)])
+        ndata = n_elements(data[0,*,*])
         foreach file, files, ii do begin
             tmp = call_function(routine, file)
-            if n_elements(tmp) eq 0 then continue
+            ;if n_elements(tmp) eq 0 then continue
+            if n_elements(tmp) ne ndata then continue
             data[ii,*,*] = tmp
         endforeach
         case the_type of

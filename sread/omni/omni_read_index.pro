@@ -14,6 +14,20 @@ pro omni_read_index, time, resolution=resolution, errmsg=errmsg
         '1min': dt = 60d
         '5min': dt = 300d
     endcase
+    
+    foreach var, ['ae','dst'] do begin
+        get_data, var, times, data
+        store_data, var, times, float(data)
+    endforeach
+    
+    fillval = !values.f_nan
+    get_data, 'ae', times, ae
+    index = where(abs(ae) ge 1e5, count)
+    if count ne 0 then begin
+        ae[index] = fillval
+        store_data, 'ae', times, ae
+    endif
+    
 
     foreach var, ['ae','dst'] do begin
         case var of
@@ -30,5 +44,6 @@ pro omni_read_index, time, resolution=resolution, errmsg=errmsg
 end
 
 time = time_double(['2014-08-25','2014-09-05'])
+time = time_double(['2018-08-25','2018-09-05'])
 omni_read_index, time
 end

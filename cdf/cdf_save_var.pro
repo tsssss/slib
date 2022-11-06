@@ -77,7 +77,7 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
     if keyword_set(save_as_one) then rec_vary = 0
     
     if rec_vary then begin
-        if data_ndim > 1 then begin
+        if data_ndim gt 1 then begin
             dimensions = data_dims[0:-2]
         endif else dimensions = []
     endif else dimensions = data_dims

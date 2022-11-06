@@ -4,14 +4,14 @@
 ; These variables are saved as prefix_[fpt_gsm,bmod_gsm,c_map]_suffix.
 ;
 ; r_var. A string of an orbit variable.
-; par. Default is 2, input parameter for Txx models.
-; h0. The altitude of lower boundary. Default is 100 km.
-; direction. The tracing direction. -1 for parallel to B, 1 for anti-parallel.
+; model=. The model.
+; h0=. The altitude of lower boundary. Default is 100 km.
+; direction=. The tracing direction. -1 for parallel to B, 1 for anti-parallel.
 ;   The default behaviour is to use z_gsm to tell the hemisphere, and trace to
 ;   the ionosphere.
-; prefix. A string to be added before variables, e.g., 'rbspb_'. Default
+; prefix=. A string to be added before variables, e.g., 'rbspb_'. Default
 ;   behaviour is to figure out from r_var variable.
-; suffix. A string to be added after variables, e.g., '_t89'. Default is ''.
+; suffix=. A string to be added after variables, e.g., '_t89'. Default is ''.
 ;-
 pro read_geopack_info, r_var, errmsg=errmsg, $
     model=model, h0=h0, direction=dir, $
@@ -54,8 +54,8 @@ pro read_geopack_info, r_var, errmsg=errmsg, $
     ntime = n_elements(times)
 
     par_var = model+'_par'
-    if tnames(par_var) eq '' then begin
-        time_range = minmax(times)
+    time_range = minmax(times)
+    if check_if_update(par_var, time_range) then begin
         sgeopack_par, time_range, model
     endif
     get_data, par_var, uts, pars

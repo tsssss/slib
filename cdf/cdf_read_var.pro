@@ -68,7 +68,11 @@ function cdf_read_var, var, range=range, filename=cdf0, errmsg=errmsg
         cdf_varget, cdfid, the_var, vals, /string, rec_start=rec_min, rec_count=nrec
         ; vals = reform(vals), reform causes problem when concatenate data.
         ; permute dimensions.
-        vals = transpose(vals)
+        if nrec eq 1 then begin
+            ;vals = vals[0]
+        endif else begin
+            vals = transpose(vals)
+        endelse
 ;        if nrec ne 1 and size(vals,/n_dimensions) gt 1 then $
 ;            vals = transpose(vals,shift(indgen(n_elements(varinq.dim)+1),1))
     endelse

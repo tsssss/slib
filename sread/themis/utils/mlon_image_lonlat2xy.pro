@@ -7,7 +7,7 @@
 ; info=. Optional, the return value of mlon_image_info(). To avoid reloading it.
 ;-
 
-pro mlon_image_mlonmlat2xy, mlon=mlon, mlat=mlat, xpos=xpos, ypos=ypos, $
+pro mlon_image_lonlat2xy, mlon=mlon, mlat=mlat, xpos=xpos, ypos=ypos, $
     info=mlon_image_info
 
     if n_elements(mlon_image_info) eq 0 then mlon_image_info = mlon_image_info()

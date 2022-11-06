@@ -33,9 +33,11 @@ function themis_read_j_ver_ewogram, input_time_range, mlat_range=mlat_range, mlt
     if direction eq 'up' then begin
         j_new = j_new>0
         ewo = total(j_new[*,*,mlat_index],3)/mlat_count
+        ct = 62
     endif else begin
         j_new = j_new<0
         ewo = -total(j_new[*,*,mlat_index],3)/mlat_count
+        ct = 49
     endelse
     ystep = 3
     ytickv = make_bins(mlt_range, ystep)
@@ -51,10 +53,13 @@ function themis_read_j_ver_ewogram, input_time_range, mlat_range=mlat_range, mlt
         'ytickv', ytickv, $
         'yticks', yticks, $
         'yminor', yminor, $
-        'color_table', 62, $
+        'color_table', ct, $
         'ztitle', 'J '+direction+' (kA)', $
         'zlog', 0 , $
         'zrange', [0,.5e2] )
+
+
+    return, ewo_var
 
 end
 

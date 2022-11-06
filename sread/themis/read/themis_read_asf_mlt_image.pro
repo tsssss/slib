@@ -18,6 +18,7 @@ pro themis_read_asf_mlt_image, input_time_range, sites=sites, $
 
 end
 
+
 time_range = time_double(['2013-03-17/07:00','2013-03-17/08:00'])
 sites = ['mcgr','fykn','gako','fsim', $
     'fsmi','tpas','gill','snkq','pina','kapu']

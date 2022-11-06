@@ -6,27 +6,27 @@ test = 1
 
 event_list = list()
 
-;event_list.add, dictionary($
-;    'site', 'inuv', $
-;    'time', '2008-02-15/07:49:12', $
-;    'pixels', list([75,60],[65,90]), $
-;    'pixel_labels', ['moon','streamer'] )
-event_list.add, dictionary($
-    'site', 'gako', $
-    'time', '2016-10-13/12:10', $
-    'pixels', list([190,64]), $
-    'pixel_labels', ['stable arc'] )
-event_list.add, dictionary($
-    'site', 'gako', $
-    'time', '2013-03-17/07:50', $
-    'pixels', list([30,100]), $
-    'pixel_labels', ['moon'] )
 event_list.add, dictionary($
     'site', 'inuv', $
-    'time', '2008-01-19/07:16', $
-    'pixels', list([140d,60],[130,160]), $
-    'pixels', list([140d,60],[130,160]), $
+    'time', '2008-02-15/07:49:12', $
+    'pixels', list([75,60],[65,90]), $
     'pixel_labels', ['moon','streamer'] )
+;event_list.add, dictionary($
+;    'site', 'gako', $
+;    'time', '2016-10-13/12:10', $
+;    'pixels', list([190,64]), $
+;    'pixel_labels', ['stable arc'] )
+;event_list.add, dictionary($
+;    'site', 'gako', $
+;    'time', '2013-03-17/07:50', $
+;    'pixels', list([30,100]), $
+;    'pixel_labels', ['moon'] )
+;event_list.add, dictionary($
+;    'site', 'inuv', $
+;    'time', '2008-01-19/07:16', $
+;    'pixels', list([140d,60],[130,160]), $
+;    'pixels', list([140d,60],[130,160]), $
+;    'pixel_labels', ['moon','streamer'] )
 
     
 ;event_list.add, dictionary($
