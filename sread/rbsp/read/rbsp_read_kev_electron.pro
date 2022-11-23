@@ -136,8 +136,11 @@ function rbsp_read_kev_electron, input_time_range, probe=probe, $
         options, var, 'no_interp', 1
         options, var, 'zlog', 1
         options, var, 'ylog', 1
-        options, var, 'ytitle', 'Energy (eV)'
+        options, var, 'ytitle', 'Energy (keV)'
         options, var, 'ztitle', 'e!U-!N flux (#/cm!U2!N-s-sr-keV)'
+        if n_elements(enbins) ne 0 then begin
+            ylim, var, min(enbins), max(enbins)
+        endif
     endif
 
 ;    dt = 10.848

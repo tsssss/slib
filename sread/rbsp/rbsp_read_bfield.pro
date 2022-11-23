@@ -6,9 +6,11 @@
 ; probe=.
 ; resolution=. 'hires', '1sec', '4sec'.
 ;-
-pro rbsp_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg, _extra=ex
+pro rbsp_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg, coord=coord, _extra=ex
 
     pre0 = 'rbsp'+probe+'_'
+    if n_elements(coord) eq 0 then coord = 'gsm'
+    b_coord_var = pre0+'b_'+coord
 
     resolution = (keyword_set(resolution))? strlowcase(resolution): '4sec'
     case resolution of
@@ -38,12 +40,20 @@ pro rbsp_read_bfield, utr0, probe=probe, resolution=resolution, errmsg=errmsg, _
     endif
     uniform_time, bvar, dt
     
+    ; convert to the wanted coord.
+    if coord ne 'gsm' then begin
+        get_data, bvar, times, bgsm
+        b_coord = cotran(bgsm, times, 'gsm2'+coord, probe=probe)
+        store_data, b_coord_var, times, b_coord
+    endif
+    
     add_setting, bvar, /smart, {$
         display_type: 'vector', $
         unit: 'nT', $
         short_name: 'B', $
-        coord: 'GSM', $
-        coord_labels: ['x','y','z']}
+        coord: strupcase(coord), $
+        coord_labels: ['x','y','z'], $
+        colors: constant('rgb') }
 
 end
 
