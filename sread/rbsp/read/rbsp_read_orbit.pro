@@ -2,7 +2,7 @@
 ; Read RBSP orbit. Save as 'rbspx_r_<coord>'. Default <coord> is gsm.
 ;
 ; input_time_range. Unix time or string for time range.
-; probe=. A string for probe. '1','2','3','4'.
+; probe=. A string for probe. 'a','b'.
 ;-
 
 function rbsp_read_orbit, input_time_range, probe=probe, $
