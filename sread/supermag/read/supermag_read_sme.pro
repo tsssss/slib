@@ -93,7 +93,7 @@ pro supermag_read_sme, input_time_range, errmsg=errmsg
     mltreg_var = prefix+'regionalmlt'
     get_data, smereg_var, times, smereg
     get_data, mltreg_var, times, mltreg
-    mlt0 = total(mltreg,2)*0.5
+    mlt0 = total(mltreg,3)*0.5
 
     mlt1 = [[mlt0[*,12:23]-24],[mlt0],[mlt0[*,0:11]+24]]
     sme1 = [[smereg[*,12:23]],[smereg],[smereg[*,0:11]]]
