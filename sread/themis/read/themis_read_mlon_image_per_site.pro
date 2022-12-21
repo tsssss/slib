@@ -20,6 +20,10 @@ pro themis_read_mlon_image_per_site, input_time_range, site=site, thumbnail=thum
         'time_var_type', 'unix' )
     read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
     if errmsg ne '' then return
+    get_data, mlon_image_var, times, images
+    images = transpose(images,[0,2,1])
+    store_data, mlon_image_var, times, images
+    
 
     vars = ['pixel_'+['mlon','mlat','elev','azim','xpos','ypos'], $
         'crop_'+['xrange','yrange'], 'image_'+['pos','size']]

@@ -59,11 +59,28 @@ pro add_setting, var, settings, smart=smart
             ; stack is less complicated than vector. The components are
             ; just the same quantity from several sources.
             'stack': begin
-                options, var, 'spec', 0                
-                ; use unit to init ytitle.
-                unit = get_setting(var, 'unit', exist)
-                if exist then options, var, 'ytitle', '('+unit+')'
-                options, var, 'ysubtitle', ''
+                options, var, 'spec', 0   
+                ytitle = get_setting(var, 'ytitle', exist)
+                if not exist then begin
+                    ; use unit to init ytitle.
+                    unit = get_setting(var, 'unit', exist)
+                    if exist then options, var, 'ytitle', '('+unit+')'
+                    options, var, 'ysubtitle', ''
+                endif
+                
+                colors = get_setting(var, 'colors', exist)
+                if not exist then begin
+                    labels = get_setting(var, 'labels', exist)
+                    if exist then begin
+                        nval = n_elements(labels)
+                        bottom = 100d
+                        top = 250d
+                        colors = reverse(long(smkarthm(bottom, top, nval, 'n')))
+                        color_table = get_setting(var, 'color_table', exist)
+                        if exist then for ii=0, nval-1 do colors[ii] = sgcolor(colors[ii], ct=color_table)
+                        options, var, 'colors', colors
+                    endif
+                endif                                
                 end
             ; list is more complicate than vector. The components of a list
             ; are a second variable with certain unit, whereas a vector has

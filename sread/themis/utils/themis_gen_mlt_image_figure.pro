@@ -9,14 +9,31 @@
 function themis_gen_mlt_image_figure, mlt_image_var, $
     fig_dir=fig_dir, time_step=time_step, crop_method=crop_method, $
     mlt_range=mlt_range0, mlat_range=mlat_range0, zrange=zrange, ct=ct, $
+    models=models, igrf=igrf, mission_probes=mission_probes, $
     _extra=extra
 
+test = 0
     get_data, mlt_image_var, times, mlt_images, limits=lim
     ntime = n_elements(times)
     if ntime eq 1 and times[0] eq 0 then begin
         errmsg = 'No mlt image ...'
         return, ''
     endif
+    
+    
+;---Prepare sc location.
+    coord = 'gsm'
+    if n_elements(models) eq 0 then models = ['t89']
+    foreach mission_probe, mission_probes do begin
+        mission_info = resolve_probe(mission_probe)
+        routine_name = mission_info.routine_name
+        probe = mission_info.probe
+        prefix = mission_info.prefix
+        routine = routine_name+'_read_orbit'
+        r_gsm_var = call_function(routine, minmax(times), probe=probe, coord=coord)
+        vinfo = geopack_trace_to_ionosphere(r_gsm_var, models=models, igrf=igrf)
+    endforeach
+
 
 ;---Get the images we want.
     time_step0 = total(times[0:1]*[-1,1])
@@ -164,6 +181,51 @@ function themis_gen_mlt_image_figure, mlt_image_var, $
         ty = tpos[1]+ychsz
         msg = 'MLT-MLat'
         xyouts, tx,ty,msg, normal=1, color=tick_color
+        
+        
+        ; Add spacecraft footpoint.
+        nmission_probe = n_elements(mission_probes)
+        colors = get_color(nmission_probe)
+        
+        all_psyms = [1,6,7,4,2,5]
+        nmodel = n_elements(models)
+        psyms = all_psyms[0:nmodel-1]
+        
+        foreach mission_probe, mission_probes, probe_id do begin
+            prefix = mission_probe+'_'
+            mlt_var = prefix+'fmlt'
+            mlat_var = prefix+'fmlat'
+            color = colors[probe_id]
+            
+            
+            mlts = get_var_data(mlt_var, at=time)
+            mlats = get_var_data(mlat_var, at=time)
+            tts = (mlts*15-90)*constant('rad')
+            rrs = (lim.mlat_range[1]-mlats)/(lim.mlat_range[1]-lim.mlat_range[0])
+            xxs = rrs*cos(tts)
+            yys = rrs*sin(tts)          
+            foreach model, models, model_id do begin
+                psym = psyms[model_id]
+                plots, xxs[model_id], yys[model_id], color=color, psym=psym, symsize=0.5
+            endforeach
+        endforeach
+        
+        tx0 = tpos[0]
+        ty0 = tpos[3]-ychsz*1
+        foreach mission_probe, mission_probes, probe_id do begin
+            tx = tx0+probe_id*6*xchsz
+            ty = ty0
+            color = colors[probe_id]
+            xyouts, tx,ty,strupcase(mission_probe), color=color, normal=1
+        endforeach
+        
+        tx0 = tpos[0]
+        ty0 = tpos[3]-ychsz*2
+        foreach model, models, model_id do begin
+            tx1 = tx0+model_id*6*xchsz
+            plots, tx1+xchsz*0.5, ty0+ychsz*0.3, psym=psyms[model_id], normal=1, symsize=0.5
+            xyouts, tx1+xchsz*1, ty0, normal=1, strupcase(model)
+        endforeach
         
         if keyword_set(test) then stop
         

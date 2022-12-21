@@ -65,8 +65,13 @@ pro themis_read_asf_mlon_image, input_time_range, sites=sites, $
 
 end
 
-time_range = time_double(['2013-03-17/07:00','2013-03-17/08:00'])
-sites = ['mcgr','fykn','gako','fsim', $
-    'fsmi','tpas','gill','snkq','pina','kapu']
+    time_range = time_double(['2013-03-17/07:00','2013-03-17/08:00'])
+    sites = ['mcgr','fykn','gako','fsim', $
+        'fsmi','tpas','gill','snkq','pina','kapu']
+    
+    time_range = time_double(['2019-03-28/08:00','2019-03-28/09:00'])
+;    sites = ['inuv','whit','atha','tpas','gill','rank']
+    sites = ['inuv','whit']
+    
 themis_read_asf_mlon_image, time_range, sites=sites, merge_method='merge_elev', min_elev=2.5
 end

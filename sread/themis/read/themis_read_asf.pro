@@ -70,5 +70,8 @@ site = 'gako'
 time_range = time_double(['2008-01-19/07:00','2008-01-19/08:00'])
 site = 'kuuj'
 
+time_range = time_double(['2019-03-28/08:00','2019-03-28/09:00'])
+site = 'whit'
+
 themis_read_asf, time_range, site=site
 end

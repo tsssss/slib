@@ -7,6 +7,11 @@ function resolve_probe, probe
         'prefix_name', 'rbsp', $; used in prefix for tplot var.
         'short_name','rb', $    ; short name is for display.
         'routine_name','rbsp')  ; default name is for finding routine.
+    missions.arase = dictionary($
+        'name','arase', $
+        'prefix_name', 'arase', $
+        'short_name', 'erg', $
+        'routine_name','arase')
     missions.polar = dictionary($
         'name','polar', $
         'prefix_name', 'po', $

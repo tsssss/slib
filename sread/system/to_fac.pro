@@ -6,7 +6,7 @@
 ; to=. The new var.
 ; q_var=. The quaternion.
 ;-
-pro to_fac, var, to=out_var, q_var=q_var
+pro to_fac, var, to=out_var, q_var=q_var, output=out_var1
 
     coord = strlowcase(get_setting(var, 'coord'))
     if coord eq 'fac' then return
@@ -14,6 +14,7 @@ pro to_fac, var, to=out_var, q_var=q_var
     if n_elements(q_var) eq 0 then q_var = get_prefix(var)+'q_'+strlowcase(coord)+'2fac'
     if tnames(q_var) eq '' then message, 'Define FAC first ...'
 
+    if n_elements(out_var1) ne 0 then out_var = out_var1
     if n_elements(out_var) eq 0 then $
         out_var = strjoin(strsplit(var, strlowcase(coord), /regex, /extract, /preserve_null), 'fac')
 

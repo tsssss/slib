@@ -5,6 +5,7 @@
 ;   id0, in, string/number, opt. The canvas id. Can be a file name for devices
 ;       like 'ps','z', can be window id for 'win' or 'x'. Default is window 0.
 ; Keywords:
+;   size, in, [xsize,ysize].
 ;   xsize, in, int, opt. Canvas xsize. Default is current device's xsize.
 ;   ysize, in, int, opt. Canvas ysize. Default is current device's ysize.
 ;   cm, in, boolean, opt. Set the size unit to be cm, default unit is pixel.

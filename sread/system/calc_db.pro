@@ -31,7 +31,7 @@ pro calc_db, bvar, bmodvar, db_name=dbvar, b0_name=b0var, smooth=width
         drec = width/dt
         dbgsm = bgsm
         for i=0, ndim-1 do $
-            dbgsm[*,i] -= smooth(dbgsm[*,i], drec, /edge_mirror)
+            dbgsm[*,i] -= smooth(dbgsm[*,i], drec, edge_mirror=1, nan=1)
     endif else begin
         if coord ne get_setting(bmodvar, 'coord') then $
             message, 'B model and B are in different coord ...'
@@ -47,7 +47,7 @@ pro calc_db, bvar, bmodvar, db_name=dbvar, b0_name=b0var, smooth=width
         if n_elements(width) eq 0 then no_smooth = 1 else if width le dt then no_smooth = 1
         if ~no_smooth then begin
             drec = width/dt
-            for i=0, ndim-1 do dbgsm[*,i] -= smooth(dbgsm[*,i], drec, /edge_mirror)
+            for i=0, ndim-1 do dbgsm[*,i] -= smooth(dbgsm[*,i], drec, edge_mirror=1, nan=1)
         endif
     endelse
     
