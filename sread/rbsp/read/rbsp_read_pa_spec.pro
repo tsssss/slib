@@ -1,26 +1,24 @@
 ;+
-; Read the energy-time spectrogram, for a given pitch angle.
-; time_range.
-; probe=.
+; Read the pitch angle spectrogram, for a given energy range.
 ;-
 
-function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
+function rbsp_read_pa_spec, input_time_range, probe=probe, errmsg=errmsg, $
     species=species, get_name=get_name, $
-    pitch_angle_range=pitch_angle_range
+    energy_range=energy_range
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
     retval = ''
 
     if n_elements(species) eq 0 then species = 'e'
-    all_species = rbsp_hope_species()
+    all_species = ['e','p','o','he']
     index = where(all_species eq species, count)
     if count eq 0 then begin
         errmsg = 'Invalid species: '+species+' ...'
         return, retval
     endif
 
-    spec_var = prefix+species+'_en_spec'
+    spec_var = prefix+species+'_pa_spec'
     if keyword_set(get_name) then return, spec_var
 
     time_range = time_double(input_time_range)
@@ -44,7 +42,6 @@ function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
     pitch_angles = cdf_read_var('PITCH_ANGLE', filename=files[0])
     npitch_angle = n_elements(pitch_angles)
 
-
     species_infos = dictionary()
     species_infos['e'] = dictionary('short_name', 'e!U-!N')
     species_infos['p'] = dictionary('short_name', 'H!U+!N')
@@ -52,56 +49,61 @@ function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
     species_infos['he'] = dictionary('short_name', 'He!U+!N')
     supported_species = species_infos.keys()
 
+
     fillval = !values.f_nan
     get_data, flux_var, times, fluxs
     index = where(abs(fluxs) ge 1e30, count)
     if count ne 0 then fluxs[index] = fillval
+    energys = get_var_data(energy_var)
 
 
-;---Treat pa.
-    if n_elements(pitch_angle_range) eq 1 then begin
-        tmp = min(pitch_angles-pitch_angle_range[0], abs=1, pitch_index)
-        npitch_index = 1
-    endif else if n_elements(pitch_angle_range) eq 2 then begin
-        pitch_index = lazy_where(pitch_angles, '[]', pitch_angle_range, count=npitch_index)
-        if npitch_index eq 0 then begin
-            errmsg = 'Invalid pitch angle range ...'
-            return, retval
-        endif
+;---Treat en.
+    ntime = n_elements(times)
+    nenergy_input = n_elements(energy_range)
+    if nenergy_input eq 1 then begin
+        the_fluxs = fltarr(ntime,npitch_angle)
+        for time_id=0,ntime-1 do begin
+            for pitch_id=0,npitch_angle-1 do begin
+                the_fluxs[time_id,pitch_id] = interpol(fluxs[time_id,*,pitch_id], energys[time_id,*], energy_range)
+            endfor
+        endfor
+    endif else if nenergy_input eq 2 then begin
+        the_fluxs = fltarr(ntime,npitch_angle)
+        for time_id=0,ntime-1 do begin
+            index = lazy_where(energys[time_id,*], '[]', energy_range, count=count)
+            if count eq 0 then continue
+            the_fluxs[time_id,*] = total(fluxs[time_id,index,*],2, nan=1)/count
+        endfor
     endif else begin
-        npitch_index = npitch_angle
-        pitch_index = findgen(npitch_index)
-        pitch_angle_range = [0,180]
+        energy_range = minmax(energys)
+        dims = size(fluxs,dimensions=1)
+        the_fluxs = total(fluxs,2,nan=1)/dims[2]
     endelse
 
-    energys = get_var_data(energy_var)
-    the_fluxs = fluxs[*,*,pitch_index]
+    store_data, spec_var, times, the_fluxs, pitch_angles
 
-    dims = size(the_fluxs,dimensions=1)
-    data = reform(total(the_fluxs,3,nan=1)/dims[2])
-
-    store_data, spec_var, times, data, energys
-
-    zrange = (species eq 'e')? [1e4,1e10]: [1e4,1e8]
+    zrange = (species eq 'e')? [1e5,1e10]: [1e5,1e8]
     species_name = species_infos[species].short_name
     add_setting, spec_var, /smart, {$
         display_type: 'spec', $
         unit: '#/cm!U2!N-s-sr-keV', $
         zrange: zrange, $
         species_name: species_name, $
-        ytitle: 'Energy (eV)', $
-        ylog: 1, $
+        ytitle: species_name+' PA (deg)', $
+        ylog: 0, $
         zlog: 1, $
+        yrange: [0,180], $
         short_name: ''}
-    if npitch_index eq 1 then begin
-        the_pitch = pitch_angles[pitch_index]
-        pitch_msg = sgnum2str(the_pitch)
+
+    if nenergy_input eq 1 then begin
+        the_energy = energy_range[0]
+        energy_msg = sgnum2str(the_energy)
     endif else begin
-        pitch_msg = '['+sgnum2str(pitch_angle_range[0])+','+sgnum2str(pitch_angle_range[1])+']'
+        energy_msg = '['+sgnum2str(energy_range[0])+','+sgnum2str(energy_range[1])+']'
     endelse
     add_setting, spec_var, {$
-        pitch_angle: pitch_angles[pitch_index], $
-        ytitle: 'Energy (eV)!C'+species_name+', PA '+pitch_msg+' deg'}
+        energy_range: energy_range, $
+        ytitle: 'PA (deg)!C'+species_name+', PA '+energy_msg+' eV'}
 
     return, spec_var
 
@@ -110,15 +112,15 @@ end
 time_range = time_double(['2013-05-01','2013-05-02'])
 probe = 'b'
 
+;time_range = time_double(['2013-06-01','2013-06-02'])
+;probe = 'a'
+
 vars = list()
 foreach species, ['p','o'] do begin
-    var = rbsp_read_en_spec(time_range, probe=probe, species=species, pitch_angle_range=[0,45])
-    vars.add, rename_var(var, output=var+'_para')
-    var = rbsp_read_en_spec(time_range, probe=probe, species=species, pitch_angle_range=[45,135])
-    vars.add, rename_var(var, output=var+'_perp')
-    var = rbsp_read_en_spec(time_range, probe=probe, species=species, pitch_angle_range=[135,180])
-    vars.add, rename_var(var, output=var+'_anti')
+    var = rbsp_read_pa_spec(time_range, probe=probe, species=species)
+    vars.add, var
 endforeach
 vars = vars.toarray()
 
+;tplot, vars, trange=time_range
 end
