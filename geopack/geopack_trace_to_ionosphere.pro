@@ -12,16 +12,17 @@
 ;-
 
 function geopack_trace_to_ionosphere, r_var, models=models, $
-    south=south, north=north, h0=h0, igrf=input_igrf, suffix=the_suffix, $
+    south=south, north=north, h0=h0, igrf=input_igrf, refine=refine, suffix=the_suffix, $
     _extra=ex
 
     if n_elements(models) eq 0 then models = ['t89']
     nmodel = n_elements(models)
     colors = get_color(nmodel)
     if n_elements(the_suffix) eq 0 then the_suffix = ''
-
+    if n_elements(refine) eq 0 then refine = 1
 
     get_data, r_var, times, r_coord, limits=lims
+    if size(lims,type=1) ne 8 then return, !null
     coord = lims.coord
     if strlowcase(coord) ne 'gsm' then begin
         r_gsm = cotran(r_coord, times, 'gsm2'+strlowcase(coord), _extra=ex)
@@ -37,16 +38,17 @@ function geopack_trace_to_ionosphere, r_var, models=models, $
     t89_par = keyword_set(t89_use_kp)? !null: 2
 
     foreach model, models do begin
-        t89 = (model eq 't89')? 1: 0
-        t96 = (model eq 't96')? 1: 0
-        t01 = (model eq 't01')? 1: 0
-        t04s = (model eq 't04s')? 1: 0
-        index = strpos(model, 's')
-        storm = (index[0] ge 0)? 1: 0
+        tmp = geopack_resolve_model(model)
+        t89 = tmp.t89
+        t96 = tmp.t96
+        t01 = tmp.t01
+        ts04 = tmp.ts04
+        storm = tmp.storm
         
         if n_elements(input_igrf) ne 0 then igrf = input_igrf
         if model eq 'igrf' then igrf = 1
         if model eq 'dip' or model eq 'dipole' then igrf = 0
+        if n_elements(igrf) eq 0 then igrf = 0
 
         time_range = minmax(times)
         par_var = geopack_read_par(time_range, model=model, t89_par=t89_par, _extra=ex)
@@ -62,7 +64,7 @@ function geopack_trace_to_ionosphere, r_var, models=models, $
             zp = r_gsm[time_id,2]
 
             geopack_trace, xp,yp,zp, trace_dir, reform(pars[time_id,*]), $
-                xf,yf,zf, r0=r0, refine=1, ionosphere=1, $
+                xf,yf,zf, r0=r0, refine=refine, ionosphere=1, $
                 t89=t89, t96=t96, t01=t01, ts04=ts04, storm=storm, igrf=igrf
             f_gsm[time_id,*] = [xf,yf,zf]
 

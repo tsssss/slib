@@ -13,7 +13,7 @@
 
 function geopack_read_bfield, time_range, mission_probe=mission_probe, $
     r_var=r_var, errmsg=errmsg, coord=coord, $
-    models=models, igrf=igrf, t89_par=t89_par, $
+    models=models, igrf=igrf, t89_par=t89_par, suffix=input_suffix, $
     _extra=ex
 
     errmsg = ''
@@ -21,6 +21,7 @@ function geopack_read_bfield, time_range, mission_probe=mission_probe, $
     coord_orig = 'gsm'
 
 ;---Check inputs.
+    if n_elements(time_range) eq 1 and size(time_range,type=1) eq 7 then r_var = time_range[0]
     if n_elements(r_var) eq 0 then begin
         pinfo = resolve_probe(mission_probe)
         routine = pinfo['routine_name']+'_read_orbit'
@@ -44,6 +45,7 @@ function geopack_read_bfield, time_range, mission_probe=mission_probe, $
         r_gsm = temporary(r_coord)
     endelse
     if n_elements(time_range) eq 0 then time_range = minmax(times)
+    if n_elements(time_range) eq 1 then time_range = minmax(times)
     ndim = 3
     ntime = n_elements(times)
 
@@ -52,18 +54,18 @@ function geopack_read_bfield, time_range, mission_probe=mission_probe, $
     if n_elements(coord) eq 0 then coord = coord_orig
 
     vinfo = dictionary()
+    if n_elements(input_suffix) eq 0 then input_suffix = ''
     foreach model, models do begin
         index = where(model eq ['dip','dipole','igrf','t89','t96','t01','t04s'], count)
         if count eq 0 then continue
-        suffix = '_'+model
+        suffix = '_'+model+input_suffix
         
-
-        t89 = (model eq 't89')? 1: 0
-        t96 = (model eq 't96')? 1: 0
-        t01 = (model eq 't01')? 1: 0
-        t04s = (model eq 't04s')? 1: 0
-        index = strpos(model, 's')
-        storm = (index[0] ge 0)? 1: 0
+        tmp = geopack_resolve_model(model)
+        t89 = tmp.t89
+        t96 = tmp.t96
+        t01 = tmp.t01
+        ts04 = tmp.ts04
+        storm = tmp.storm
 
         par_var = geopack_read_par(time_range, model=model, t89_par=t89_par)
         pars = get_var_data(par_var, at=times)

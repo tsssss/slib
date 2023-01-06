@@ -46,7 +46,10 @@ function geopack_read_par, input_time_range, model=model, get_name=get_name, $
     get_data, sw_v_var, times, sw_v
     store_data, vp_var, times, snorm(sw_v)
 
-    get_tsy_params, dst_var, imf_var, sw_n_var, vp_var, model, speed=1, imf_yz=1, trange=time_range
+    the_model = model
+    index = strpos(model, '04')
+    if index[0] ne -1 then the_model = 't04s'
+    get_tsy_params, dst_var, imf_var, sw_n_var, vp_var, the_model, speed=1, imf_yz=1, trange=time_range
 
     get_data, par_var, times, pars
     ntime = n_elements(times)
