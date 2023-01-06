@@ -13,6 +13,21 @@ pro themis_gen_mlt_image_movie, mlt_image_var, _extra=extra, filename=movie_file
 end
 
 
+time_range = time_double(['2013-05-01/07:00','2013-05-01/08:00'])
+sites = ['fsim','fsmi','atha']
+sites = ['atha']
+min_elev = 5
+merge_method = 'merge_elev'
+mlat_range = [60,90]
+mission_probes = ['rbspb']
+
+;mlt_image_var = themis_read_asf_mlt_image(time_range, sites=sites, min_elev=min_elev, $
+;    merge_method=merge_method, mlat_range=mlat_range)
+movie_file = join_path([homedir(),'test','test_asf_movie_2013_0501.mp4'])
+themis_gen_mlt_image_movie, mlt_image_var, filename=movie_file, $
+    mlt_range=[-1,1]*6, mlat_range=[50,90], fig_xsize=6, zrange=[0,1e4], $
+    mission_probes=mission_probes, models=['t89'], igrf=0
+stop
 
 
 time_range = time_double(['2008-01-21/07:00','2008-01-21/08:00'])

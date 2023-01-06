@@ -24,6 +24,8 @@ test = 0
 ;---Prepare sc location.
     coord = 'gsm'
     if n_elements(models) eq 0 then models = ['t89']
+    if n_elements(mission_probes) eq 0 then mission_probes = []
+        
     foreach mission_probe, mission_probes do begin
         mission_info = resolve_probe(mission_probe)
         routine_name = mission_info.routine_name

@@ -1,7 +1,10 @@
 
-pro themis_read_asf_mlon_image_gen_merge_info, sites=sites, $
-    min_elev=min_elev, merge_method=merge_method
+function themis_read_asf_mlon_image_gen_merge_info, sites=sites, $
+    min_elev=min_elev, merge_method=merge_method, get_name=get_name
 
+    the_var = 'thg_mlon_image_merge_weight'
+    if keyword_set(get_name) then return, the_var
+    
     mlon_image_info = mlon_image_info()
     image_size = mlon_image_info.image_size
 
@@ -38,6 +41,7 @@ pro themis_read_asf_mlon_image_gen_merge_info, sites=sites, $
         endforeach
     endif
 
-    store_data, 'thg_mlon_image_merge_weight', 0, merge_weight
+    store_data, the_var, 0, merge_weight
+    return, the_var
 
 end

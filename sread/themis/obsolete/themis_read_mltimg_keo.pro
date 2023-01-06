@@ -13,7 +13,7 @@ pro themis_read_mltimg_keo, time_range, mlat_range=mlat_range, $
 
 
 ;---Settings.
-    mlt_keo_var = 'thg_asf_keo'
+    the_var = 'thg_asf_keo'
 
 
 ;---Load MLon image.

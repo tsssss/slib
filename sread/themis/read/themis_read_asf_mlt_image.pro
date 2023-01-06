@@ -2,19 +2,22 @@
 ; Read ASI mlt image.
 ;-
 
-pro themis_read_asf_mlt_image, input_time_range, sites=sites, $
-    min_elev=min_elev, merge_method=merge_method, _extra=extra
+function themis_read_asf_mlt_image, input_time_range, sites=sites, $
+    min_elev=min_elev, merge_method=merge_method, $
+    get_name=get_name, _extra=extra
 
     errmsg = ''
+    retval = ''
+    mlt_image_var = 'thg_asf_mlt_image'
+    if keyword_set(get_name) then return, mlt_image_var
+    
     time_range = time_double(input_time_range)
-
-    themis_read_asf_mlon_image, input_time_range, sites=sites, min_elev=min_elev, merge_method=merge_method, errmsg=errmsg
-    if errmsg ne '' then return
+    mlon_image_var = themis_read_asf_mlon_image(input_time_range, sites=sites, $
+        min_elev=min_elev, merge_method=merge_method, errmsg=errmsg)
+    if errmsg ne '' then return, retval
 
 ;---Rotate from mlon to mlt.
-    mlon_image_var = 'thg_asf_mlon_image'
-    mlt_image_var = 'thg_asf_mlt_image'
-    mlon_image_to_mlt_image, mlon_image_var, to=mlt_image_var
+    return, mlon_image_to_mlt_image(mlon_image_var, output=mlt_image_var)
 
 end
 
