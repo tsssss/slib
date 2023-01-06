@@ -2,44 +2,58 @@
 ; Read GOES position.
 ;-
 
-function goes_read_orbit, input_time_range, probe=probe, errmsg=errmsg, coord=coord, get_name=get_name, _extra=ex
+function goes_read_orbit, input_time_range, probe=input_probe, errmsg=errmsg, coord=coord, get_name=get_name, _extra=ex
 
+    probe = goes_resolve_probe(input_probe)
     prefix = 'g'+probe+'_'
-    dt = 60.0
     errmsg = ''
     retval = ''
+    dt = 60.0
 
     if n_elements(coord) eq 0 then coord = 'gsm'
     var = prefix+'r_'+coord
     if keyword_set(get_name) then return, var
 
     time_range = time_double(input_time_range)
+    files = goes_load_ssc(time_range, probe=probe)
+    if errmsg ne '' then return, retval
 
-    ; read 'xyz_gsm'
-    goes_read_orbit_cdaweb, time_range, probe=probe, coord='gsm', errmsg=errmsg
-    if errmsg ne '' then goes_read_ssc, time_range, id='pos', probe=probe, errmsg=errmsg
+
+    var_list = list()
+    orig_var = prefix+'r_gsm'
+    var_list.add, dictionary($
+        'in_vars', 'XYZ_GSM', $
+        'out_vars', orig_var, $
+        'time_var_name', 'Epoch', $
+        'time_var_type', 'epoch' )
+    read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
+    if errmsg ne '' then return, retval
 
     if coord ne 'gsm' then begin
-        get_data, prefix+'r_gsm', times, r_gsm, limits=lim
+        get_data, orig_var, times, r_gsm, limits=lim
         r_coord = cotran(r_gsm, times, 'gsm2'+coord)
         store_data, var, times, r_coord, limits=lim
     endif
-    
-    add_setting, var, smart=1, {$
-        display_type: 'vector', $
-        unit: 'Re', $
-        short_name: 'R', $
-        coord: strupcase(coord), $
-        coord_labels: constant('xyz')}
 
-    uniform_time, var, dt, errmsg=errmsg
-    if errmsg ne '' then begin
-        del_data, var
-        return, retval
-    endif else return, var
+    add_setting, var, smart=1, dictionary($
+        'display_type', 'vector', $
+        'short_name', 'R', $
+        'unit', 'Re', $
+        'coord', strupcase(coord), $
+        'coord_labels', constant('xyz') )
+    
+    return, var
 
 end
 
+;    ; read 'xyz_gsm'
+;    goes_read_orbit_cdaweb, time_range, probe=probe, coord='gsm', errmsg=errmsg
+;    if errmsg ne '' then goes_read_ssc, time_range, id='pos', probe=probe, errmsg=errmsg
+
+
+var = goes_read_orbit(['2013-05-01','2013-05-02'], probe='15', coord='gsm')
+
+stop
 
 time_range = time_double(['2006-01-01','2007-01-01'])
 time_range = time_double(['2016-01-01','2017-01-01'])

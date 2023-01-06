@@ -107,7 +107,7 @@ function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
 
 end
 
-time_range = time_double(['2013-05-01','2013-05-02'])
+time_range = time_double(['2013-05-01/07:20','2013-05-01/07:50'])
 probe = 'b'
 
 vars = list()
@@ -120,5 +120,27 @@ foreach species, ['p','o'] do begin
     vars.add, rename_var(var, output=var+'_anti')
 endforeach
 vars = vars.toarray()
+options, vars, 'zrange', [1e4, 1e6]
+options, vars, 'color_table', 40
+
+sgopen, 0, xsize=8, ysize=10
+nvar = n_elements(vars)
+margins = [15,4,12,1]
+poss = sgcalcpos(nvar, margins=margins)
+tplot, vars, trange=time_range, position=poss
+times = make_bins(time_range, 5*60, inner=1)
+timebar, times, color=sgcolor('white'), linestyle=1
+constants = [1e1,1e2,1e3,1e4]
+yrange = [1,5e4]
+xrange = time_range
+for ii=0,nvar-1 do begin
+    tpos = poss[*,ii]
+    plot, xrange, yrange, $
+        xstyle=5, ystyle=5, ylog=1, $
+        nodata=1, noerase=1, position=tpos
+    foreach ty, constants do begin
+        oplot, xrange, ty+[0,0], linestyle=1, color=sgcolor('white')
+    endforeach
+endfor
 
 end

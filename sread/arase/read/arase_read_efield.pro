@@ -61,6 +61,7 @@ function arase_read_efield, input_time_range, probe=probe, $
     
     if coord ne coord_orig then begin
         j2000_var = 'arase_e_j2000'
+        timespan, time_range[0], time_range[1]-time_range[0], second=1
         erg_cotrans, e_orig_var, j2000_var, in_coord=coord_orig, out_coord='j2000'
         spd_cotrans, j2000_var, var, in_coord='j2000', out_coord=coord
     endif
