@@ -57,7 +57,13 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
     extra = create_struct(var_type,1)
 
     ; Get the data size.
-    vals = transpose(temporary(data))
+    ndim = size(data,n_dimension=1)
+    if ndim gt 1 then begin
+        permu = shift(findgen(ndim),-1)
+        vals = transpose(temporary(data),permu)
+    endif else begin
+        vals = transpose(temporary(data))
+    endelse
     nrec = n_elements(vals)
     data_dims = size(vals,/dimensions)
     data_ndim = n_elements(data_dims)
@@ -79,6 +85,8 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
     if rec_vary then begin
         if data_ndim gt 1 then begin
             dimensions = data_dims[0:-2]
+            ; Scalar needs dimensions to be [].
+            if n_elements(dimensions) eq 1 and dimensions[0] eq 1 then dimensions = []
         endif else dimensions = []
     endif else dimensions = data_dims
     
@@ -100,4 +108,12 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
     if input_is_file then cdf_close, cdfid
 
 
+end
+
+
+file = join_path([homedir(),'test.cdf'])
+uts = findgen(1200)
+cdf_save_var, 'ut', value=uts, filename=file
+vec = findgen(1200,3)
+cdf_save_var, 'vec', value=vec, filename=file
 end

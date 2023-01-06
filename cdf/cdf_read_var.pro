@@ -71,7 +71,11 @@ function cdf_read_var, var, range=range, filename=cdf0, errmsg=errmsg
         if nrec eq 1 then begin
             ;vals = vals[0]
         endif else begin
-            vals = transpose(vals)
+            ndim = size(vals,n_dimension=1)
+            if ndim gt 1 then begin
+                permu = shift(findgen(ndim),1)
+                vals = transpose(temporary(vals),permu)
+            endif
         endelse
 ;        if nrec ne 1 and size(vals,/n_dimensions) gt 1 then $
 ;            vals = transpose(vals,shift(indgen(n_elements(varinq.dim)+1),1))
