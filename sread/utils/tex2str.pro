@@ -31,6 +31,8 @@ function tex2str, input
         'Sigma': output = '!9'+string(83b)+'!X'
         'tau': output = '!9'+string(116b)+'!X'
         'rho': output = '!9'+string(114b)+'!X'
+        'lambda': output = '!9'+string(108b)+'!X'
+        'Lambda': output = '!9'+string(76b)+'!X'
     ;---Math symbols.
         'perp': output = '!9'+string(94b)+'!X'
         'parallel': output = '||'
