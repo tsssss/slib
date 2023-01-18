@@ -112,6 +112,7 @@ probe = 'b'
 
 vars = list()
 foreach species, ['p','o'] do begin
+    var = rbsp_read_en_spec(time_range, probe=probe, species=species)
     var = rbsp_read_en_spec(time_range, probe=probe, species=species, pitch_angle_range=[0,45])
     vars.add, rename_var(var, output=var+'_para')
     var = rbsp_read_en_spec(time_range, probe=probe, species=species, pitch_angle_range=[45,135])

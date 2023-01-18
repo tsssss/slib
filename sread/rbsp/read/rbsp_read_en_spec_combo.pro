@@ -1,8 +1,14 @@
 ;+
 ; Read parallel, perp, and anti-parallel energy spectrogram.
+; input_time_range.
+; probe=.
+; species=['p','o','he','e'].
+; get_name=.
+; errmsg=.
 ;-
 
-function rbsp_read_en_spec_combo, input_time_range, probe=probe, errmsg=errmsg, species=species, get_name=get_name
+function rbsp_read_en_spec_combo, input_time_range, probe=probe, $
+    errmsg=errmsg, species=species, get_name=get_name
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
