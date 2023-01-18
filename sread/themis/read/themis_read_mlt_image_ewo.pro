@@ -80,7 +80,7 @@ function themis_read_mlt_image_ewo, time_range, mlat_range=mlat_range, $
         yticks: yticks, $
         yminor: yminor, $
         color_table: 49, $
-        ztitle: 'Photon count (#)', $
+        ztitle: 'ASI count (#)', $
         zlog: 0 , $
         zrange: [1,1000], $
         yticklen: -0.02, $
