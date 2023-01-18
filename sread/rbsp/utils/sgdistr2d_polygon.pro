@@ -23,13 +23,14 @@
 ;-
 
 pro sgdistr2d_polygon, tdat, angs, diss, cangs, cdiss, ncolor = nztk, $
-    position = tpos, zrange = zrng, title = titl, xtitle = xttl0
+    position = tpos, zrange = zrng, title = titl, xtitle = xttl0, ct=ct
 
     ; dat in [nang,nvel], number flux.
     ; cang in [nang+1], in radian [0,pi].
     ; cdis in [nvel+1], in km/s.
 
     blck = sgcolor('black')
+    if n_elements(ct) eq 0 then ct = 40
 
     ; constants.
     emsz = double(!d.x_ch_size)/!d.x_size
@@ -71,7 +72,8 @@ pro sgdistr2d_polygon, tdat, angs, diss, cangs, cdiss, ncolor = nztk, $
             
             tmp = where(ztks le tdat[j,i], cnt)
             if cnt eq 0 then idx = 0 else idx = tmp[cnt-1]
-            tc = sgcolor(zcls[idx],ct=43,file='ct2')
+;            tc = sgcolor(zcls[idx],ct=ct,file='ct2')
+            tc = sgcolor(zcls[idx],ct=ct)
             
             tcdis = cdiss[[i,i,i+1,i+1,j]]
             tcang = cangs[[j,j+1,j+1,j,j]]
@@ -129,6 +131,6 @@ pro sgdistr2d_polygon, tdat, angs, diss, cangs, cdiss, ncolor = nztk, $
 ;    tvlct,rgb
 
     sgcolorbar, zcls, position=pos2, $
-        zrange=zrng, ztitle=zttl, zcharsize=0.8
+        zrange=zrng, ztitle=zttl, zcharsize=0.8, ct=ct
 
 end
