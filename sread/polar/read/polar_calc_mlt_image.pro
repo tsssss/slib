@@ -99,10 +99,10 @@ pro polar_calc_mlt_image, input_time_range, emission_height=emission_height
         ; other info.
         sphere = orbit[2] gt 0
 
-        ; get mlat/mlon. method 1: geotoapex.
+        ; get mlat/mlon. method 1: geo2apex.
         apexfile = sparentdir(srootdir())+'/support/mlatlon.1997a.xdr'
-        geotoapex, glat, glon, apexfile, mlat, mlon
-        get_local_time, fet, glat, glon, apexfile, glt, mlt
+        geo2apex, glat, glon, mlat, mlon
+        get_local_time, fet, glat, glon, glt, mlt
 
         ; read raw image.
         img = reform(imgs[i,*,*])

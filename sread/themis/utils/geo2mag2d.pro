@@ -19,7 +19,7 @@
 pro geo2mag2d, time, glat=glat, glon=glon, mlat=mlat, mlon=mlon, use_apex=use_apex
 
     if keyword_set(use_apex) then begin
-        geotoapex, glat, glon, '', mlat, mlon
+        geo2apex, glat, glon, mlat, mlon
         return
     endif
 

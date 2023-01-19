@@ -211,9 +211,9 @@ function sread_polar_uvi, tr0, filename = fn0, $
         ; do line-of-sight and dayglow correction.
 ;        polar_uvi_corr, fet,torb,tsys, glat,glon, img
             
-        ; get mlat/mlon, use geotoapex.
-        geotoapex, glat, glon, apexfile, mlat, mlon
-        get_local_time, fet, glat, glon, apexfile, glt, mlt
+        ; get mlat/mlon, use geo2apex.
+        geo2apex, glat, glon, apexfile, mlat, mlon
+        get_local_time, fet, glat, glon, glt, mlt
         get_mlt_image, img, mlat, mlt, minlat, sphere, mltimg, ncell = imgsz
         if keyword_set(half) then mltimgs[i,*,*] = mltimg[*,0:imgsz/2] $
         else mltimgs[i,*,*] = mltimg

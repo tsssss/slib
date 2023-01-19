@@ -235,8 +235,8 @@ function sread_image_fuv, tr0, filename = fn0, $
         ; other info.
         sphere = orbit[2] gt 0
 
-        geotoapex, glat, glon, apexfile, mlat, mlon
-        get_local_time, tet, glat, glon, apexfile, glt, mlt
+        geo2apex, glat, glon, apexfile, mlat, mlon
+        get_local_time, tet, glat, glon, glt, mlt
         get_mlt_image, img, mlat, mlt, minlat, sphere, mltimg, ncell = imgsz
         
 ;        tvscl, mlat, 0, /nan

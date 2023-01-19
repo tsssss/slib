@@ -235,8 +235,8 @@ function sread_image_fuv_fix_spinphase, tr0, filename = fn0, $
         ; other info.
         sphere = orbit[2] gt 0
 
-        geotoapex, glat, glon, apexfile, mlat, mlon
-        get_local_time, tet, glat, glon, apexfile, glt, mlt
+        geo2apex, glat, glon, mlat, mlon
+        get_local_time, tet, glat, glon, glt, mlt
         get_mlt_image, img, mlat, mlt, minlat, sphere, mltimg, ncell = imgsz
         
         nudge = 1
@@ -274,8 +274,8 @@ function sread_image_fuv_fix_spinphase, tr0, filename = fn0, $
             glat[where(abs(glat) gt 1e20)] = !values.d_nan
             glon[where(abs(glon) gt 1e20)] = !values.d_nan
             
-            geotoapex, glat, glon, apexfile, mlat, mlon
-            get_local_time, tet, glat, glon, apexfile, glt, mlt
+            geo2apex, glat, glon, mlat, mlon
+            get_local_time, tet, glat, glon, glt, mlt
             get_mlt_image, img, mlat, mlt, minlat, sphere, mltimg, ncell = imgsz
             
         endwhile
