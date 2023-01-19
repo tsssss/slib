@@ -57,13 +57,18 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
     extra = create_struct(var_type,1)
 
     ; Get the data size.
-    ndim = size(data,n_dimension=1)
-    if ndim gt 1 then begin
-        permu = shift(findgen(ndim),-1)
-        vals = transpose(temporary(data),permu)
+    if keyword_set(save_as_one) then begin
+        vals = temporary(data)
     endif else begin
-        vals = transpose(temporary(data))
+        ndim = size(data,n_dimension=1)
+        if ndim gt 1 then begin
+            permu = shift(findgen(ndim),-1)
+            vals = transpose(temporary(data),permu)
+        endif else begin
+            vals = transpose(temporary(data))
+      endelse
     endelse
+    
     nrec = n_elements(vals)
     data_dims = size(vals,/dimensions)
     data_ndim = n_elements(data_dims)
