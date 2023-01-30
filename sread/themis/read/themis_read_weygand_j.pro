@@ -26,7 +26,7 @@ function themis_read_weygand_j, input_time_range, id=datatype, get_name=get_name
         var_list.add, dictionary( 'in_vars', j_var )
         read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
         if errmsg ne '' then return, ''
-
+        
         glat_var = prefix+'glat_j'+suffix
         glon_var = prefix+'glon_j'+suffix
         glat = cdf_read_var(glat_var, filename=files[0])
@@ -51,6 +51,9 @@ function themis_read_weygand_j, input_time_range, id=datatype, get_name=get_name
         store_data, j_var, times, jdata
         options, j_var, 'glon_bins', glon_bins
         options, j_var, 'glat_bins', glat_bins
+        
+        vatt = cdf_read_setting(j_var, filename=files[0])
+        options, j_var, 'unit', vatt.unit
     endforeach
 
     if datatype eq 'j_hor_mag' then begin
