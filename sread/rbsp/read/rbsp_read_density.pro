@@ -1,5 +1,8 @@
 ;+
 ; Read HOPE density.
+; input_time_range,
+; probe=.
+; id=. 'emfisis','hope','efw'. Default is 'hope'
 ;-
 
 function rbsp_read_density, input_time_range, probe=probe, id=id, errmsg=errmsg
