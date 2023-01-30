@@ -7,7 +7,7 @@ function rbsp_plot_pitch2d, input_time_range, probe=probe, $
     species=input_species, unit=unit, log=log, zrange=input_zrange, $
     plot_dir=plot_dir, errmsg=errmsg, use_contour=use_contour
 
-test = 0
+test = 1
 
 ;---Input check.
     prefix = 'rbsp'+probe+'_'
@@ -163,14 +163,16 @@ test = 0
         title = 'RBSP-'+strupcase(probe)+' Pitch Angle, '+species_str+' flux!C'+$
             time_string(time-dtime)+' - '+time_string(time+dtime,tformat='hh:mm:ss')
 
-        base = prefix+'hope_l3_pitch2d_'+species+'_'+time_string(time,tformat='YYYY_MMDD_hhmm_ss')+'_v01.pdf'
+        plot_type = keyword_set(polygon)? 'polygon': 'contour'
+        base = prefix+'hope_l3_pitch2d_'+species+'_'+time_string(time,tformat='YYYY_MMDD_hhmm_ss')+'_'+plot_type+'_v01.pdf'
         ofn = join_path([plot_dir,base])
         if keyword_set(test) then ofn = 0
         sgopen, ofn, xsize = 5, ysize = 5, /inch
         if keyword_set(use_contour) then begin
-            sgindexcolor, 43, file = 'ct2'
-            sgdistr2d, tdat, tang, tdis, position=tpos, zrange=zrange, $
-                title=title, xtitle=xtitle, ncolor=10
+;            sgindexcolor, 43, file = 'ct2'
+;            sgdistr2d, tdat, tang, tdis, position=tpos, zrange=zrange, $
+;                title=title, xtitle=xtitle, ncolor=10
+            tmp = plot_pa_contour2d(tdat,tang,tdis, position=tpos, zrange=zrange, title=title, xtitle=xtitle, ncolor=10)
         endif else begin
             sgtruecolor
             sgdistr2d_polygon, tdat, tang, tdis, cangs, cdiss, position=tpos, $
@@ -192,9 +194,9 @@ time_range = ['2013-06-01/05:49','2013-06-01/06:00']
 probe = 'a'
 the_species = ['o']
 
-;time_range = ['2013-05-01/07:20','2013-05-01/07:50']
-;probe = 'b'
-;the_species = ['p','o','e']
+time_range = ['2013-05-01/07:38','2013-05-01/07:50']
+probe = 'b'
+the_species = ['p','o']
 
 foreach species, the_species do begin
     var = rbsp_plot_pitch2d(time_range, probe=probe, species=species, log=0, use_contour=1, unit='velocity')
