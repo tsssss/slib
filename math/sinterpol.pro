@@ -28,18 +28,16 @@ function sinterpol, data, oldabs, newabs, _extra = extra
   newxx = newabs
   
   oldsize = size(oldyy)
-  oldndims = oldsize[0]
+  old_ndim = oldsize[0]
   
-  if oldndims gt 3 then $
-    message, '# of dimension greater than 2 ...'
-      
-  if oldndims eq 0 then begin
+
+  if old_ndim eq 0 then begin
     message, 'data is scalar, return ...', /continue
     return, data
   endif
   
   ; scalar array.
-  if oldndims eq 1 then $
+  if old_ndim eq 1 then $
     return, interpol(oldyy, oldxx, newxx, /nan, _extra = extra)
   
   ; vector array.
