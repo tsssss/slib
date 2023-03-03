@@ -94,18 +94,26 @@ pro add_setting, var, settings, smart=smart
                 options, var, 'ytitle', short_name+'!C('+unit+')'
                 get_data, var, uts, dat, vals
                 nval = n_elements(vals)
-                if size(vals[0],/type) ne 7 then begin
-                    value_unit = get_setting(var, 'value_unit', exist)
-                    if not exist then value_unit = ''
-                    labels = strarr(nval)
-                    for i=0, nval-1 do labels[i] = sgnum2str(sround(vals[i]))+' '+value_unit
-                endif else labels = vals
                 
-                bottom = 100d
-                top = 250d
-                colors = reverse(long(smkarthm(bottom, top, nval, 'n')))
-                color_table = get_setting(var, 'color_table', exist)
-                if exist then for ii=0, nval-1 do colors[ii] = sgcolor(colors[ii], ct=color_table)
+                labels = get_setting(var, 'labels', exist)
+                if not exist or (exist and n_elements(labels) ne n_elements(vals)) then begin
+                    if size(vals[0],/type) ne 7 then begin
+                        value_unit = get_setting(var, 'value_unit', exist)
+                        if not exist then value_unit = ''
+                        labels = strarr(nval)
+                        for i=0, nval-1 do labels[i] = sgnum2str(sround(vals[i]))+' '+value_unit
+                    endif else labels = vals
+                endif
+                
+                colors = get_setting(var, 'colors', exist)
+                if not exist or (exist and n_elements(colors) ne n_elements(vals)) then begin
+                    bottom = 100d
+                    top = 250d
+                    colors = reverse(long(smkarthm(bottom, top, nval, 'n')))
+                    color_table = get_setting(var, 'color_table', exist)
+                    if exist then for ii=0, nval-1 do colors[ii] = sgcolor(colors[ii], ct=color_table)
+                endif
+                
                 options, var, 'labels', labels
                 options, var, 'colors', colors
                 end
