@@ -15,9 +15,15 @@ function googledir, errmsg=errmsg
             return, retval
         end
     endcase
+    
 
     the_dir = join_path([diskdir(google_name),'My Drive'])
     if susrhost() eq 'Sheng Tian@DESKTOP-2N7I6Q7' then the_dir = 'D:\tian\googledrive'
+    if file_test(the_dir,directory=1) eq 0 then begin
+        the_dir = join_path([homedir(),'My Drive'])
+    endif
+    
+    if file_test(the_dir,directory=1) eq 0 then stop
     return, the_dir
 
 end
