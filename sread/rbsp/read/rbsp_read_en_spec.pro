@@ -46,10 +46,10 @@ function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
 
 
     species_infos = dictionary()
-    species_infos['e'] = dictionary('short_name', 'e!U-!N')
-    species_infos['p'] = dictionary('short_name', 'H!U+!N')
-    species_infos['o'] = dictionary('short_name', 'O!U+!N')
-    species_infos['he'] = dictionary('short_name', 'He!U+!N')
+    species_infos['e'] = dictionary('short_name', 'e!E-!N')
+    species_infos['p'] = dictionary('short_name', 'H!E+!N')
+    species_infos['o'] = dictionary('short_name', 'O!E+!N')
+    species_infos['he'] = dictionary('short_name', 'He!E+!N')
     supported_species = species_infos.keys()
 
     fillval = !values.f_nan
@@ -76,9 +76,21 @@ function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
 
     energys = get_var_data(energy_var)
     the_fluxs = fluxs[*,*,pitch_index]
-
+    index = where(the_fluxs eq 0 or finite(the_fluxs,nan=1), count)
+    if count ne 0 then the_fluxs[index] = 0
+    
+    ; A more complicated version b/c flux contain a lot 0 and nan.
     dims = size(the_fluxs,dimensions=1)
-    data = reform(total(the_fluxs,3,nan=1)/dims[2])
+    data = fltarr(dims[0:1])
+    for ii=0,dims[0]-1 do begin
+        for jj=0,dims[1]-1 do begin
+            the_data = the_fluxs[ii,jj,*]
+            index = where(the_data ne 0, count)
+            if count eq 0 then continue
+            data[ii,jj] = total(the_data)/count
+        endfor
+    endfor
+    ;data = reform(total(the_fluxs,3,nan=1)/dims[2])
 
     store_data, spec_var, times, data, energys
 
@@ -86,7 +98,7 @@ function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
     species_name = species_infos[species].short_name
     add_setting, spec_var, /smart, {$
         display_type: 'spec', $
-        unit: '#/cm!U2!N-s-sr-keV', $
+        unit: '#/cm!E2!N-s-sr-keV', $
         zrange: zrange, $
         species_name: species_name, $
         ytitle: 'Energy (eV)', $

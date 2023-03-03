@@ -1,5 +1,5 @@
 ;+
-; Read RBSP s/c velocity in GSE. Save as 'rbspx_v_gsm'
+; Read RBSP s/c velocity in GSE. Save as 'rbspx_v_gse'
 ;
 ; time. A time or a time range in ut sec.
 ; probe. A string sets the probe, 'a' or 'b'.

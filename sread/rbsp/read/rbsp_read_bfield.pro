@@ -46,11 +46,11 @@ resolution=resolution, errmsg=errmsg, coord=coord, get_name=get_name, _extra=ex
     if errmsg ne '' then return, retval
 
     ; Remove invalid values.
-    get_data, vec_default_var, times, vec_coord
-    index = where(abs(vec_coord) ge 65536, count)
+    get_data, vec_default_var, times, vec_default
+    index = where(abs(vec_default) ge 65536, count)
     if count ne 0 then begin
-        vec_coord[index] = !values.f_nan
-        store_data, vec_default_var, times, vec_coord
+        vec_default[index,*] = !values.f_nan
+        store_data, vec_default_var, times, vec_default
     endif
     
 
@@ -63,7 +63,7 @@ resolution=resolution, errmsg=errmsg, coord=coord, get_name=get_name, _extra=ex
     ; Convert to the wanted coord.
     if coord ne default_coord then begin
         get_data, vec_default_var, times, vec_default, limits=lim
-        vec_coord = cotran(vec_coord, times, default_coord+'2'+coord, probe=probe)
+        vec_coord = cotran(vec_default, times, default_coord+'2'+coord, probe=probe)
         store_data, vec_coord_var, times, vec_coord, limits=lim
     endif
 

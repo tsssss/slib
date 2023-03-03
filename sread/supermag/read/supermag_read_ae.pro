@@ -51,7 +51,7 @@ function supermag_read_ae, input_time_range, errmsg=errmsg, get_name=get_name
 
 
 ;---Further processing.
-    rename_var, prefix+'sme', to=sme_var
+    sme_var = rename_var(prefix+'sme', output=sme_var)
     get_data, sme_var, times, sme
     add_setting, sme_var, smart=1, dictionary($
         'display_type', 'scalar', $
