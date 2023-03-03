@@ -8,37 +8,14 @@ function goes_read_kev_flux, input_time_range, probe=probe, $
     time_range = time_double(input_time_range)
     prefix = probe+'_'
     if strmid(probe,0,1) ne 'g' then prefix = 'g'+probe+'_'
-    vars = prefix+['e','p']+'_flux'
+    vars = prefix+'kev_'+['e','p']+'_flux'
     if keyword_set(get_name) then return, vars
 
     retval = ''
-    goes_read_kev_electron, time_range, probe=probe, errmsg=errmsg
+    e_var = goes_read_kev_electron(time_range, probe=probe, errmsg=errmsg)
     if errmsg ne '' then return, retval
-    goes_read_kev_proton, time_range, probe=probe, errmsg=errmsg
+    p_var = goes_read_kev_proton(time_range, probe=probe, errmsg=errmsg)
     if errmsg ne '' then return, retval
-
-    ct = 33
-    foreach var, vars do begin
-        short_name = (var eq prefix+'e_flux')? 'e-': 'H+'
-        if keyword_set(no_spec) then begin
-            add_setting, var, smart=1, dictionary($
-                'display_type', 'list', $
-                'unit', '#/cm!U-2!N-s-sr-keV', $
-                'short_name', short_name, $
-                'ylog', 1, $
-                'color_table', ct, $
-                'value_unit', 'keV' )
-        endif else begin
-            add_setting, var, smart=1, dictionary($
-                'display_type', 'spec', $
-                'unit', '#/cm!U-2!N-s-sr-keV', $
-                'ylog', 1, $
-                'ytitle', '(keV)', $
-                'zlog', 1, $
-                'color_table', ct, $
-                'short_name', short_name )
-        endelse
-    endforeach
 
     return, vars
 

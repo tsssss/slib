@@ -1,19 +1,23 @@
 ;+
 ; Read RBSP keV electron flux.
-; Save as rbspx_kev_ele_flux.
+; Save as rbspx_kev_e_flux.
 ;
-; set pitch_angle to load data for a specific pitch angle, otherwise load all pitch angles.
+; set pitch_angle_range to load data for a specific pitch angle, otherwise load all pitch angles.
 ;-
 function rbsp_read_kev_electron, input_time_range, probe=probe, $
-    errmsg=errmsg, pitch_angle=pitch_angle, energy=energy, spec=spec
+    errmsg=errmsg, get_name=get_name, $
+    pitch_angle_range=pitch_angle_range, energy_range=energy_range, spec=spec
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
     retval = ''
 
+    out_var = prefix+'kev_e_flux'
+    if keyword_set(get_name) then return, out_var
+
     time_range = time_double(input_time_range)
     files = rbsp_load_mageis(time_range, probe=probe, errmsg=errmsg, id='l3')
-    if errmsg ne '' then return, ''
+    if errmsg ne '' then return, retval
 
 
 ;---Read data.
@@ -24,128 +28,133 @@ function rbsp_read_kev_electron, input_time_range, probe=probe, $
         'time_var_name', 'Epoch', $
         'time_var_type', 'epoch' )
     read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
-    if errmsg ne '' then return, ''
+    if errmsg ne '' then return, retval
 
-    var = prefix+'kev_e_flux'
-    enbins = cdf_read_var('FEDU_Energy', filename=files[0])
-    nenbin = n_elements(enbins)
-    enidx = where(finite(enbins) and enbins ge 0, nenbin)
-    enbins = enbins[enidx]
+    energy_bins = cdf_read_var('FEDU_Energy', filename=files[0])
+    nenergy_bin = n_elements(energy_bins)
+    energy_index = where(finite(energy_bins) and energy_bins ge 0, nenergy_bin)
+    energy_bins = energy_bins[energy_index]
 
-    get_data, 'FEDU', uts, dat
-    dat = reform(dat[*,enidx,*])>1
+    get_data, 'FEDU', common_times, fluxs
+    fluxs = reform(fluxs[*,energy_index,*])>1
 
-    ; apply energy range.
-    if n_elements(energy) eq 0 then enidx = findgen(nenbin) else begin
-        case n_elements(energy) of
-            1: begin
-                enidx = where(enbins eq energy, cnt)
-                if cnt eq 0 then tmp = min(enbins-energy[0], /absolute, enidx)
-                end
-            2: begin
-                enidx = where(enbins ge energy[0] and enbins le energy[1], cnt)
-                if cnt eq 0 then begin
-                    errmsg = 'no energy in given range ...'
-                    return, ''
-                endif
-                end
-            else: begin
-                errmsg = 'wrong # of energy info ...'
-                return, ''
-                end
-        endcase
+;---Apply energy range.
+    nenergy_range = n_elements(energy_range)
+    if nenergy_range eq 0 then begin
+        energy_index = findgen(nenergy_bin)
+    endif else if nenergy_range eq 1 then begin
+        energy_index = where(energy_bins eq energy_range, count)
+        if count eq 0 then begin
+            tmp = min(energy_bins-energy_range[0], absolute=1, energy_index)
+        endif
+        energy_ratio = 1.5
+        the_energy_range = energy_range[0]*[energy_ratio,1/energy_ratio]
+        index = lazy_where(energy_bins[energy_index], '[]', the_energy_range, count=count) 
+        if count eq 0 then return, retval
+    endif else if nenergy_range eq 2 then begin
+        energy_index = lazy_where(energy_bins, '[]', energy_range, count=count)
+        if count eq 0 then begin
+            errmsg = 'no energy in given range ...'
+            return, retval
+        endif
+    endif else begin
+        errmsg = 'wrong # of energy info ...'
+        return, retval
+    endelse 
+    fluxs = fluxs[*,energy_index,*]
+    energy_bins = energy_bins[energy_index]
+    nenergy_bin = n_elements(energy_bins)
+
+
+;---Apply pitch angle range.
+    pitch_angle_bins = cdf_read_var('FEDU_Alpha', filename=files[0])
+    npitch_angle_bin = n_elements(pitch_angle_bins)
+    npitch_angle_range = n_elements(pitch_angle_range)
+    if npitch_angle_range eq 0 then begin
+        pitch_angle_index = findgen(npitch_angle_bin)
+    endif else if npitch_angle_range eq 1 then begin
+        pitch_angle_index = where(pitch_angle_bins eq pitch_angle_range, count)
+        if count eq 0 then begin
+            tmp = min(pitch_angle_bins-pitch_angle_range[0], absolute=1, pitch_angle_index)
+        endif
+    endif else if npitch_angle_range eq 2 then begin
+        pitch_angle_index = lazy_where(pitch_angle_bins, '[]', pitch_angle_range, count=count)
+        if count eq 0 then begin
+            errmsg = 'no pitch angle in given range ...'
+            return, retval
+        endif
+    endif else begin
+        errmsg = 'wrong # of pitch angle info ...'
+        return, retval
     endelse
-    dat = dat[*,enidx,*]
-    enbins = enbins[enidx]
-    nenbin = n_elements(enbins)
-
-
-    ; filter pitch angle.
-    pabins = cdf_read_var('FEDU_Alpha', filename=files[0])
-    npabin = n_elements(pabins)
-    if n_elements(pitch_angle) eq 0 then paidx = findgen(npabin) else begin
-        case n_elements(pitch_angle) of
-            1: begin
-                paidx = where(pabins eq pitch_angle, cnt)
-                if cnt eq 0 then tmp = min(pabins-pitch_angle[0], /absolute, paidx)
-                end
-            2: begin
-                paidx = where(pabins ge pitch_angle[0] and pabins le pitch_angle[1], cnt)
-                if cnt eq 0 then begin
-                    errmsg = 'no pitch angle in given range ...'
-                    return, ''
-                endif
-                end
-            else: begin
-                errmsg = 'wrong # of pitch angle info ...'
-                return, ''
-                end
-        endcase
-    endelse
-    dat = reform(dat[*,*,paidx])
-    pabins = pabins[paidx]
-    npabin = n_elements(pabins)
+    fluxs = reform(fluxs[*,*,pitch_angle_index])
+    pitch_angle_bins = pitch_angle_bins[pitch_angle_index]
+    npitch_angle_bin = n_elements(pitch_angle_bins)
 
     ; Average pitch angle if no pitch angle info is provided.
-    if n_elements(pitch_angle) eq 0 then begin
-        dat = total(dat,3,/nan)/npabin
-        npabin = 0
+    if npitch_angle_range eq 0 then begin
+        fluxs = total(fluxs,3,nan=1)/npitch_angle_bin
+        npitch_angle_bin = 0
     endif
 
-    ; save data.
-    if nenbin eq 1 and npabin eq 1 then begin
-        store_data, var, uts, dat
-        add_setting, var, /smart, {$
+;---Save data.
+    flux_unit = '#/cm!U2!N-s-sr-keV'
+    energy_unit = 'keV'
+    short_name = 'e!U-!N'
+    ct = 52
+    if nenergy_bin eq 1 and npitch_angle_bin eq 1 then begin
+        store_data, out_var, common_times, fluxs
+        add_setting, out_var, smart=1, {$
             display_type: 'scalar', $
             ylog: 1, $
-            unit: '#/cm!U2!N-s-sr-keV', $
-            short_name: 'e!U-!N flux '+sgnum2str(sround(pabins))+'deg, '+sgnum2str(sround(enbins))+'keV'}
-    endif else if nenbin eq 1 then begin    ; flux vs pitch angle at certain energy.
-        store_data, var, uts, dat, pabins
-        add_setting, var, /smart, {$
+            unit: flux_unit, $
+            short_name: short_name+' '+sgnum2str(sround(pitch_angle_bins))+'deg, '+sgnum2str(sround(energy_bins))+energy_unit}
+    endif else if nenergy_bin eq 1 then begin    ; flux vs pitch angle at certain energy.
+        store_data, out_var, common_times, fluxs, pitch_angle_bins
+        add_setting, out_var, smart=1, {$
             display_type: 'list', $
             ylog: 1, $
-            unit: '#/cm!U2!N-s-sr-keV', $
+            unit: flux_unit, $
             value_unit: 'deg', $
-            short_name: 'e!U-!N flux '+sgnum2str(sround(enbins))+' keV'}
-    endif else if npabin eq 1 then begin    ; flux vs energy at certain pitch angle.
-        yrange = 10d^ceil(alog10(minmax(dat)))>1
-        store_data, var, uts, dat, enbins
-        add_setting, var, /smart, {$
+            short_name: short_name+' '+sgnum2str(sround(energy_bins))+energy_unit}
+    endif else if npitch_angle_bin eq 1 then begin    ; flux vs energy at certain pitch angle.
+        yrange = 10d^ceil(alog10(minmax(fluxs)))>1
+        store_data, out_var, common_times, fluxs, energy_bins
+        add_setting, out_var, smart=1, {$
             display_type: 'list', $
             ylog: 1, $
             yrange: yrange, $
-            color_table: 52, $
-            unit: '#/cm!U2!N-s-sr-keV', $
-            value_unit: 'keV', $
-            short_name: 'e!U-!N flux '+sgnum2str(sround(pabins))+' deg'}
+            color_table: ct, $
+            unit: flux_unit, $
+            value_unit: energy_unit, $
+            short_name: short_name+' '+sgnum2str(sround(pitch_angle_bins))+' deg'}
     endif else begin
-        store_data, var, uts, dat, enbins
-        add_setting, var, /smart, {$
+        store_data, out_var, common_times, fluxs, energy_bins
+        add_setting, out_var, smart=1, {$
             display_type: 'list', $
             ylog: 1, $
-            color_table: 52, $
-            unit: '#/cm!U2!N-s-sr-keV', $
-            value_unit: 'keV', $
-            short_name: 'e!U-!N flux' }
+            color_table: ct, $
+            unit: flux_unit, $
+            value_unit: energy_unit, $
+            short_name: short_name }
     endelse
 
 
     if keyword_set(spec) then begin
-        options, var, 'spec', 1
-        options, var, 'no_interp', 1
-        options, var, 'zlog', 1
-        options, var, 'ylog', 1
-        options, var, 'ytitle', 'Energy (keV)'
-        options, var, 'ztitle', 'e!U-!N flux (#/cm!U2!N-s-sr-keV)'
-        if n_elements(enbins) ne 0 then begin
-            ylim, var, min(enbins), max(enbins)
+        options, out_var, 'spec', 1
+        options, out_var, 'no_interp', 1
+        options, out_var, 'zlog', 1
+        options, out_var, 'ylog', 1
+        options, out_var, 'ytitle', 'Energy ('+energy_unit+')'
+        options, out_var, 'ztitle', short_name+' ('+flux_unit+')'
+        if n_elements(energy_bins) ne 0 then begin
+            ylim, out_var, min(energy_bins), max(energy_bins)
         endif
     endif
 
 ;    dt = 10.848
-;    uniform_time, var, dt
-    return, var
+;    uniform_time, out_var, dt
+    return, out_var
 
 end
 
