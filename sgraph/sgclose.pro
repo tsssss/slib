@@ -15,6 +15,8 @@
 
 pro sgclose, wdelete = wdelete
 
+    if !sgraph.test then stop
+
     ; all known devices.
     devp = 'ps'
     devz = 'z'

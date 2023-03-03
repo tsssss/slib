@@ -20,13 +20,18 @@
 ;-
 
 pro sgopen, id0, size=fig_size, xsize=xsize, ysize=ysize, cm=cm, inch=inch, $
-    magnify=magc0, background=bgc0, $
+    magnify=magc0, background=bgc0, test=test, $
     xchsz=xchsz, ychsz=ychsz, hsize=hsize, _extra=extra
     
     compile_opt idl2
     
+    ; if test then will behave differently.
+    if keyword_set(test) then test = 1 else test = 0
+    
     if n_elements(id0) eq 0 then id0 = 0    ; w-mode, window 0.
     fn = id0[0]
+    if test then fn = test
+    
     
     if n_elements(bgc0) eq 0 then bgc0 = sgcolor('white')
     
@@ -135,12 +140,13 @@ pro sgopen, id0, size=fig_size, xsize=xsize, ysize=ysize, cm=cm, inch=inch, $
 ;        sgraph = {d0:d0, d1:d0, p0:!p, x0:!x, y0:!y, z0:!z, $
 ;            r0:r0, g0:g0, b0:b0, pmode:pmode, zmode:zmode, wmode:wmode}
         sgraph = {d0:d0, d1:d0, p0:!p, x0:!x, y0:!y, z0:!z, $
-            pmode:pmode, zmode:zmode, wmode:wmode}
+            pmode:pmode, zmode:zmode, wmode:wmode, test:test}
         defsysv, '!sgraph', sgraph
     endif else begin
         !sgraph.pmode = pmode
         !sgraph.zmode = zmode
         !sgraph.wmode = wmode
+        !sgraph.test = test
     endelse
     
     ; set to the new device.
@@ -169,7 +175,7 @@ pro sgopen, id0, size=fig_size, xsize=xsize, ysize=ysize, cm=cm, inch=inch, $
     d1 = create_struct(d1, 'decomposed', dec, 'depth', long(depth), $
         'r0',r0, 'g0',g0, 'b0',b0)
     !sgraph.d1 = d1
-
+    
 
     ; set the new device to sgraph config.
     device, _extra = opt
