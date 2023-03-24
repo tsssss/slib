@@ -45,9 +45,12 @@ function moon_elev, time, glon0, glat0, azimuth=azm, degree=degree
     alt = asin(hor[*,2])              ; altitude in rad.
     
     ; refraction, https://en.wikipedia.org/wiki/Atmospheric_refraction.
-    r = 1.02/(tan(alt+10.3/(alt*deg+5.11))) ; in minutes of arc
-    r = r/60*rad    ; from minutes of arc to rad.
-    alt -= r
+    index = where(alt*deg ge 0, count)
+    if count ne 0 then begin
+        r = 1.02/(tan(alt+10.3/(alt*deg+5.11))) ; in minutes of arc
+        r = r/60*rad    ; from minutes of arc to rad.
+        alt[index] -= r[index]
+    endif
 
     if keyword_set(degree) then begin
         alt *= deg & azm *= deg
