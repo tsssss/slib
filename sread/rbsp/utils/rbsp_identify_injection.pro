@@ -24,6 +24,8 @@ end
 function rbsp_identify_injection, time_range, mission_probe=mission_probe, $
     probe=probe, prefix=prefix, routine_name=routine_name, min_duration=min_duration
 
+    retval = []
+
     secofday = constant('secofday')
     if n_elements(mission_probe) ne 0 then begin
         probe_info = resolve_probe(mission_probe)
@@ -40,20 +42,29 @@ function rbsp_identify_injection, time_range, mission_probe=mission_probe, $
 
     routine = routine_name+'_read_kev_electron'
     flux_var0 = call_function(routine, data_time_range, probe=probe, spec=1)
-    flux_var = flux_var0+'1'
-    rename_var, flux_var0, to=flux_var
+    flux_var = rename_var(flux_var0, output=flux_var0+'1')
     time_step = 120.
     uniform_time, flux_var, time_step
     
     
     ; Prepare the flux.
     full_fluxs = get_var_data(flux_var, energys, times=full_times, limits=lim)
+    ntime = n_elements(full_times)
+
+    ; Check invalid data.
+    min_energy = 120.
+    index = where(energys le min_energy, count)
+    if count eq 0 then return, retval
+    the_fluxs = total(full_fluxs[*,index],2)
+    index = where(finite(the_fluxs,nan=1), count)
+    if count ge ntime*0.5 then return, retval
+    
+    ; Get the flux around the target energy.
     target_energy = 100.    ; kev.
     tmp = min(energys-target_energy, energy_index, abs=1)
     
     ; Remove very low flux and nan.
     invalid_flux = 1e0
-    ntime = n_elements(full_times)
     pad_rec = 2
     tmp = full_fluxs[*,energy_index]
     index = where(tmp le invalid_flux or finite(tmp,nan=1), count)
