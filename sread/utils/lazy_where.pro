@@ -18,25 +18,28 @@ function lazy_where, data, relation, range, count=count, _extra=ex
     endelse
 
     case rel of
-        'in': return, where(data ge val[0] and data le val[1], count, _extra=ex)
-        'within': return, where(data gt val[0] and data lt val[1], count, _extra=ex)
-        'ge': return, where(data ge val[0], count, _extra=ex)
-        'gt': return, where(data gt val[0], count, _extra=ex)
-        'le': return, where(data le val[0], count, _extra=ex)
-        'lt': return, where(data lt val[0], count, _extra=ex)
-        '[)': return, where(data ge val[0] and data lt val[1], count, _extra=ex)
-        '(]': return, where(data gt val[0] and data le val[1], count, _extra=ex)
-        '[]': return, where(data ge val[0] and data le val[1], count, _extra=ex)
-        '()': return, where(data gt val[0] and data lt val[1], count, _extra=ex)
-        '][': return, where(data le val[0] or data ge val[1], count, _extra=ex)
-        '](': return, where(data le val[0] or data gt val[1], count, _extra=ex)
-        ')(': return, where(data lt val[0] or data gt val[1], count, _extra=ex)
-        ')[': return, where(data lt val[0] or data ge val[1], count, _extra=ex)
-        '[': return, where(data ge val[0], count, _extra=ex)
-        '(': return, where(data gt val[0], count, _extra=ex)
-        ']': return, where(data le val[0], count, _extra=ex)
-        ')': return, where(data lt val[0], count, _extra=ex)
+        'in': res = where(data ge val[0] and data le val[1], count, _extra=ex)
+        'within': res = where(data gt val[0] and data lt val[1], count, _extra=ex)
+        'ge': res = where(data ge val[0], count, _extra=ex)
+        'gt': res = where(data gt val[0], count, _extra=ex)
+        'le': res = where(data le val[0], count, _extra=ex)
+        'lt': res = where(data lt val[0], count, _extra=ex)
+        '[)': res = where(data ge val[0] and data lt val[1], count, _extra=ex)
+        '(]': res = where(data gt val[0] and data le val[1], count, _extra=ex)
+        '[]': res = where(data ge val[0] and data le val[1], count, _extra=ex)
+        '()': res = where(data gt val[0] and data lt val[1], count, _extra=ex)
+        '][': res = where(data le val[0] or data ge val[1], count, _extra=ex)
+        '](': res = where(data le val[0] or data gt val[1], count, _extra=ex)
+        ')(': res = where(data lt val[0] or data gt val[1], count, _extra=ex)
+        ')[': res = where(data lt val[0] or data ge val[1], count, _extra=ex)
+        '[': res = where(data ge val[0], count, _extra=ex)
+        '(': res = where(data gt val[0], count, _extra=ex)
+        ']': res = where(data le val[0], count, _extra=ex)
+        ')': res = where(data lt val[0], count, _extra=ex)
     endcase
+    
+    if count eq 0 then res = !null
+    return, res
 
 end
 
