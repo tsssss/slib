@@ -10,7 +10,7 @@ function themis_calc_mlt_image, input_time_range, sites=sites, $
     errmsg = ''
     retval = ''
     time_range = time_double(input_time_range)
-    if n_elements(sites) eq 0 then sites = themis_read_asi_available_sites(time_range)
+    if n_elements(sites) eq 0 then sites = themis_asi_read_available_sites(time_range)
     if n_elements(min_elev) eq 0 then min_elev = 5d
     if n_elements(merge_method) eq 0 then merge_method = 'merge_elev'
     if n_elements(calibrate_method) eq 0 then calibrate_method = 'normal'
@@ -36,9 +36,8 @@ function themis_calc_mlt_image, input_time_range, sites=sites, $
         ; Calculate MLon image directly.
         pad_time = 5d*60
         data_time_range = time_range+[-1,1]*pad_time
-        themis_read_asf, data_time_range, site=site, errmsg=errmsg
+        asf_var = themis_read_asf(data_time_range, site=site, errmsg=errmsg)
         if errmsg ne '' then continue
-        asf_var = 'thg_'+site+'_asf'
 
         ; Calibrate brightness before mapping works better.
         asf_cal_var = asf_var+'_cal'

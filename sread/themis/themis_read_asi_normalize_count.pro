@@ -52,7 +52,7 @@ site = 'gill'
 ;time_range = time_double(['2016-10-13/12:00','2016-10-13/13:00'])   ; stable arc at 160,70
 ;site = 'gako'
 
-themis_read_asf, time_range, site=site
+var = themis_read_asf(time_range, site=site)
 get_data, 'thg_'+site+'_asf', times, imgs
 themis_read_asi_normalize_count, 'thg_'+site+'_asf', window=120
 end

@@ -6,7 +6,7 @@ pro themis_read_asf_glon_image_read_mapping_info_gen_file, input_time_range, $
     site=site, filename=file
 
 ;---Get pixel info for ASF image.
-    asf_info = themis_read_asi_pixel_info(input_time_range, site=site, errmsg=errmsg)
+    asf_info = themis_asi_read_pixel_info(input_time_range, site=site, errmsg=errmsg)
     ; Get the pixel's center position.
     center_elevs = asf_info.pixel_elev
     center_azims = asf_info.pixel_azim
@@ -181,7 +181,7 @@ end
 ;glat_range = list()
 ;sites = themis_read_asi_sites()
 ;foreach site, sites do begin
-;    asf_info = themis_read_asi_pixel_info(time_range, site=site)
+;    asf_info = themis_asi_read_pixel_info(time_range, site=site)
 ;    glon_range.add, minmax(asf_info.pixel_glon)
 ;    glat_range.add, minmax(asf_info.pixel_glat)
 ;endforeach

@@ -38,7 +38,7 @@ pro themis_plot_asi_site, fov=fov, filename=plot_file
     circle_color = sgcolor('gray')
     label_size = 1
     foreach site, sites, site_id do begin
-        site_info = themis_read_asi_site_info(site)
+        site_info = themis_asi_read_site_info(site)
         center_glon = site_info.asc_glon
         center_glat = site_info.asc_glat
         plots, center_glon, center_glat, $

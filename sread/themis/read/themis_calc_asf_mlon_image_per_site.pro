@@ -73,8 +73,7 @@ end
 time_range = time_double(['2013-03-17/07:00','2013-03-17/08:00'])
 site = 'fykn'
 time_range = time_double(input_time_range)
-themis_read_asf, time_range, site=site, errmsg=errmsg
-asf_var = 'thg_'+site+'_asf'
+asf_var = themis_read_asf(time_range, site=site, errmsg=errmsg)
 themis_calc_asf_mlon_image_per_site, asf_var, crop=1
 themis_asi_cal_brightness, mlon_image_var, newname=mlon_image_var+'_norm'
 end

@@ -60,7 +60,7 @@ ncommon_time = n_elements(common_times)
         mltimg_info = dictionary()
 
         ; Available sites.
-        sites = themis_read_asi_available_sites(common_times[0], id='l1%'+datatype, sites=input_sites)
+        sites = themis_asi_read_available_sites(common_times[0], id='l1%'+datatype, sites=input_sites)
 
 
         ; For each site, read data and get the mapping indices.

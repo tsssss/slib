@@ -23,7 +23,7 @@ pro themis_read_ast, input_time_range, site=site, errmsg=errmsg
 
 
 ;---Reconstruct the thumbnail image.
-    pixel_info = themis_read_asi_pixel_info(time_range, site=site, thumbnail=1)
+    pixel_info = themis_asi_read_pixel_info(time_range, site=site, thumbnail=1)
     ; This is the bin # of a mosaic column (c) and row (r).
     binc = pixel_info.ast_binc
     binr = pixel_info.ast_binr
@@ -48,7 +48,7 @@ pro themis_read_ast, input_time_range, site=site, errmsg=errmsg
 
 
 ;;---Reconstruct the thumbnail image. This is more straightforward but slower.
-;    info = themis_read_asi_pixel_info(time_range, site=site, thumbnail=1)
+;    info = themis_asi_read_pixel_info(time_range, site=site, thumbnail=1)
 ;    ; This is the bin # of a mosaic column (c) and row (r).
 ;    binc = info.ast_binc
 ;    binr = info.ast_binr
@@ -82,11 +82,11 @@ pro themis_read_ast, input_time_range, site=site, errmsg=errmsg
         short_name: strupcase(site[0])}
         
     ; Read pixel and site info.
-    pixel_info = themis_read_asi_pixel_info(time_range, site=site, id='ast')
+    pixel_info = themis_asi_read_pixel_info(time_range, site=site, id='ast')
     foreach key, pixel_info.keys() do begin
         options, ast_var, key, pixel_info[key]
     endforeach
-    asc_info = themis_read_asi_site_info(site)
+    asc_info = themis_asi_read_site_info(site)
     foreach key, asc_info.keys() do begin
         options, ast_var, key, asc_info[key]
     endforeach

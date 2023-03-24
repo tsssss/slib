@@ -5,7 +5,7 @@ function mlon_image_rect_info
 ;    mlon_range = list()
 ;    mlat_range = list()
 ;    foreach site, sites do begin
-;        asf_info = themis_read_asi_pixel_info([0,0], site=site, errmsg=errmsg)
+;        asf_info = themis_asi_read_pixel_info([0,0], site=site, errmsg=errmsg)
 ;        mlon_range.add, minmax(asf_info.pixel_mlon)
 ;        mlat_range.add, minmax(asf_info.pixel_mlat)
 ;    endforeach

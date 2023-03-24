@@ -61,7 +61,7 @@ function mlon_image_map_old2new, old_images, site=site, crop=crop
 end
 
 ;site = 'pina'
-;site_info = themis_read_asi_pixel_info(site=site)
+;site_info = themis_asi_read_pixel_info(site=site)
 ;old_pixels = site_info.pixel_mlon
 ;crop = 0
 

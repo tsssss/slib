@@ -15,9 +15,8 @@ pro themis_load_asf_glon_image_per_site_gen_file, time, site=site, filename=file
     pad_time = 5*60
     data_time_range = time_range+[-1,1]*pad_time
     ; Read asf to test data_time_range.
-    themis_read_asf, data_time_range, site=site, errmsg=errmsg
+    asf_var = themis_read_asf(data_time_range, site=site, errmsg=errmsg)
     if errmsg ne '' then return
-    asf_var = 'thg_'+site+'_asf'
     get_data, asf_var, times
     time_step = 3d
     min_time = min(times)
@@ -30,7 +29,7 @@ pro themis_load_asf_glon_image_per_site_gen_file, time, site=site, filename=file
         ; This means data ends in the current hour.
         if max_time lt time_range[1] then data_time_range = time_range-[1800d,pad_time]
         ; Reload with the new time range.
-        themis_read_asf, data_time_range, site=site, errmsg=errmsg
+        asf_var = themis_read_asf(data_time_range, site=site, errmsg=errmsg)
     endelse
     
     ; Calibrate brightness before mapping works better.

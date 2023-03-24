@@ -13,7 +13,7 @@ function themis_asi_midn_mlon, times
 ;        site_mlons = dblarr(nsite)
 ;        site_midns = dblarr(nsite)
 ;        foreach site, sites, site_id do begin
-;            site_info = themis_read_asi_site_info(site)
+;            site_info = themis_asi_read_site_info(site)
 ;            site_mlons[site_id] = site_info.asc_mlon
 ;            site_midns[site_id] = site_info.midn_ut
 ;        endforeach

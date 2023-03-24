@@ -11,7 +11,7 @@ function themis_read_asf_mlon_image_rect, input_time_range, sites=sites, $
     if keyword_set(get_name) then return, mlon_image_var
 
     time_range = time_double(input_time_range)
-    if n_elements(sites) eq 0 then sites = themis_read_asi_available_sites(time_range)
+    if n_elements(sites) eq 0 then sites = themis_asi_read_available_sites(time_range)
     if n_elements(min_elev) eq 0 then min_elev = 5d
     if n_elements(merge_method) eq 0 then merge_method = 'merge_elev'
 

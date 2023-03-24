@@ -8,8 +8,9 @@
 ;-
 pro themis_plot_asi_raw_count_survey, input_time_range, site=site, test_time=test_time, filename=plot_file
 
+    prefix = 'thg_'+site+'_'
     time_range = time_double(input_time_range)
-    themis_read_asf, time_range, site=site, errmsg=errmsg
+    asf_var = themis_read_asf(time_range, site=site, errmsg=errmsg)
     if errmsg ne '' then return
 
     if n_elements(plot_file) eq 0 then plot_file = 0
@@ -23,8 +24,6 @@ pro themis_plot_asi_raw_count_survey, input_time_range, site=site, test_time=tes
 
 
 ;---Collect info for test image and pixel counts.
-    prefix = 'thg_'+site+'_'
-    asf_var = prefix+'asf'
     get_data, asf_var, times, imgs_raw, limits=lim
     ntime = n_elements(times)
     image_size = lim.image_size
@@ -65,14 +64,14 @@ pro themis_plot_asi_raw_count_survey, input_time_range, site=site, test_time=tes
     endforeach
 
     ; Add moon.
-    site_info = themis_read_asi_site_info(site)
+    site_info = themis_asi_read_site_info(site)
     center_glon = site_info.asc_glon
     center_glat = site_info.asc_glat
     moon_elev = moon_elev(test_time, $
         center_glon, center_glat, azimuth=moon_azim, degree=1)
     min_moon_elev = 10d ; deg
     if moon_elev ge min_moon_elev then begin
-        asf_info = themis_read_asi_pixel_info(time_range, site=site)
+        asf_info = themis_asi_read_pixel_info(time_range, site=site)
         elev = asf_info.asf_elev
         azim = asf_info.asf_azim
         moon_dis = sqrt((elev-moon_elev)^2+(azim-moon_azim)^2)

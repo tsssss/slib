@@ -10,7 +10,7 @@ function themis_read_asf_mlon_image_rect_gen_merge_info, sites=sites, $
 
     elev_dict = dictionary()
     foreach site, sites do begin
-        pixel_info = themis_read_asi_pixel_info(site=site)
+        pixel_info = themis_asi_read_pixel_info(site=site)
         elevs = pixel_info.pixel_elev
         index = where(elevs ge min_elev, complement=index2)
         elevs[index2] = 0

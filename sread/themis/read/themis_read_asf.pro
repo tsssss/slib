@@ -4,22 +4,27 @@
 ; input_time_range. Input time in string or unix time.
 ; site=. Required input, a string for site.
 ;-
-pro themis_read_asf, input_time_range, site=site, errmsg=errmsg
+function themis_read_asf, input_time_range, site=site, errmsg=errmsg, get_name=get_name
+
+    asf_var = 'thg_'+site+'_asf'
+    if keyword_set(get_name) then return, asf_var
+
+    retval = !null
+    errmsg = ''
 
     time_range = time_double(input_time_range)
     files = themis_load_asi(time_range, site=site, id='l1%asf', errmsg=errmsg)
-    if errmsg ne '' then return
+    if errmsg ne '' then return, retval
 
     var_list = list()
 
-    asf_var = 'thg_'+site+'_asf'
     var_list.add, dictionary($
         'in_vars', 'thg_asf_'+site, $
         'out_vars', asf_var, $
         'time_var_name', 'thg_asf_'+site+'_time', $
         'time_var_type', 'unix' )
     read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
-    if errmsg ne '' then return
+    if errmsg ne '' then return, retval
 
 
     ; Read the raw image, convert it to float.
@@ -53,14 +58,16 @@ pro themis_read_asf, input_time_range, site=site, errmsg=errmsg
         short_name: strupcase(site[0])}
         
     ; Read pixel and site info.
-    pixel_info = themis_read_asi_pixel_info(time_range, site=site, id='asf')
+    pixel_info = themis_asi_read_pixel_info(time_range, site=site, id='asf')
     foreach key, pixel_info.keys() do begin
         options, asf_var, key, pixel_info[key]
     endforeach
-    asc_info = themis_read_asi_site_info(site)
+    asc_info = themis_asi_read_site_info(site)
     foreach key, asc_info.keys() do begin
         options, asf_var, key, asc_info[key]
     endforeach
+
+    return, asf_var
 
 end
 
@@ -73,5 +80,5 @@ site = 'kuuj'
 time_range = time_double(['2019-03-28/08:00','2019-03-28/09:00'])
 site = 'whit'
 
-themis_read_asf, time_range, site=site
+var = themis_read_asf(time_range, site=site)
 end

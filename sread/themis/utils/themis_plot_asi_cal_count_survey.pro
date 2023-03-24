@@ -17,8 +17,8 @@ pro themis_plot_asi_cal_count_survey, test_time, $
     time = time_double(test_time)
     time_range = time-(time mod 3600)+[0,3600]
     prefix = 'thg_'+site+'_'
-    asf_var = prefix+'asf'
-    if check_if_update(asf_var, time_range) then themis_read_asf, time_range, site=site
+    asf_var = themis_read_asf(time_range, site=site, get_name=1)
+    if check_if_update(asf_var, time_range) then asf_var = themis_read_asf(time_range, site=site, errmsg=errmsg)
     get_data, asf_var, times, imgs_raw
     tmp = min(times-time, abs=1, time_id)
     asf_cal_var = asf_var+'_cal'
