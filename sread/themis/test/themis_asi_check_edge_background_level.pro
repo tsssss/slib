@@ -47,7 +47,7 @@ function themis_asi_check_edge_background_level, input_time_range, site=site
     store_data, bg_var, file_times, [[bg_levels],[bg_mins]]
     add_setting, bg_var, smart=1, dictionary($
         'display_type', 'stack', $
-        'unit', '#', $
+        'ytitle', strupcase(site)+' Count (#)', $
         'labels', ['Median','Min'], $
         'colors', sgcolor(['blue','red']), $
         'ylog', 1, $
@@ -59,5 +59,10 @@ end
 
 date = '2008-01-19'
 sites = themis_read_asi_sites()
-foreach site, sites do tmp = themis_asi_check_edge_background_level(date, site=site)
+vars = []
+foreach site, sites do begin
+    var = themis_asi_check_edge_background_level(date, site=site)
+    vars = [vars,var]
+    tplot, vars
+endforeach
 end
