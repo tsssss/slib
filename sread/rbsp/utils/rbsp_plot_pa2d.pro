@@ -536,8 +536,12 @@ time_range = ['2013-06-28/10:00','2013-06-28/10:30']
 probe = 'a'
 the_species = ['p']
 
+time_range = ['2014-09-11/00:04','2014-09-11/00:06']
+probe = 'b'
+the_species = ['e']
+
 foreach species, the_species do begin
     var = rbsp_plot_pa2d(time_range, probe=probe, $
-      species=species, scale_method='default', unit='energy', zrange=[5e3,5e7], test=1)
+      species=species, scale_method='default', unit='energy', zrange=[5e3,5e7], test=0)
 endforeach
 end
