@@ -2,25 +2,6 @@
 ; Calibrate the background count for given asf image.
 ;-
 
-function calc_baseline_smooth, asi_raw, window, times
-
-    time_step = total(times[0:1]*[-1,1])
-    width = window/time_step
-
-    ; Get the smooth, overal trend.
-    imgs_bg = smooth(asi_raw, width, nan=1, edge_mirror=1)
-
-    ; Adjust for standar deviation, estimate using smooth+abs.
-    imgs_cal = asi_raw-imgs_bg
-    imgs_offset = smooth(abs(imgs_cal), width, nan=1, edge_mirror=1)
-
-    imgs_bg -= imgs_offset
-
-    return, imgs_bg
-
-end
-
-
 
 ; sample window does not significantly affect algorithm speed.
 pro themis_asi_cal_brightness_smooth, asf_var, newname=newname, smooth_window=smooth_window

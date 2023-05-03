@@ -1,0 +1,181 @@
+;+
+; Load calibrated asf images.
+;-
+
+function scale_value_to_smooth_width, xxs
+;    return, 10^2*10.^(-atanh((xxs-3.5e4)/3e4))
+    return, (1-tanh((xxs)/2e4))*1199+1
+end
+
+function scale_value_to_min_duration, xxs
+    min_durations = exp(xxs/1e4)
+    return, (1-(min_durations-1)/(max(min_durations)-1))*600+1
+end
+
+function scale_value_to_weight, xxs
+    return, (tanh((xxs-0.5e4)/0.5e4)+1)*0.5
+end
+
+
+function themis_asf_calc_background_image, input_time_range, site=site, $
+    asf_var=asf_var, errmsg=errmsg, output=bg_var, get_name=get_name, $
+    min_bg_image=min_bg_image, test=test
+
+    errmsg = ''
+
+;---Handle input.
+    if n_elements(asf_var) eq 0 then begin
+        time_range = time_double(input_time_range)
+        asf_var = themis_read_asf(time_range, site=site, get_name=1)
+        if check_if_update(asf_var, time_range) then asf_var = themis_read_asf(time_range, site=site)
+    endif else begin
+        if n_elements(site) eq 0 then site = get_setting(asf_var, 'site')
+        if n_elements(input_time_range) ne 2 then input_time_range = minmax(get_var_time(asf_var))
+    endelse
+    time_range = time_double(input_time_range)
+
+
+;---Read original asf images.
+    if n_elements(bg_var) eq 0 then bg_var = asf_var+'_bg'
+    if keyword_set(get_name) then return, bg_var
+    get_data, asf_var, times, orig_images, limits=lim
+    image_size = lim.image_size
+    npixel = product(image_size)
+    nframe = n_elements(times)
+    time_step = times[1]-times[0]
+
+
+;---Seperate edge and center pixels.
+    edge_indices = lim.edge_index
+    center_index = lim.center_index
+
+
+    bg_images = reform(orig_images, [nframe,npixel])
+    foreach pixel, center_index do begin
+        bg_images[*,pixel] = test_themis_asf_calc_background(bg_images[*,pixel])
+    endforeach
+    bg_images = reform(bg_images, [nframe,image_size])
+    store_data, bg_var, times, bg_images, limits=lim
+    return, bg_var
+
+
+;---A minimum background per pixel.
+    ; Ideally, this should be the min over the entire night.
+    ; But it's usually fine to use the 1 hour data.
+    if n_elements(min_bg_image) eq 0 then begin
+        min_bg_image = fltarr(image_size)
+        for ii=0,image_size[0]-1 do begin
+            for jj=0,image_size[1]-1 do begin
+                min_bg_image[ii,jj] = min(orig_images[*,ii,jj])
+            endfor
+        endfor
+    endif
+    min_bg_image_1d = reform(min_bg_image,npixel)
+    
+    
+;---A adaptive background.
+    ; Need to consider data gaps.
+    common_times = make_bins(time_range, time_step, inner=1)
+    ntime = n_elements(common_times)
+    if ntime ne nframe then begin
+        bg_images = fltarr([nframe,image_size])
+        for ii=0,image_size[0]-1 do begin
+            for jj=0,image_size[1]-1 do begin
+                bg_images[*,ii,jj] = interpol(orig_images[*,ii,jj],times, common_times)
+            endfor
+        endfor
+    endif else begin
+        bg_images = reform(float(orig_images), [nframe,npixel])
+    endelse
+    value_bins = make_bins([0,65535], 3e3, inner=1)
+    ; An empirical adaptive threshold to exclude fluctuations due to aurora:
+    ; 1. Short duration fluctuations (several min) like auroral streamers.
+    ; 2. Longer duration fluctuations (several 10 min) like the stable arcs.
+    min_durations = scale_value_to_min_duration(value_bins)
+    ; Only do it for the center pixels and toss all edge pixels.
+    foreach pixel_index, center_index, index_id do begin
+        if keyword_set(test) then begin
+            index_2d = array_indices(image_size, pixel_index, dimensions=1)
+;            if index_2d[0] ne 50 then continue
+;            if index_2d[1] ne 130 then continue
+            if index_2d[0] ne 210 then continue
+            if index_2d[1] ne 80 then continue
+        endif
+        
+        
+        the_data = bg_images[*,pixel_index]
+        min_data = min_bg_image_1d[pixel_index]
+        ; An empirical weight: 1 for large value, 0 for values close to min_data.
+        weight = scale_value_to_weight(the_data-min_data)
+        ; Merge the min_data and the actual data according to the weight.
+        ; So that merged_data will drop to min_data for typical values w/o moon (<1-2e4).
+        merged_data = weight*the_data+(1-weight)*min_data
+        ; Sample merged_data to get an overall AND smooth trend of the data.
+        sample_indexs = []
+        foreach value, value_bins, value_id do begin
+            tindex = where(merged_data ge value, count)
+            if count eq 0 then continue
+            the_index = time_to_range(tindex,time_step=1)
+            durations = the_index[*,1]-the_index[*,0]
+            the_duration = min_durations[value_id]
+            tindex = where(durations ge the_duration, count)
+            if count eq 0 then continue
+            the_index = the_index[tindex,*]
+            sample_indexs = [sample_indexs,the_index]
+        endforeach
+        sample_indexs = sort_uniq(sample_indexs)
+        sample_values = merged_data[sample_indexs]
+
+        ; sample_index are sparse at low values, need to add some more (but not too close).
+        nsample_index = n_elements(sample_indexs)
+        for ii=1,nsample_index-1 do begin
+            i0 = sample_indexs[ii-1]+600
+            i1 = sample_indexs[ii]-600
+            if i0 gt i1 then continue
+            iis = make_bins([i0,i1], 1200, inner=1)
+            if n_elements(iis) eq 0 then continue
+            sample_indexs = [sample_indexs,iis]
+            sample_values = [sample_values,fltarr(n_elements(iis))+min_data]
+        endfor
+        index = sort_uniq_index(sample_indexs)
+        sample_indexs = sample_indexs[index]
+        sample_values = sample_values[index]
+        
+        ; Use sample_index to get the overall AND smooth trend for all times.
+        ; Use an adaptive and empirical smoothing width to smoothe the trend.
+        ; Smoothing is necessary because the interpol the sample_index gives contour-like patterns.
+        sample_bg = interpol(sample_values, common_times[sample_indexs], times)
+        smooth_widths = scale_value_to_smooth_width(sample_bg)
+        bg = smooth_pro(merged_data, smooth_widths)
+        weight = scale_value_to_weight(bg-min_data)
+        bg_images[*,pixel_index] = weight*bg+(1-weight)*min_data
+        
+        
+        if keyword_set(test) then begin
+            sgopen, 0, size=[12,4]
+            plot, the_data, yrange=[1e3,1e5], ylog=1, xstyle=1
+            oplot, merged_data, color=sgcolor('green')
+            oplot, sample_indexs, sample_values, psym=1, color=sgcolor('red')
+            oplot, bg_images[*,pixel_index], color=sgcolor('red')
+            stop
+        endif
+    endforeach
+    if nframe ne ntime then begin
+        index = (times-time_range[0])/time_step
+        bg_images = bg_images[index,*]
+    end
+    bg_images = reform(bg_images, [ntime,image_size])
+    store_data, bg_var, times, bg_images, limits=lim
+    return, bg_var
+
+
+end
+
+
+time_range = time_double(['2016-10-13/04:10','2016-10-13/14:54'])   ; stable arc.
+site = 'gako'
+test = 1
+
+bg_var = themis_asf_calc_background_image(time_range, site=site, test=test)
+
+end

@@ -41,10 +41,10 @@ function themis_asi_moon_align, input_time_range, site=site, asf_var=asf_var, ge
     ma_images = asf_images
     foreach time, common_times, time_id do begin
         rotation_angle = rotation_angles[time_id]
-        if rotation_angle eq !values.f_nan or rotation_angle eq 0 then continue
+        if finite(rotation_angle,nan=1) or rotation_angle eq 0 then continue
         asf_image_current = reform(asf_images[time_id,*,*])
         ma_images[time_id,*,*] = rot(asf_image_current, rotation_angle, 1, $
-            rotation_center[0], rotation_center[1], pivot=1, missing=1, interp=1, cubic=-0.5)
+            rotation_center[0], rotation_center[1], pivot=1, missing=0, interp=1)
     endforeach
 
     store_data, moon_align_var, common_times, ma_images, limits=lim

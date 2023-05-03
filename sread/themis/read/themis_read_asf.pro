@@ -66,6 +66,12 @@ function themis_read_asf, input_time_range, site=site, errmsg=errmsg, get_name=g
     foreach key, asc_info.keys() do begin
         options, asf_var, key, asc_info[key]
     endforeach
+    
+    ; Add center and edge pixel index (1d).
+    pixel_elevs = pixel_info.pixel_elev
+    edge_index = where(finite(pixel_elevs,nan=1) or pixel_elevs le 0, complement=center_index)
+    options, asf_var, 'edge_index', edge_index
+    options, asf_var, 'center_index', center_index
 
     return, asf_var
 

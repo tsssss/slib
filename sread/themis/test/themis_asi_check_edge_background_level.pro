@@ -51,6 +51,7 @@ function themis_asi_check_edge_background_level, input_time_range, site=site
         'labels', ['Median','Min'], $
         'colors', sgcolor(['blue','red']), $
         'ylog', 1, $
+        'site', site, $
         'yrange', [1e3,1e5] )
     return, bg_var
 

@@ -93,5 +93,6 @@ function themis_read_weygand_j, input_time_range, id=datatype, get_name=get_name
 end
 
 time_range = ['2008-01-19/06:00','2008-01-19/09:00']
+time_range = ['2013-05-01/07:38','2013-05-01/07:39']
 vars = themis_read_weygand_j(time_range)
 end

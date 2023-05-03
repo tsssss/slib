@@ -27,7 +27,7 @@ function themis_asi_read_moon_pos, input_time_range, site=site, errmsg=errmsg, g
 
     time_range = time_double(input_time_range)
     time_step = 3d
-    common_times = make_bins(time_range, time_step)
+    common_times = make_bins(time_range+[0,-0.1*time_step], time_step, inner=1)
     ntime = n_elements(common_times)
     moon_elevs = moon_elev(common_times, glon, glat, degree=1, azim=moon_azims)
 

@@ -22,19 +22,20 @@ function themis_load_asi, input_time_range, site=site, id=datatype, $
     compile_opt idl2
     on_error, 0
     errmsg = ''
+    retval = !null
 
 
 ;---Check inputs.
     sync_threshold = 0
     if n_elements(site) eq 0 then begin
         errmsg = 'No input site ...'
-        return, ''
+        return, retval
     endif
     sites = themis_read_asi_sites()
     index = where(sites eq site, count)
     if count eq 0 then begin
         errmsg = 'Invalid site: '+site[0]+' ...'
-        return, ''
+        return, retval
     endif
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'themis'])
     if n_elements(remote_root) eq 0 then remote_root = 'http://themis.ssl.berkeley.edu/data/themis'
@@ -100,11 +101,11 @@ function themis_load_asi, input_time_range, site=site, id=datatype, $
 ;---Dispatch patterns.
     if n_elements(datatype) eq 0 then begin
         errmsg = handle_error('No input datatype ...')
-        return, ''
+        return, retval
     endif
     if not type_dispatch.haskey(datatype) then begin
         errmsg = handle_error('Do not support type '+datatype+' yet ...')
-        return, ''
+        return, retval
     endif
     request = type_dispatch[datatype]
     if keyword_set(return_request) then return, request
@@ -113,7 +114,7 @@ function themis_load_asi, input_time_range, site=site, id=datatype, $
     files = prepare_files(request=request, errmsg=errmsg, local_files=files, $
         file_times=file_times, time=time_range, nonexist_files=nonexist_files)
 
-    if n_elements(files) eq 0 then return, '' else return, files
+    if n_elements(files) eq 0 then return, retval else return, files
 
 end
 
