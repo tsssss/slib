@@ -102,7 +102,7 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
     if n_elements(dimensions) eq 0 then begin
         tmp = cdf_varcreate(cdfid, the_var, zvariable=1, numelem=numelem, _extra=extra)
     endif else begin
-        dimvary = indgen(n_elements(dimensions))+1
+        dimvary = fltarr(n_elements(dimensions))+1
         tmp = cdf_varcreate(cdfid, the_var, dimvary, dimensions=dimensions, zvariable=1, numelem=numelem, _extra=extra)
     endelse
     cdf_varput, cdfid, the_var, vals, zvariable=1
