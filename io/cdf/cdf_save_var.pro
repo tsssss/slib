@@ -53,7 +53,7 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
     if has_var then cdf_del_var, the_var, filename=cdfid
 
     ; Get the cdf_type.
-    var_type = keyword_set(cdf_type)? cdf_type: scdffmidltype(size(data[0],/type))
+    var_type = keyword_set(cdf_type)? cdf_type: cdf_type_from_idl_type(size(data[0],/type))
     extra = create_struct(var_type,1)
 
     ; Get the data size.

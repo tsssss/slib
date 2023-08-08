@@ -76,7 +76,7 @@ pro scdfwrite, cdf0, vname, skt=skt, value=val, errmsg=errmsg, $
 
     if newvar eq 1 then begin
         ; deal with cdf_type.
-        vtype = keyword_set(cdftype)? cdftype: scdffmidltype(size(val[0],/type))
+        vtype = keyword_set(cdftype)? cdftype: cdf_type_from_idl_type(size(val[0],/type))
         if n_elements(extra) eq 0 then extra1 = create_struct(vtype,1) else begin
             idx = where(tag_names(extra) eq strupcase(vtype), cnt)
             if cnt eq 0 then extra1 = create_struct(vtype,1, extra) else begin

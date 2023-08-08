@@ -14,7 +14,7 @@
 ; History:
 ;   2018-02-04, Sheng Tian, create.
 ;-
-function scdffmidltype, types, structure=structure
+function cdf_type_from_idl_type, types, structure=structure
     on_error, 2
 
     cdftypes = 'CDF_'+['XXX','BYTE','UINT1','INT1','CHAR','UCHAR',$
@@ -65,7 +65,7 @@ function scdffmidltype, types, structure=structure
     endelse
 end
 
-print, scdffmidltype(size(0d,/type))
-help, scdffmidltype(size(0d,/type),/structure)
-help, scdffmidltype('cdf_epoch')
+print, cdf_type_from_idl_type(size(0d,/type))
+help, cdf_type_from_idl_type(size(0d,/type),/structure)
+help, cdf_type_from_idl_type('cdf_epoch')
 end

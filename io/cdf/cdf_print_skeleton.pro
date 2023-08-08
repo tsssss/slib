@@ -61,9 +61,8 @@ pro cdf_print_skeleton, skeleton, filename=out_file
         printf, lun, '#Variables'
         printf, lun, str_enter
         vars = skeleton.var
-        ii = 0
-        foreach var, vars do begin
-            ii += 1
+        foreach key, vars.keys(), ii do begin
+            var = vars[key]
             recvary = var.recvary? 'VARY': 'NOVARY'
             dimvary = strjoin(string(var.dimvary,format='(I0)'),', ')
             printf, lun, ii, var.name, format = '(I4, " ", A)'

@@ -10,7 +10,7 @@
 ; History:
 ;   2014-02-12, Sheng Tian, create.
 ;-
-function scdf2idltype, types
+function cdf_type_to_idl_type, types
     on_error, 2
 
     cdftypes = 'CDF_'+['XXX','BYTE','UINT1','INT1','CHAR','UCHAR',$

@@ -1,5 +1,5 @@
 ;+
-; Read or print the skeleton of a cdf file.
+; Read the skeleton of a cdf file.
 ;-
 function cdf_read_skeleton, cdf0
 
