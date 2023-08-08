@@ -121,7 +121,7 @@ function stodate, ut0, f10
             'e': d1+= string(dy,format='(I2)')
             'H': d1+= string(fix(hr),format='(I02)')
             'I': d1+= string(fix(hr mod 12),format='(I02)')
-            'j': d1+= string(stodoy(yr,mo),format='(I03)')
+            'j': d1+= string(stodoy(yr,mo,dy),format='(I03)')
             'k': d1+= string(fix(hr),format='(I2)')
             'l': d1+= string(fix(hr mod 12),format='(I2)')
             'm': d1+= string(mo,format='(I02)')
