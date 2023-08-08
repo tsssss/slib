@@ -14,8 +14,8 @@ function constant, name
         'deg': retval = 180d/!dpi
         'rad': retval = !dpi/180d
         'pi': retval = !dpi
-        're': retval = 6378d
-        're1': retval = 1d/6378d
+        're': retval = 6378.14
+        're1': retval = 1d/6378.137
         'rgb': retval = sgcolor(['red','green','blue'])
         'xyz': retval = ['x','y','z']
         'uvw': retval = ['u','v','w']
