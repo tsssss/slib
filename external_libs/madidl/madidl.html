@@ -1,0 +1,727 @@
+<html>
+<head><title>Madidl documentation</title></head>
+<body>
+<h1>IDL Madrigal remote data access API reference guide</h1>
+<blockquote>
+  <p>    The following are the methods for accessing Madrigal data remotely:</p>
+</blockquote>
+<ul>
+  <li><a href="#madgetallinstruments">madgetallinstruments</a> - returns an array of all instruments in Madrigal database</li>
+<li><a href="#madgetexperiments">madgetexperiments</a> - returns an array of experiments for a given instument(s) and date range</li>
+<li><a href="#madgetexperimentfiles">madgetexperimentfiles</a> - returns an array of files in a given experiment</li>
+<li><a href="#madgetexperimentfileparameters">madgetexperimentfileparameters</a> - returns an array of measured parameters in a file, and derived parameters available</li>
+<li><a href="#madsimpleprint">madsimpleprint</a> - returns all data in a file as a 2-D array</li>
+<li><a href="#madprint">madprint</a> - returns data from a file as a 2-D array using user specified parameters and filters</li>
+<li><a href="#maddownloadfile">maddownloadfile</a> - downloads a Madrigal file to local computer in a simple ascii format</li>
+<li><a href="#madglobalprint">madglobalprint</a> - returns user-specified data from multiple experiments</li>
+<li><a href="#madglobaldownload">madglobaldownload</a> - download data files from multiple experiments</li>
+<li><a href="#madcalculator">madcalculator</a> - returns derived parameters for a given time and set of spatial locations</li>
+<li><a href="#madgetversion">madgetversion</a> - returns version as list of integers in descending order of significance</li>
+
+</ul>
+  <p> A good way to learn how to use this IDL API is to run either the  <a href=#example3>Madrigal 3 example</a>
+  or the <a href=#example>Madrigal 2 example</a>. All Madrigal 2 calls also work with Madrigal 3, but Madrigal
+  3 has arguments not supported by Madrigal 2 sites.
+  <a name="madgetallinstruments" id="madgetallinstruments"></a>
+<pre>
+   ***********************************************************
+;+
+; NAME: 
+;    madgetallinstruments(madurl)
+;
+; PURPOSE: 
+;    Get information on all instruments with data at the Madrigal site specified
+;    by madUrl
+;
+; INPUTS: 
+;      madurl - scalar string giving a fully qualified url to the Madrigal site
+;
+; OUTPUT: an array of structures with the following fields:
+;		1. name - (string) Example: 'Millstone Hill Incoherent Scatter Radar'
+;		2. code - (int) Example: 30
+;		3. mnemonic - (3 char string) Example: 'mlh'
+;		4. latitude - (double) Example: 45.0
+;		5. longitude (double) Example: 110.0
+;		6. altitude (double)  Example: 0.015 (km)
+;		7. category (string) Example: 'Incoherent scatter radars'
+; EXAMPLE: 
+;     result = madGetAllInstruments('http://madrigal.haystack.mit.edu/madrigal')
+;
+; $Id: madidl.html 6687 2018-12-18 19:26:05Z brideout $
+;
+FUNCTION madgetallinstruments, madurl
+</pre>
+<a name="madgetexperiments" id="madgetexperiments"></a>
+<pre>
+   ***********************************************************
+;+
+; NAME: 
+;    madgetexperiments(madurl, instcode, startyear, startmonth, startday, starthour, startmin, startsec,
+;                                      endyear, endmonth, endday, endhour, endmin, endsec, local)
+;
+; PURPOSE: 
+;    Get information on experiments for a given instrument and date range
+;
+; INPUTS: 
+;      madurl - scalar string giving a fully qualified url to the Madrigal site
+;      instcode = int or array of ints representing instrument code(s). Special value of 0 selects all instruments.
+;      startyear, startmonth, startday, starthour, startmin, startsec - 6 ints representing start time
+;      endyear, endmonth, endday, endhour, endmin, endsec - 6 ints representing end time
+;      local - 0 if all sites desired, 1 (default) if only local experiments desired
+;
+; OUTPUT: an array of structures representing experiments between the dates with the following fields:
+;	1. strid (string) Example: "10000111".  Uniquely identifies experiment. Can be converted to a long long.
+;         Not stored as a long long because that just doesn't seem to work, so user needs to convert.
+;   2. url (string) Example: 'http://www.haystack.mit.edu/cgi-bin/madtoc/1997/mlh/03dec97'
+;         Deprecated - use realUrl field instead (described below)
+;   3. name (string) Example: 'Wide Latitude Substorm Study'
+;   4. siteid (int) Example: 1
+;   5. sitename (string) Example: 'Millstone Hill Observatory'
+;   6. instcode (int) Code of instrument. Example: 30
+;   7. instname (string) Instrument name. Example: 'Millstone Hill Incoherent Scatter Radar'
+;   8. startyear, startmonth, startday, starthour, startmin, startsec - 6 ints representing start time of experiments
+;   9. endyear, endmonth, endday, endhour, endmin, endsec - 6 ints representing end time of experiments
+;   10. isLocal - 1 if a local experiment, 0 if not
+;   11. madrigalUrl - url of Madrigal site.  Used if not a local experiment.
+;   12. pi - name of experiment PI
+;   13. piemail - email of experiment PI
+;   14. realUrl - real url to experiment web page
+;   If no experiements found, returns a Null Pointer (IDL does not allow empty arrays)
+;
+;    Note that if the returned experiment is not local, the experiment id will be -1.  This means that you
+;    will need to rerun madgetexperiments with the url of the 
+;    non-local experiment (experiment.madrigalUrl).
+;    This is because 
+;    while Madrigal sites share metadata about experiments, the real experiment ids are only
+;    known by the individual Madrigal sites.  See example_madidl.pro for an example of this
+;           for an example of this.
+; EXAMPLE: 
+;     result = madGetExperiments('http://madrigal.haystack.mit.edu/madrigal', 30, 1998,1,1,0,0,0, 1998,1,31,23,59,59,1)
+;
+; $Id: madidl.html 6687 2018-12-18 19:26:05Z brideout $
+;
+FUNCTION madGetExperiments, madurl,  instcode, startyear, startmonth, startday, starthour, startmin, startsec, $
+                                      endyear, endmonth, endday, endhour, endmin, endsec, local
+</pre>
+<a name="madgetexperimentfiles" id="madgetexperimentfiles"></a>
+<pre>
+   ***********************************************************
+;+
+; NAME: 
+;    madgetexperimentfiles(madurl, expid, getnondefault)
+;
+; PURPOSE: 
+;    returns a list of all  Madrigal Experiment Files for a given experiment id
+;
+; INPUTS: 
+;      madurl - scalar string giving a fully qualified url to the Madrigal site
+;      expid - experiment id as returned by madgetexperiments
+;      getnondefault - an optional argument.  If 1, get all files, including non-default.  If 0 (the default)
+;             get only default files. In general, non-default files should be used with caution, and most users
+;             should set this argument to 0.
+;
+; OUTPUT: an array of structures representing experiment files for that experiment with the following fields:
+;     1. name (string) Example '/opt/madrigal/blah/mlh980120g.001'
+;     2. kindat (int) Kindat code.  Example: 3001
+;     3. kindatdesc (string) Kindat description: Example 'Basic Derived Parameters'
+;     4. category (int) (1=default, 2=variant, 3=history, 4=real-time)
+;     5. status (string)('preliminary', 'final', or any other description)
+;     6. permission (int)  0 for public, 1 for private
+;     7. expId - experiment id (int) of the experiment this MadrigalExperimentFile belongs in
+;     8. doi - Citable URL of file
+;   If no experiement files found, returns a Null Pointer (IDL does not allow empty arrays)
+; EXAMPLE: 
+;     result = madGetExperimentFiles('http://madrigal.haystack.mit.edu/madrigal', 300041, 0)
+;
+; $Id: madidl.html 6687 2018-12-18 19:26:05Z brideout $
+;
+FUNCTION madGetExperimentFiles, madurl,  expId, getNonDefault
+</pre>
+<a name="madgetexperimentfileparameters" id="madgetexperimentfileparameters"></a>
+<pre>
+   ***********************************************************
+;+
+; NAME: 
+;    madgetexperimentfileparameters(madurl, fullFilename)
+;
+; PURPOSE: 
+;    returns a list of all measured and derivable parameters in file
+;
+; INPUTS: 
+;      madurl - scalar string giving a fully qualified url to the Madrigal site
+;      fullFilename - full path to experiment file as returned by madGetExperimentFiles.
+;
+; OUTPUT: an array of structures representing parameters for that experiment file with the following fields:
+;     1. mnemonic (string) Example 'dti'
+;     2. description (string) Example: "F10.7 Multiday average observed (Ott)"
+;     3. isError (int) 1 if error parameter, 0 if not
+;     4. units (string) Example "W/m2/Hz"
+;     5. isMeasured (int) 1 if measured, 0 if derivable
+;     6. category (string) Example: "Time Related Parameter"
+;     7. isSure (int)  1 if parameter can be found for every record, 0 if can only be found for some
+;     8. isAddIncrement - 1 if additional increment, 0 if normal, -1 if unknown (this capability
+;                        only added with Madrigal 2.5)
+; EXAMPLE: 
+;     result = madGetExperimentFileParameters('http://madrigal.haystack.mit.edu/madrigal', '/opt/madrigal/blah/mlh980120g.001')
+;
+; $Id: madidl.html 6687 2018-12-18 19:26:05Z brideout $
+;
+FUNCTION madGetExperimentFileParameters, madurl,  fullFilename
+</pre>
+<a name="madsimpleprint" id="madsimpleprint"></a>
+<pre>
+   ***********************************************************
+;+
+; NAME: 
+;    madsimpleprint(madurl, fullFilename, user_fullname, user_email, user_affiliation)
+;
+; PURPOSE: 
+;    madSimplePrint prints the data in the given file is a simple ascii format.
+;
+;        madSimplePrint prints only the parameters in the file, without filters or derived
+;        parameters.  To choose which parameters to print, to print derived parameters, or
+;        to filter the data, use isprint instead.
+;
+; INPUTS: 
+;      madurl - scalar string giving a fully qualified url to the Madrigal site
+;      fullFilename - full path to experiment file as returned by madGetExperimentFiles.
+;      user_fullname - full name of user making request
+;      user_email - email address of user making request
+;      user_affiliation - affiliation of user making request
+;
+; OUTPUT: a structure with following fields:
+;     1. parameters - an array of strings giving the mnemonics of the parameters.  Equal to the number of columns in data
+;     2. data - a two dimensional array of double.  Number of columns = number of parameters above.  Number of rows
+;         is the number of measurments.  Note that Madrigal often contains a number a measurments at the same time
+;         (such as when a radar makes different range measurements at the same time), so two or more rows may have the same time.
+; EXAMPLE: 
+;     result = madSimplePrint('http://madrigal.haystack.mit.edu/madrigal', '/opt/madrigal/blah/mlh980120g.001', $
+;                                              'Bill Rideout', 'brideout@haystack.mit.edu', 'MIT')
+;
+; $Id: madidl.html 6687 2018-12-18 19:26:05Z brideout $
+;
+FUNCTION madSimplePrint, madurl,  fullFilename, user_fullname, user_email, user_affiliation
+</pre>
+<a name="madprint" id="madprint"></a>
+<pre>
+   ***********************************************************
+;+
+; NAME: 
+;    madprint(madurl, fullFilename, parms, filters, user_fullname, user_email, user_affiliation, ignore_no_data, verbose, outputFile)
+;
+; PURPOSE: 
+;    madPrint returns a two-dimensional array of doubles based on user-specified parmeters and filters.
+;
+;       See madSimplePrint to print a file with all data and just those parameters in the file itself.
+;
+;        madPrint allows you to choose which parameters to print, to print derived parameters, or
+;        to filter the data.
+;
+; INPUTS: 
+;      madurl - scalar string giving a fully qualified url to the Madrigal site
+;      fullFilename - full path to experiment file as returned by madGetExperimentFiles.
+;      parms - Comma delimited string listing requested parameters (no spaces allowed).
+;      filters - Space delimited string listing filters desired, as in isprint command (see
+;                   Documentation->Administrator's Guide->Using isprint for file quick looks)
+;      user_fullname - full name of user making request
+;      user_email - email address of user making request
+;      user_affiliation - affiliation of user making request
+;      ignore_no_data - if 0 (the default), raises error if no data, If 1, ignores no data
+;      verbose - if 0 (the default) no printing progress information.  If 1, print progress information.
+;      outputFile - if not '', download the results to outputFile.  If outputFile has an extension
+;                of .h5, .hdf, or .hdf5, will download in Madrigal Hdf5 format.  If it has a .nc extension, will
+;                download as netCDF4. Otherwise, it will download as column delimited ascii.
+;                Trying to save as Hdf5 or netCDF4 with a Madrigal 2 site will raise an exception
+;                If '' (the default) parse data into array.
+;
+; OUTPUT:  If outputFile is '', returns a two dimensional array of doubles.  Number of columns = number of parameters requested.  Number of rows
+;         is the number of measurments.  Note that Madrigal often contains a number a measurments at the same time
+;         (such as when a radar makes different range measurements at the same time), so two or more rows may have the same time.
+;         If outputFile not '', saves data into file, and returns 1.  If error on server, prints error and returns -1
+; EXAMPLE: 
+;     result = madPrint('http://madrigal.haystack.mit.edu/madrigal', '/opt/madrigal/blah/mlh980120g.001', $
+;                                   'year,month,day,hour,min,sec,gdalt,ti', 'filter=gdalt,500,600 filter=ti,1900,2000' $
+;                                   'Bill Rideout', 'brideout@haystack.mit.edu', 'MIT')
+;
+; $Id: madidl.html 6687 2018-12-18 19:26:05Z brideout $
+;
+FUNCTION madPrint, madurl,  fullFilename, parms, filters, user_fullname, user_email, user_affiliation, ignore_no_data, $
+    verbose, outputFile
+</pre>
+<a name="maddownloadfile" id="maddownloadfile"></a>
+<pre>
+   ***********************************************************
+;+
+; NAME: 
+;    maddownloadfile, madurl, fullFilename, outputFile, user_fullname, user_email, user_affiliation, format
+;
+; PURPOSE: 
+;    downloads a Madrigal file in ascii, Hdf5, or netCDF4 format to local computer
+;
+; INPUTS: 
+;      madurl - scalar string giving a fully qualified url to the Madrigal site
+;      fullFilename - full path to experiment file as returned by madGetExperimentFiles.
+;      outputFile - path to save file locally
+;      user_fullname - full name of user making request
+;      user_email - email address of user making request
+;      user_affiliation - affiliation of user making request
+;      format - 'ascii'or 'hdf5' or 'netCDF4'. Default is ascii. netCDF4 requires Madrigal3
+;
+; EXAMPLE: 
+;     maddownloadfile, 'http://madrigal.haystack.mit.edu/madrigal', '/opt/madrigal/experiments/1998/mlh/20jan98/mlh980120g.002', '/tmp/junk.hdf5', &
+;                                   'Bill Rideout', 'brideout@haystack.mit.edu', 'MIT', 'hdf5'
+;
+; $Id: madidl.html 6687 2018-12-18 19:26:05Z brideout $
+;
+PRO maddownloadfile, madurl,  fullFilename, outputFile, user_fullname, user_email, user_affiliation, format
+</pre>
+<a name="madglobalprint" id="madglobalprint"></a>
+<pre>
+   ***********************************************************
+;+
+; NAME: 
+;    madglobalprint, madurl, parms, output, user_fullname, user_email, user_affiliation, startDate, endDate, 
+;                          inst, filters, kindats, expName,  fileDesc, format
+;
+; PURPOSE
+;     madglobalprint is a procedure to search through the entire Madrigal database
+;     for appropriate data to print in ascii to a file or to files in a directory in Hdf5 or netCDF4
+;
+; INPUTS: 
+;
+;        madurl - url to homepage of site to be searched (Example: 
+;              'http://www.haystack.mit.edu/madrigal/'
+;
+;        parms - a comma delimited string listing the desired Madrigal 
+;            parameters in mnemonic form.  
+;            (Example: 'year,month,day,hour,min,sec,gdalt,dte,te').  
+;            Ascii space-separated data will be returned in the same  
+;            order as given in this string. See 
+;            http://cedar.openmadrigal.org/parameterMetadata/
+;            for all possible parameters.
+;
+;        output - the local file or directory name to store the resulting data.
+;                 (Example: '/tmp/isprint.txt' or '/tmp') If a directory, a format
+;                 may be specified, with ascii the default.
+;
+;        user_fullname - the full user name (Example: 'Bill Rideout')
+;
+;        user email -  Example: 'brideout@haystack.mit.edu'
+;
+;        user_affiliation - Example: 'MIT'
+;
+;        startDate - a time in IDL Julian Date format at which to begin the search
+;
+;        endDate - a time in IDL Julian Date format at which to end the search
+;
+;        inst - instrument code (integer).  See 
+;            http://cedar.openmadrigal.org/instMetadata/
+;            for this list. Examples: 30 for Millstone
+;            Hill Incoherent Scatter Radar, 80 for Sondrestrom Incoherent 
+;            Scatter Radar
+;
+;    Optional inputs
+;
+;        filters - is the optional filters requested in exactly the form given in isprint
+;         command line (example = 'filter=gdalt,,500 filter=ti,500,1000')
+;         See:  Documentation->Administrator's Guide->Using isprint for file quick looks for details
+;
+;        kindats - is an optional array of kindat (kinds of data) codes to accept.
+;           The default is a null pointer, which will accept all kindats.
+;  
+;        expName - a case insensitive string as used by strmatch that matches the experiment
+;           name.  Default is zero-length string, which matches all experiment names.
+;
+;        fileDesc - a case insensitive string as used by strmatch that matches the file description.
+;           Default is zero-length string, which matches all file descriptions.
+;
+;        format - 'ascii', 'hdf5', or 'netCDF4'.  The default is ascii
+;
+; OUTPUT: Nothing.
+;
+;    Affects: Writes results to output file or directory
+;    
+;
+; EXAMPLE: 
+;   madglobalprint, 'http://www.haystack.mit.edu/madrigal/',  $
+;                         'year,month,day,hour,min,sec,gdalt,dte,te', $
+;                         '/tmp/isprint.txt', $
+;                         'Bill Rideout',  'brideout@haystack.mit.edu', 'MIT', $
+;                         julday(1,19,1998,0,0,0),  julday(1,21,1998,23,59,59), 30
+;
+;  $Id: madidl.html 6687 2018-12-18 19:26:05Z brideout $
+;
+pro madglobalprint, madurl, parms, output, user_fullname, user_email, user_affiliation, startDate, endDate, $
+                           inst, filters, kindats, expName,  fileDesc, format
+</pre>
+<a name="madglobaldownload" id="madglobaldownload"></a>
+<pre>
+   ***********************************************************
+;+
+; NAME: 
+;    madglobaldownload, madurl, outputDir, user_fullname, user_email, user_affiliation, startDate, endDate, 
+;                          inst, kindats, format, expName,  fileDesc
+;
+; PURPOSE
+;     madglobaldownload is a procedure to search through the entire Madrigal database
+;     for appropriate data files to download to outputDir
+;
+; INPUTS: 
+;
+;        madurl - url to homepage of site to be searched (Example: 
+;              'http://www.haystack.mit.edu/madrigal/'
+;
+;        outputDir - the local directory to store the downloaded files in. Must exist.
+;                 (Example: '/tmp/isprint.txt')
+;
+;        user_fullname - the full user name (Example: 'Bill Rideout')
+;
+;        user email -  Example: 'brideout@haystack.mit.edu'
+;
+;        user_affiliation - Example: 'MIT'
+;
+;        startDate - a time in IDL Julian Date format at which to begin the search
+;
+;        endDate - a time in IDL Julian Date format at which to end the search
+;
+;        inst - instrument code (integer).  See 
+;            http://cedar.openmadrigal.org/instMetadata/
+;            for this list. Examples: 30 for Millstone
+;            Hill Incoherent Scatter Radar, 80 for Sondrestrom Incoherent 
+;            Scatter Radar
+;
+;    Optional inputs
+;
+;        kindats - is an optional array of kindat (kinds of data) codes to accept.
+;           The default is a null pointer, which will accept all kindats.
+;
+;        format - ascii or hdf5 or netCDF4.  Default is ascii. netCDF4 only works with Madrigal 3 or greater
+;  
+;        expName - a case insensitive string as used by strmatch that matches the experiment
+;           name.  Default is zero-length string, which matches all experiment names.
+;
+;        fileDesc - a case insensitive string as used by strmatch that matches the file description.
+;           Default is zero-length string, which matches all file descriptions.
+;
+; OUTPUT: Nothing.
+;
+;    Affects: Writes downloaded files to outputDir
+;    
+;
+; EXAMPLE: 
+;   madglobaldownload, 'http://www.haystack.mit.edu/madrigal/',  $
+;                         '/tmp/downloads', $
+;                         'Bill Rideout',  'brideout@haystack.mit.edu', 'MIT', $
+;                         julday(1,19,1998,0,0,0),  julday(1,21,1998,23,59,59), 30, $
+;                         3410, 'hdf5'
+;
+;  $Id: madidl.html 6687 2018-12-18 19:26:05Z brideout $
+;
+pro madglobaldownload, madurl, outputDir, user_fullname, user_email, user_affiliation, startDate, endDate, $
+                           inst, kindats, format, expName,  fileDesc
+</pre>
+<a name="madcalculator" id="madcalculator"></a>
+<pre>
+   ***********************************************************
+;+
+; NAME: 
+;    madcalculator(madurl, year,  month, day, hour, min, sec, startLat, endLat, stepLat,
+;                             startLong, endLong, stepLong, startAlt, endAlt, stepAlt,  parms)
+;
+; PURPOSE: 
+;    madcalculator calculates requested derived parameter for a given time and grid of spatial points
+;
+; INPUTS: 
+;      madurl - scalar string giving a fully qualified url to the Madrigal site
+;      year,  month, day, hour, min, sec - time at which to run calculation
+;      startLat - Starting geodetic latitude, -90 to 90 (float)
+;      endLat - Ending geodetic latitude, -90 to 90 (float)
+;      stepLat - Latitude step (0.1 to 90) (float)
+;      startLong - Starting geodetic longitude, -180 to 180  (float)
+;      endLong - Ending geodetic longitude, -180 to 180 (float)
+;      stepLong - Longitude step (0.1 to 180) (float)
+;      startAlt - Starting geodetic altitude, >= 0 (float)
+;      endAlt - Ending geodetic altitude, > 0 (float)
+;      stepAlt - Altitude step (>= 0.1) (float)
+;      parms - comma delimited string of Madrigal parameters desired
+;
+; OUTPUT: a two dimensional array of doubles.  Number of columns = 3 + number of parameters requested, because the
+;                first three parameters are always geodetic latitude, longitude, and altitude.  Number of rows
+;                is the number of latitudes * number of longitudes * number of altitudes.
+; EXAMPLE: 
+;     result = madcalculator(1999,2,15,12,30,0,45,55,5,-170,-150,10,200,200,0,'bmag,bn')
+;
+; $Id: madidl.html 6687 2018-12-18 19:26:05Z brideout $
+;
+FUNCTION madcalculator, madurl, year,  month, day, hour, min, sec, startLat, endLat, stepLat,  $
+                       startLong, endLong, stepLong, startAlt, endAlt, stepAlt,  parms
+</pre>
+<a name="madgetversion" id="madgetversion"></a>
+<pre>
+   ***********************************************************
+;+
+; NAME: 
+;    madgetversion(madurl)
+;
+; PURPOSE: 
+;    Get information on version at the Madrigal site specified
+;    by madUrl
+;
+; INPUTS: 
+;      madurl - scalar string giving a fully qualified url to the Madrigal site
+;
+; OUTPUT: a list of integers giving version in descending order (eg, [2 6 4])
+; EXAMPLE: 
+;     result = madgetversion('http://madrigal.haystack.mit.edu/madrigal')
+;
+; $Id: madidl.html 6687 2018-12-18 19:26:05Z brideout $
+;
+FUNCTION madgetversion, madurl
+</pre>
+
+  <a name="example3" id="example3"></a>
+  <h4> Example Madrigal 3 IDL code </h4>
+  <pre>
+  ; Simple example of all methods in the remote IDL interface to Madrigal version 3 (madidl)
+;
+; $Id: madidl.html 6687 2018-12-18 19:26:05Z brideout $
+
+PRO example_mad3
+
+     ; these are the instrument codes for the Millstone ISR.  Run the function madGetAllInstruments
+     ; to see a list of all instruments available in Madrigal
+     instList = [30,31,32]
+     
+     ; run this test for Haystack
+     siteList = ['http://cedar.openmadrigal.org' ]
+     for i=0,  n_elements(siteList)-1  do begin
+         site = siteList[i]
+         print, 'Testing Madrigal url ', site
+
+         ; the highest level of Madrigal data is the instrument - here we get a list of all available instruments
+         ; See madgetallinstruments.pro for a definition of the instrument structure returned in an array
+         result = madGetAllInstruments(site)
+         print, 'madGetAllInstruments returned', result
+         print, ""
+         
+         ; the next level of Madrigal is the experiment.  An experiment has only one instrument associated with
+         ; it.  In this case, we ask for all experiments in Jan 1998 for any Millstone ISR radar.  sonce this
+         ; is a standard test file, its found at both Millstone and SRI
+         ; See madgetexperiments.pro for a definition of the experiment structure returned in an array
+         result = madGetExperiments(site, instList, 1998,1,20,0,0,0, 1998,1,21,23,59,59,1)
+         print, 'madGetExperiments returned ', result
+         print, ""
+         
+         ; next we get an array of files in that experiment.  See madgetexperimentfiles.pro for a definition 
+         ; of the experimentfile structure returned in an array
+         expId = long64(result[0].strid)
+         result = madGetExperimentFiles(site, expid, 1)
+         print, 'madGetExperimentFiles returned ', result
+         
+         ; next we want to get a list of all parameters.  Note Madrigal allows access to both parameters in the file
+         ; (called measured parameters) and parameters derivable form the measured ones (called derived parameters).
+         ; See madgetexperimentfileparameters.pro for a definition of the parmeter structure returned in an array
+         fullFilename = result[0].name
+         result = madGetExperimentFileParameters(site, fullFilename)
+         print, 'madGetExperimentFileParameters returned ', result
+         print, ""
+         
+         ; the next method effectively downloads the file into an IDL 2-D array.  It only downloads measured parameters
+         ; in the file.  See more advanced method madPrint to choose measured or derived parameters and/or to filter data.
+         ; See madsimpleprint.pro for details of how the data is returned
+         result = madSimplePrint(site, fullFilename,  'Bill Rideout', 'brideout@haystack.mit.edu', 'MIT')
+         print, 'size of data returned by madSimplePrint is ', size(result.data)
+         print, 'madSimplePrint parameters are ', result.parameters
+         print, ""
+         
+         ; the next method is similar to madsimpleprint, except the user chooses which measured or derived parameters 
+         ; to download, and can filter data using the filter string as discussed in 
+         ;    http://madrigal.haystack.mit.edu/madrigal/ug_commandLine.html#isprint
+         ; See madprint.pro for details of how the data is returned
+         result = madPrint(site, fullFilename,  'year,month,day,hour,min,sec,gdalt,ti', 'filter=recno,5,6 filter=ti,1000,', $
+                                         'Bill Rideout', 'brideout@haystack.mit.edu', 'MIT', 0, 1, '/tmp/junk.hdf5')
+         print, 'size of data returned by madPrint is ', size(result)
+         print, "madPrint complete"
+         
+         ; the next method is similar to madSimplePrint, except that it downloads the data from
+         ; a file into a simple column delimited formated file on your local computer
+         exampleDir = '/home/jupiter/brideout/tmp'
+         exampleFile = FILEPATH('junk5', /TMP)
+         print, exampleFile
+         maddownloadfile, site, fullFilename, exampleFile, 'Bill Rideout',  'brideout@haystack.mit.edu',  'MIT'
+         print, 'file has been downloaded to ', exampleFile
+         
+         ; The next method is used to run the Madrigal derivation engine for any random time and array of geodetic points in space
+         ; In other words, things such as Magnetic field and geophysicals indices can be calculated without a Madrigal file.
+         ; See madCalculator.pro for details of how the data is returned
+         result = madCalculator(site, 1999,2,15,12,30,0,45,55,5,-170,-150,10,200,200,0,'bmag,bn')
+         print, 'madCalculator returned ', result
+         print, ""
+         
+         ; The next procedure madglobalPrint allows you to get data from multiple files in a particular Madrigal datbase
+         ; at once.  Since it can return very large data sets, it writes to a file rather than an IDL array
+         exampleFile = FILEPATH('isprint.txt', /TMP)
+         exampleDir = '/tmp'
+         madglobalPrint, site,  'year,month,day,hour,min,sec,gdalt,dte,te', $
+                               exampleDir, 'Bill Rideout',  'brideout@haystack.mit.edu',  'MIT', $
+                               julday(1,19,1998,0,0,0),  julday(1,21,1998,23,59,59), 30, $
+                               '', [3408, 3409, 3410], '*world*', '', 'netCDF4'
+
+         print, 'madglobalprint complete'
+         ; The next procedure madglobaldownload allows you to download multiple files in a particular Madrigal datbase
+         ; at once
+         print, 'Using madglobaldownload to get files in ascii format'
+         madglobaldownload, 'http://madrigal.haystack.mit.edu/madrigal/',  $
+                            exampleDir, $
+                            'Bill Rideout',  'brideout@haystack.mit.edu', 'MIT', $
+                            julday(1,19,1998,0,0,0),  julday(1,21,1998,23,59,59), 30, $
+                            [3408, 3409, 3410]
+                            
+         ; Next madglobaldownload is called to download Hdf5 files
+         print, 'Using madglobaldownload to get files in hdf5 format'
+         madglobaldownload, 'http://madrigal.haystack.mit.edu/madrigal/',  $
+                            exampleDir, $
+                            'Bill Rideout',  'brideout@haystack.mit.edu', 'MIT', $
+                            julday(1,19,1998,0,0,0),  julday(1,21,1998,23,59,59), 30, $
+                            [3408, 3409, 3410], 'hdf5'
+                              
+           
+                               
+      endfor ; next Madrigal site
+
+      
+END
+
+  </pre>
+  <a name="example" id="example"></a>
+  <h4> Example Madrigal 2 IDL code </h4>
+  <pre>
+  ; Simple example of all methods in the remote IDL interface to Madrigal (madidl)
+;
+; $Id: madidl.html 6687 2018-12-18 19:26:05Z brideout $
+
+PRO example_madidl
+
+     ; these are the instrument codes for the Millstone ISR.  Run the function madGetAllInstruments
+     ; to see a list of all instruments available in Madrigal
+     instList = [30,31,32]
+     
+     ; run this test for two different sites (Haystack and SRI), using the test files in each site
+     siteList = ['http://madrigal.haystack.mit.edu/madrigal', $
+                      'http://isr.sri.com/madrigal/' ]
+     for i=0,  n_elements(siteList)-1  do begin
+         site = siteList[i]
+         print, 'Testing Madrigal url ', site
+
+         ; the highest level of Madrigal data is the instrument - here we get a list of all available instruments
+         ; See madgetallinstruments.pro for a definition of the instrument structure returned in an array
+         result = madGetAllInstruments(site)
+         print, 'madGetAllInstruments returned', result
+         print, ""
+         
+         ; the next level of Madrigal is the experiment.  An experiment has only one instrument associated with
+         ; it.  In this case, we ask for all experiments in Jan 1998 for any Millstone ISR radar.  sonce this
+         ; is a standard test file, its found at both Millstone and SRI
+         ; See madgetexperiments.pro for a definition of the experiment structure returned in an array
+         result = madGetExperiments(site, instList, 1998,1,19,0,0,0, 1998,1,20,23,59,59,1)
+         print, 'madGetExperiments returned ', result
+         print, ""
+         
+         ; next we get an array of files in that experiment.  See madgetexperimentfiles.pro for a definition 
+         ; of the experimentfile structure returned in an array
+         expId = long64(result[0].strid)
+         result = madGetExperimentFiles(site, expid, 1)
+         print, 'madGetExperimentFiles returned ', result
+         print, ""
+         
+         ; next we want to get a list of all parameters.  Note Madrigal allows access to both parameters in the file
+         ; (called measured parameters) and parameters derivable form the measured ones (called derived parameters).
+         ; See madgetexperimentfileparameters.pro for a definition of the parmeter structure returned in an array
+         fullFilename = result[0].name
+         result = madGetExperimentFileParameters(site, fullFilename)
+         print, 'madGetExperimentFileParameters returned ', result
+         print, ""
+         
+         ; the next method effectively downloads the file into an IDL 2-D array.  It only downloads measured parameters
+         ; in the file.  See more advanced method madPrint to choose measured or derived parameters and/or to filter data.
+         ; See madsimpleprint.pro for details of how the data is returned
+         result = madSimplePrint(site, fullFilename,  'Bill Rideout', 'brideout@haystack.mit.edu', 'MIT')
+         print, 'size of data returned by madSimplePrint is ', size(result.data)
+         print, 'madSimplePrint parameters are ', result.parameters
+         print, ""
+         
+         ; the next method is similar to madsimpleprint, except the user chooses which measured or derived parameters 
+         ; to download, and can filter data using the filter string as discussed in 
+         ;    http://madrigal.haystack.mit.edu/madrigal/ug_commandLine.html#isprint
+         ; See madprint.pro for details of how the data is returned
+         result = madPrint(site, fullFilename,  'year,month,day,hour,min,sec,gdalt,ti', 'filter=recno,5,6 filter=ti,1000,', $
+                                         'Bill Rideout', 'brideout@haystack.mit.edu', 'MIT')
+         print, 'size of data returned by madPrint is ', size(result)
+         print, ""
+         
+         ; the next method is similar to madSimplePrint, except that it downloads the data from
+         ; a file into a simple column delimited formated file on your local computer
+         exampleDir = '/tmp'
+         exampleFile = FILEPATH('junk5', /TMP)
+         print, exampleFile
+         maddownloadfile, site, fullFilename, exampleFile, 'Bill Rideout',  'brideout@haystack.mit.edu',  'MIT', 'hdf5'
+         print, 'file has been downloaded to ', exampleFile
+         
+         ; The next method is used to run the Madrigal derivation engine for any random time and array of geodetic points in space
+         ; In other words, things such as Magnetic field and geophysicals indices can be calculated without a Madrigal file.
+         ; See madCalculator.pro for details of how the data is returned
+         result = madCalculator(site, 1999,2,15,12,30,0,45,55,5,-170,-150,10,200,200,0,'bmag,bn')
+         print, 'madCalculator returned ', result
+         print, ""
+         
+         ; The next procedure madglobalPrint allows you to get data from multiple files in a particular Madrigal datbase
+         ; at once.  Since it can return very large data sets, it writes to a file rather than an IDL array
+         exampleFile = FILEPATH('isprint.txt', /TMP)
+         madglobalPrint, site,  'year,month,day,hour,min,sec,gdalt,dte,te', $
+                               exampleFile, 'Bill Rideout',  'brideout@haystack.mit.edu',  'MIT', $
+                               julday(1,19,1998,0,0,0),  julday(1,21,1998,23,59,59), 30, $
+                               '', [3408, 3409, 3410], '*world*'
+
+         ; The next procedure madglobaldownload allows you to download multiple files in a particular Madrigal datbase
+         ; at once
+         print, 'Using madglobaldownload to get files in ascii format'
+         madglobaldownload, 'http://madrigal.haystack.mit.edu/madrigal/',  $
+                            exampleDir, $
+                            'Bill Rideout',  'brideout@haystack.mit.edu', 'MIT', $
+                            julday(1,19,1998,0,0,0),  julday(1,21,1998,23,59,59), 30, $
+                            [3408, 3409, 3410], 'ascii'
+                            
+         ; Next madglobaldownload is called to download Hdf5 files
+         print, 'Using madglobaldownload to get files in hdf5 format'
+         madglobaldownload, 'http://madrigal.haystack.mit.edu/madrigal/',  $
+                            exampleDir, $
+                            'Bill Rideout',  'brideout@haystack.mit.edu', 'MIT', $
+                            julday(1,19,1998,0,0,0),  julday(1,21,1998,23,59,59), 30, $
+                            [3408, 3409, 3410], 'hdf5'
+                              
+           
+                               
+      endfor ; next Madrigal site
+
+
+      ; an example of getting data from a site from a different Madrigal site - search for Poker Flat data from Millstone site
+      site = 'http://madrigal.haystack.mit.edu/madrigal'
+      instList = [61] ; Poker Flat ISR
+      result = madGetExperiments(site, instList, 2008,4,1,0,0,0, 2008,4,30,23,59,59,0)
+      print, 'madGetExperiments returned ', result
+      ; handle a non-local experiment
+      if (result[0].isLocal eq 0) then begin
+          site = result[0].madrigalUrl
+          ; call madGetExperiments again with local url
+          result = madGetExperiments(site, instList, 2008,4,1,0,0,0, 2008,4,30,23,59,59,0)
+      endif
+      expId = long64(result[0].strid)
+      result = madGetExperimentFiles(site, expid, 1)
+      print, 'madGetExperimentFiles returned ', result
+      print, ""
+      
+END
+
+  </pre>
+</body>
+</html>

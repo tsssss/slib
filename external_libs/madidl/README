@@ -1,0 +1,20 @@
+This collection of IDL files allows you to access data from any Madrigal database directly from
+within IDL.  
+
+DOCUMENTATION
+
+A good way to learn this API would be to run the example procedure
+example_madidl.  Documentation of all public methods can be found in the file madidl.html.
+
+For a background on the Madrigal database, go to http://madrigal.haystack.mit.edu/madrigal and
+click on the documentation link.
+
+INSTALLATION
+
+All the included *.pro files must be on the IDL path.
+
+Written by:
+
+Bill Rideout
+brideout@haystack.mit.edu
+July 14, 2010
