@@ -33,7 +33,7 @@ function rbsp_read_efield_survey, input_time_range, probe=probe, get_name=get_na
 ;    if errmsg ne '' then return, retval
 
     default_coord = 'uvw'
-    vec_default_var = prefix+'efw_esvy'
+    vec_default_var = prefix+'e_uvw'
     time_range = time_double(input_time_range)
     rbsp_efw_phasef_read_e_uvw, time_range, probe=probe
 

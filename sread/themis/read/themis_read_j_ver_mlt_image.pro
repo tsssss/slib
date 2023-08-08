@@ -10,7 +10,7 @@ function themis_read_j_ver_mlt_image, input_time_range, errmsg=errmsg, get_name=
 
     time_range = time_double(input_time_range)
     mlon_image_var = themis_read_j_ver_mlon_image(time_range)
-    mlon_image_to_mlt_image, mlon_image_var, to=mlt_image_var
+    mlt_image_var = mlon_image_to_mlt_image(mlon_image_var, output=mlt_image_var)
 
     return, mlt_image_var
 end

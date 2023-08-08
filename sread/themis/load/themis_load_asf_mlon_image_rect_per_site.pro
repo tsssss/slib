@@ -6,7 +6,8 @@ function themis_load_asf_mlon_image_rect_per_site, input_time_range, site=site, 
     print_datatype=print_datatype, errmsg=errmsg, $
     local_files=files, file_times=file_times, version=version, $
     local_root=local_root, remote_root=remote_root, $
-    return_request=return_request
+    return_request=return_request, $
+    calibration_method=calibration_method
 
     compile_opt idl2
     on_error, 1
@@ -33,6 +34,9 @@ function themis_load_asf_mlon_image_rect_per_site, input_time_range, site=site, 
     endif else begin
         time_range = input_time_range
     endelse
+    
+    if n_elements(calibration_method) eq 0 then calibration_method = 'simple'
+
 
 
 ;---Init settings.
@@ -41,6 +45,7 @@ function themis_load_asf_mlon_image_rect_per_site, input_time_range, site=site, 
     ; ASF MLon image calibrated.
     valid_range = [time_double('2008'),systime(1)]
     base_name = 'thg_l3_asf_mlon_image_rect_'+site+'_%Y%m%d%H_'+version+'.cdf'
+    if calibration_method eq 'simple' then base_name = 'thg_l3_asf_mlon_image_rect_simple_'+site+'_%Y%m%d%H_'+version+'.cdf'
     local_path = [local_root,'thg','mlon_image_rect',site,'%Y','%m']
     request = dictionary($
         'pattern', dictionary($
@@ -58,7 +63,7 @@ function themis_load_asf_mlon_image_rect_per_site, input_time_range, site=site, 
         foreach file, request.nonexist_files do begin
             file_time = file.file_time
             local_file = file.local_file
-            themis_load_asf_mlon_image_rect_per_site_gen_file, file_time, site=site, filename=local_file
+            themis_load_asf_mlon_image_rect_per_site_gen_file, file_time, site=site, filename=local_file, calibration_method=calibration_method
         endforeach
         files = prepare_files(request=request, errmsg=errmsg, local_files=files, $
             file_times=file_times, time=time_range, nonexist_files=nonexist_files)

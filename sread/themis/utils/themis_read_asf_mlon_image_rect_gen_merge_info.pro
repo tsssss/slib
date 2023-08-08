@@ -8,11 +8,15 @@ function themis_read_asf_mlon_image_rect_gen_merge_info, sites=sites, $
     mlon_image_rect_info = mlon_image_rect_info()
     image_size = mlon_image_rect_info.image_size
 
+    if n_elements(min_elev) eq 0 then min_elev = 5d
+    nsite = n_elements(sites)
+    if n_elements(min_elev) ne nsite then min_elevs = fltarr(nsite)+min_elev[0] else min_elevs = min_elev
+
     elev_dict = dictionary()
-    foreach site, sites do begin
+    foreach site, sites, site_id do begin
         pixel_info = themis_asi_read_pixel_info(site=site)
         elevs = pixel_info.pixel_elev
-        index = where(elevs ge min_elev, complement=index2)
+        index = where(elevs ge min_elevs[site_id], complement=index2)
         elevs[index2] = 0
         elev_dict[site] = mlon_image_rect_map_old2new(elevs, site=site)
     endforeach

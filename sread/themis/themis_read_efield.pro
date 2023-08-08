@@ -26,7 +26,7 @@ pro themis_read_efield, time, probe=probe, resolution=resolution, coord=coord, e
     if errmsg ne '' then return
     
     var = pre0+'e_gsm'
-    rename_var, pre0+type+'_dot0_gsm', to=var
+    var = rename_var(pre0+type+'_dot0_gsm', output=var)
     
     get_data, var, times, edata
     ntime = n_elements(times)

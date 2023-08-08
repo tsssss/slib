@@ -2,7 +2,7 @@
 ; Load calibrated mlon image.
 ;-
 
-pro themis_load_asf_mlon_image_rect_per_site_gen_file, time, site=site, filename=file, errmsg=errmsg
+pro themis_load_asf_mlon_image_rect_per_site_gen_file, time, site=site, filename=file, errmsg=errmsg, calibration_method=calibration_method
 
 ;---Init settings.
     errmsg = ''
@@ -34,7 +34,7 @@ pro themis_load_asf_mlon_image_rect_per_site_gen_file, time, site=site, filename
     
     ; Calibrate brightness before mapping works better.
     asf_cal_var = asf_var+'_cal'
-    themis_asi_cal_brightness, asf_var, newname=asf_cal_var
+    themis_asi_cal_brightness, asf_var, newname=asf_cal_var, calibration_method=calibration_method
     themis_calc_asf_mlon_image_rect_per_site, asf_cal_var, errmsg=errmsg
     if errmsg ne '' then return
     

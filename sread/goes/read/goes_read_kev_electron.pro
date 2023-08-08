@@ -98,5 +98,7 @@ end
 
 probes = ['11']
 time_range = time_double(['2008-01-19/06:00','2008-01-19/09:00'])
+probes = ['15']
+time_range = time_double(['2014-10-28','2014-10-29'])
 foreach probe, probes do var = goes_read_kev_electron(time_range, probe=probe)
 end

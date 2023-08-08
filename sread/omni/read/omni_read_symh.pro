@@ -7,15 +7,16 @@ function omni_read_symh, input_time_range, errmsg=errmsg, get_name=get_name, coo
     errmsg = ''
     retval = ''
 
-    time_range = time_double(input_time_range)
-    if n_elements(resolution) eq 0 then resolution = '1min'
-    files = omni_load(time_range, errmsg=errmsg, id='cdaweb%hro%'+resolution)
-    if errmsg ne '' then return, retval
-
 
     prefix = 'omni_'
     var = prefix+'dst'
     if keyword_set(get_name) then return, var
+    if not check_if_update(var, time_range) then return, var
+
+    time_range = time_double(input_time_range)
+    if n_elements(resolution) eq 0 then resolution = '1min'
+    files = omni_load(time_range, errmsg=errmsg, id='cdaweb%hro%'+resolution)
+    if errmsg ne '' then return, retval
 
     var_list = list()
     var_list.add, dictionary($

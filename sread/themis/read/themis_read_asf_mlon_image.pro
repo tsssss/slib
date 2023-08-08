@@ -4,7 +4,8 @@
 ;-
 
 function themis_read_asf_mlon_image, input_time_range, sites=sites, $
-    min_elev=min_elev, merge_method=merge_method, errmsg=errmsg, get_name=get_name
+    min_elev=min_elev, merge_method=merge_method, errmsg=errmsg, get_name=get_name, $
+    calibration_method=calibration_method
 
     errmsg = ''
     mlon_image_var = 'thg_asf_mlon_image'
@@ -14,6 +15,8 @@ function themis_read_asf_mlon_image, input_time_range, sites=sites, $
     if n_elements(sites) eq 0 then sites = themis_asi_read_available_sites(time_range)
     if n_elements(min_elev) eq 0 then min_elev = 5d
     if n_elements(merge_method) eq 0 then merge_method = 'merge_elev'
+    if n_elements(calibration_method) eq 0 then calibration_method = 'simple'
+
 
     ; Collect merge info for the given sites.
     merge_weight = get_var_data(themis_read_asf_mlon_image_gen_merge_info($
@@ -32,7 +35,7 @@ function themis_read_asf_mlon_image, input_time_range, sites=sites, $
         index = where(weight ne 0, count)
         if count eq 0 then continue
 
-        the_var = themis_read_mlon_image_per_site(time_range, site=site, errmsg=errmsg)
+        the_var = themis_read_mlon_image_per_site(time_range, site=site, errmsg=errmsg, calibration_method=calibration_method)
         if errmsg ne '' then continue
         get_data, the_var, uts, images, limits=lim
         

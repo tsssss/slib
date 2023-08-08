@@ -4,12 +4,15 @@
 ; input_time_range. Input time range in unix time or string.
 ;-
 
-pro polar_read_mlt_image, input_time_range, errmsg=errmsg, $
+pro polar_read_mlt_image, input_time_range, errmsg=errmsg, get_name=get_name, $
     local_root=local_root, version=version, renew_file=renew_file, _extra=extra
 
     compile_opt idl2
     on_error, 0
     errmsg = ''
+
+    mlt_image_var = 'po_mlt_image'
+    if keyword_set(get_name) then return, mlt_image_var
 
 ;---Check inputs.
     sync_threshold = 0
@@ -32,7 +35,7 @@ pro polar_read_mlt_image, input_time_range, errmsg=errmsg, $
         'var_list', list($
             dictionary($
                 'in_vars', ['mlt_image'], $
-                'out_vars', ['po_mlt_image'], $
+                'out_vars', [mlt_image_var], $
                 'time_var_name', 'ut_sec', $
                 'time_var_type', 'unix')))
 
@@ -56,8 +59,8 @@ pro polar_read_mlt_image, input_time_range, errmsg=errmsg, $
 ;---Read data from files and save to memory.
     read_files, time_range, files=files, request=request
 
-    pixel_mlt = cdf_read_var('pixel_mlt', filename=files[0])
-    pixel_mlat = cdf_read_var('pixel_mlat', filename=files[0])
+    ;pixel_mlt = cdf_read_var('pixel_mlt', filename=files[0])
+    ;pixel_mlat = cdf_read_var('pixel_mlat', filename=files[0])
     
     imgsz = (size(pixel_mlt,dimensions=1))[0]
     mlt_image_size = [imgsz,imgsz]
@@ -85,9 +88,16 @@ pro polar_read_mlt_image, input_time_range, errmsg=errmsg, $
     pixel_mlt = mlt_bin_centers
     pixel_mlat = mlat_bin_centers
     
-    store_data, 'po_mlt_image', limits={$
-        pixel_mlt: pixel_mlt, $
-        pixel_mlat: pixel_mlat }
+    add_setting, mlt_image_var, smart=1, dictionary($
+        'display_type', 'mlt_image', $
+        'pixel_mlt', pixel_mlt, $
+        'pixel_mlat', pixel_mlat, $
+        'zlog', 1, $
+        'zrange', [10,1000], $
+        'unit', '#', $
+        'color_table', 49, $
+        'mlat_range', mlat_range, $
+        'mlt_range', mlt_range )
 
 end
 

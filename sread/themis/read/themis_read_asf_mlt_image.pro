@@ -4,7 +4,7 @@
 
 function themis_read_asf_mlt_image, input_time_range, sites=sites, $
     min_elev=min_elev, merge_method=merge_method, $
-    get_name=get_name, _extra=extra
+    get_name=get_name, calibration_method=calibration_method, _extra=extra
 
     errmsg = ''
     retval = ''
@@ -13,7 +13,7 @@ function themis_read_asf_mlt_image, input_time_range, sites=sites, $
     
     time_range = time_double(input_time_range)
     mlon_image_var = themis_read_asf_mlon_image(input_time_range, sites=sites, $
-        min_elev=min_elev, merge_method=merge_method, errmsg=errmsg)
+        min_elev=min_elev, merge_method=merge_method, errmsg=errmsg, calibration_method=calibration_method)
     if errmsg ne '' then return, retval
 
 ;---Rotate from mlon to mlt.

@@ -51,23 +51,70 @@ end
 
 
 ; sample window does not significantly affect algorithm speed.
-pro themis_asi_cal_brightness, asf_var, newname=newname, sample_windows=sample_windows
+pro themis_asi_cal_brightness, asf_var, newname=newname, sample_windows=sample_windows, $
+    calibration_method=calibration_method
 
     if n_elements(newname) eq 0 then newname = asf_var+'_norm'
     get_data, asf_var, times, imgs_raw, limits=lim
     image_size = size(reform(imgs_raw[0,*,*]), dimensions=1)
     nframe = n_elements(times)
     max_count = 65535
+    
 
-;---Mapping the count to wanted window.
-    counts = findgen(max_count+1)
-    windows = (1-tanh((counts-1.2e4)/1e4))*0.5*(600-3)+3
-
+;---Separate edge and center.
     rad = constant('rad')
     pixel_elevs = lim.pixel_elev*rad
     pixel_azims = lim.pixel_azim*rad
     edge_indices = where(finite(pixel_elevs,nan=1) or pixel_elevs le 0, $
         complement=center_indices, nedge_index)
+
+
+;---Simple method, remove the minimum count per pixel over the night.
+    if calibration_method eq 'simple' then begin
+    ;---Get the full time range over the night.
+        site_info = themis_asi_read_site_info(site)
+        midn_ut = date+site_info['midn_ut']
+        search_time_range = midn_ut+[-1,1]*9*secofhour
+        file_times = themis_asi_read_available_file_times(search_time_range, site=site)
+        asf_var = themis_read_asf(min(file_times)+[0,secofhour], site=site)
+        get_data, asf_var, times
+        start_time = min(times)
+        asf_var = themis_read_asf(max(file_times)+[0,secofhour], site=site)
+        get_data, asf_var, times
+        end_time = max(times)
+        full_time_range = [start_time,end_time]
+
+        asf_var = themis_read_asf(time_range, site=site, get_name=1)
+        if check_if_update(asf_var, time_range) then begin
+            asf_var = themis_read_asf(time_range, site=site)
+        endif
+        get_data, asf_var, common_times, orig_images, limits=lim
+        imgs_bg = fltarr(image_size)
+        for ii=0,image_size[0]-1 do begin
+            for jj=0,image_size[1]-1 do begin
+                imgs_bg[ii,jj] = min(orig_images[*,ii,jj])
+            endfor
+        endfor
+
+        ; Need to recover the original data.
+        store_data, asf_var, times, imgs_raw, limits=lim
+
+        ; Calculate the calibrated background.
+        npixel = product(image_size)
+        imgs_cal = reform(imgs_raw,[nframe,npixel]
+        for ii=0,nframe-1 do begin
+            imgs_cal[ii,*] -= imgs_bg
+            imgs_cal[ii,edge_indices] = 0
+        endfor
+        imgs_cal = reform(imgs_cal,[nframe,image_size])
+        store_data, newname, times, imgs_cal, limits=lim
+        return
+    endif
+
+
+;---Mapping the count to wanted window.
+    counts = findgen(max_count+1)
+    windows = (1-tanh((counts-1.2e4)/1e4))*0.5*(600-3)+3
 
 ;---Calculate a smooth background to extract fast moving structures.
     if n_elements(sample_windows) eq 0 then sample_windows = [600d,50,10,1]*3   ; sec.

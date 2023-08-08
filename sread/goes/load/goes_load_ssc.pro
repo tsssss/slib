@@ -48,12 +48,15 @@ function goes_load_ssc, input_time_range, probe=input_probe, id=datatype, $
     gx = 'g'+probe
 
     case probe of
-        '12': valid_range = ['2006-01-01','2016-12-31']
+        '10': valid_range = ['2006-01-01','2017-01-01']
+        '11': valid_range = ['2006-01-01','2017-01-01']
+        '12': valid_range = ['2006-01-01','2017-01-01']
         '13': valid_range = ['2006-01-01']
         '14': valid_range = ['2009-01-01']
         '15': valid_range = ['2010-01-01']
         '16': valid_range = ['2016-01-01']
         '17': valid_range = ['2018-01-01']
+        '18': valid_range = ['2022-01-01']
     endcase
 
     ; position.

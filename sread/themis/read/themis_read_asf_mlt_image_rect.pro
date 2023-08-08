@@ -7,7 +7,7 @@
 function themis_read_asf_mlt_image_rect, time_range, $
     errmsg=errmsg, get_name=get_name, $
     mlat_range=mlat_range, mlt_range=mlt_range, $
-    output=mlt_image_var, _extra=ex
+    output=mlt_image_var, calibration_method=calibration_method, _extra=ex
 
     if n_elements(mlt_image_var) eq 0 then mlt_image_var = 'thg_asf_mlt_image_rect'
     if keyword_set(get_name) then return, mlt_image_var
@@ -17,7 +17,7 @@ function themis_read_asf_mlt_image_rect, time_range, $
     if n_elements(mlat_range) eq 0 then mlat_range = [55.,85]
 
 ;---Load MLon image.
-    mlon_image_var = themis_read_asf_mlon_image_rect(time_range, _extra=ex)
+    mlon_image_var = themis_read_asf_mlon_image_rect(time_range, calibration_method=calibration_method, _extra=ex)
     get_data, mlon_image_var, times, mlon_images, limits=lim
     index = where(finite(mlon_images,nan=1), count)
     if count ne 0 then mlon_images[index] = 0

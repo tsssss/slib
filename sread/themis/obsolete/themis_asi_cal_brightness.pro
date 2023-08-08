@@ -6,8 +6,10 @@
 
 
 ; sample window does not significantly affect algorithm speed.
-pro themis_asi_cal_brightness, asf_var, newname=newname
-
+pro themis_asi_cal_brightness, asf_var, newname=newname, $
+    calibration_method=calibration_method
+    
+    if n_elements(calibration_method) eq 0 then calibration_method = 'simple'
     if n_elements(newname) eq 0 then newname = asf_var+'_norm'
     get_data, asf_var, times, imgs_raw, limits=lim
     image_size = double(size(reform(imgs_raw[0,*,*]), dimensions=1))
@@ -25,6 +27,56 @@ pro themis_asi_cal_brightness, asf_var, newname=newname
     center_indices_2d = fltarr(ncenter_index,2)
     center_indices_2d[*,0] = center_indices mod image_size[0]
     center_indices_2d[*,1] = (center_indices-center_indices_2d[*,0])/image_size[0]
+
+
+;---Simple method, remove the minimum count per pixel over the night.
+    if calibration_method eq 'simple' then begin
+    ;---Get the full time range over the night.
+        site = lim.site
+        secofhour = constant('secofhour')
+        secofday = constant('secofday')
+
+        site_info = themis_asi_read_site_info(site)
+        date = mean(minmax(times))
+        date = date-(date mod secofday)
+        midn_ut = date+site_info['midn_ut']
+        search_time_range = midn_ut+[-1,1]*9*secofhour
+        file_times = themis_asi_read_available_file_times(search_time_range, site=site)
+        asf_var = themis_read_asf(min(file_times)+[0,secofhour], site=site)
+        get_data, asf_var, the_times
+        start_time = min(the_times)
+        asf_var = themis_read_asf(max(file_times)+[0,secofhour], site=site)
+        get_data, asf_var, the_times
+        end_time = max(the_times)
+        full_time_range = [start_time,end_time]
+
+        asf_var = themis_read_asf(full_time_range, site=site, get_name=1)
+        if check_if_update(asf_var, full_time_range) then begin
+            asf_var = themis_read_asf(full_time_range, site=site)
+        endif
+        get_data, asf_var, common_times, orig_images, limits=lim
+        imgs_bg = fltarr(image_size)
+        for ii=0,image_size[0]-1 do begin
+            for jj=0,image_size[1]-1 do begin
+                imgs_bg[ii,jj] = min(orig_images[*,ii,jj])
+            endfor
+        endfor
+
+        ; Need to recover the original data.
+        store_data, asf_var, times, imgs_raw, limits=lim
+
+        ; Calculate the calibrated background.
+        npixel = product(image_size)
+        imgs_cal = reform(imgs_raw,[nframe,npixel])
+        for ii=0,nframe-1 do begin
+            imgs_cal[ii,*] -= imgs_bg
+            imgs_cal[ii,edge_indices] = 0
+        endfor
+        imgs_cal = reform(imgs_cal,[nframe,image_size])
+        store_data, newname, times, imgs_cal, limits=lim
+        return
+    endif
+
     
 
 ;---A minimum background per pixel.

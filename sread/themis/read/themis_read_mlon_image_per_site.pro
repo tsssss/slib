@@ -1,7 +1,8 @@
 ;+
 ; Read MLon image per site (with calibrated brightness).
 ;-
-function themis_read_mlon_image_per_site, input_time_range, site=site, thumbnail=thumbnail, errmsg=errmsg
+function themis_read_mlon_image_per_site, input_time_range, site=site, $
+    thumbnail=thumbnail, errmsg=errmsg, calibration_method=calibration_method
 
     errmsg = ''
     retval = ''
@@ -13,7 +14,7 @@ function themis_read_mlon_image_per_site, input_time_range, site=site, thumbnail
     if keyword_set(thumbnail) then datatype = 'ast'
     time_range = time_double(input_time_range)
 
-    files = themis_load_asf_mlon_image_per_site(time_range, site=site, errmsg=errmsg)
+    files = themis_load_asf_mlon_image_per_site(time_range, site=site, errmsg=errmsg, calibration_method=calibration_method)
     if errmsg ne '' then return, retval
 
     var_list = list()

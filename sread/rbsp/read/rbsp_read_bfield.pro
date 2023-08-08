@@ -67,7 +67,7 @@ resolution=resolution, errmsg=errmsg, coord=coord, get_name=get_name, _extra=ex
         store_data, vec_coord_var, times, vec_coord, limits=lim
     endif
 
-    add_setting, vec_coord_var, /smart, {$
+    add_setting, vec_coord_var, smart=1, {$
         display_type: 'vector', $
         unit: 'nT', $
         short_name: 'B', $
