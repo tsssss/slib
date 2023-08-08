@@ -15,7 +15,7 @@ function check_if_update, var, time_range, dtime=dtime
     
     tr = get_setting(var, 'requested_time_range', exist)
     if exist then begin
-        if time_range[0] ge tr[0] and time_range[1] le tr[1] then return, 0 else return, 1
+        if time_range[0] ge tr[0] and time_range[1] le tr[-1] then return, 0 else return, 1
     endif else begin
         get_data, var, times
         if n_elements(times) le 1 then return, 1

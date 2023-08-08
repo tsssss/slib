@@ -10,5 +10,6 @@ function fgetbase, files
         if last eq '/' or last eq '\' then continue
         bases[ii] = file_basename(files[ii])
     endfor
-    return, reform(bases)
+    if nfile eq 1 then bases = bases[0]
+    return, bases
 end

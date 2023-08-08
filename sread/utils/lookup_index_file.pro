@@ -7,16 +7,18 @@
 ;
 ; The index_file and basenames are assumed to be in the same folder.
 ;=
-function lookup_index_file, files, index_file, silent=silent
+function lookup_index_file, files, index_file, silent=silent, lines=lines
 
     retval = ''
     nfile = n_elements(files)
     if nfile eq 0 then return, retval
 
     ofiles = files
-    if n_elements(index_file) ne 1 then return, ''
-    if file_test(index_file) eq 0 then return, ''
-    lines = read_all_lines(index_file[0])
+    if n_elements(lines) eq 0 then begin
+        if n_elements(index_file) ne 1 then return, ''
+        if file_test(index_file) eq 0 then return, ''
+        lines = read_all_lines(index_file[0])
+    endif
     if n_elements(lines) eq 1 and lines[0] eq '' then return, ''
 
     foreach file, files, ii do begin

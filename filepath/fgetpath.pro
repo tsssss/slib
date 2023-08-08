@@ -18,6 +18,7 @@ function fgetpath, files, level=level
     
     dirs = (level gt 1)? file_dirname(fgetpath(files)): file_dirname(files)
     dirs = treatslash(dirs)
+
     return, dirs
 end
 
@@ -27,9 +28,11 @@ files = list()
 ;files.add, '\home\user/test.txt'
 ;files.add, '\home\user\'
 ;files.add, '\home\user'
+files.add, 'hehe'
 files.add, !null
 files.add, 'ftp:\\hehe\\haha'
 files.add, 'ftp:\\hehe\haha\piou\\piou'
+
 
 foreach file, files do print, fgetpath(file,level=2)
 end
