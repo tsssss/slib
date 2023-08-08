@@ -30,7 +30,7 @@ pro sgopen, id0, size=fig_size, xsize=xsize, ysize=ysize, cm=cm, inch=inch, $
     
     if n_elements(id0) eq 0 then id0 = 0    ; w-mode, window 0.
     fn = id0[0]
-    if test then fn = test
+    if keyword_set(test) then fn = test
     
     
     if n_elements(bgc0) eq 0 then bgc0 = sgcolor('white')
@@ -69,8 +69,8 @@ pro sgopen, id0, size=fig_size, xsize=xsize, ysize=ysize, cm=cm, inch=inch, $
         else: tmp = 1d
     endcase
     
-    ; try to do a smart thing: if xsz or ysz is small (say < 10) then it's inch.
-    if (xsz le 10) or (ysz le 10) and tmp eq 1 then tmp = 101.6d
+    ; try to do a smart thing: if xsz or ysz is small then it's inch.
+    if (xsz le 20) or (ysz le 20) and tmp eq 1 then tmp = 101.6d
     
     
     ; apply magnfication to canvas.
