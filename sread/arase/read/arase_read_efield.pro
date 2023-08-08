@@ -1,3 +1,4 @@
+
 ;+
 ; Read Arase E field. Save as 'arase_edot0_gsm'.
 ; 

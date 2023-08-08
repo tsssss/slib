@@ -41,17 +41,47 @@ function arase_load_pwe, input_time_range, probe=probe, id=datatype, $
 ;---Init settings.
     type_dispatch = hash()
     valid_range = time_double(['2017-03-01'])
+    
+
 
     ; EFD Level 2.
-    base_name = 'erg_pwe_efd_l2_E_spin_%Y%m%d_'+version+'.cdf'
-    remote_path = [remote_root,'pwe','efd','l2','E_spin','%Y','%m']
-    local_path = [local_root,'pwe','efd','l2','E_spin','%Y','%m']
-    type_dispatch['efd%l2%E_spin'] = dictionary($
+    base_name = 'erg_pwe_efd_l2_pot8Hz_%Y%m%d_'+version+'.cdf'
+    remote_path = [remote_root,'pwe','efd','l2','pot8Hz','%Y','%m']
+    local_path = [local_root,'pwe','efd','l2','pot8Hz','%Y','%m']
+    type_dispatch['efd%l2%pot8Hz'] = dictionary($
+        'pattern', dictionary($
+        'local_file', join_path([local_path,base_name]), $
+        'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+        'remote_file', join_path([remote_path,base_name]), $
+        'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name) )
+    
+    base_name = 'erg_pwe_efd_l2_pot_%Y%m%d_'+version+'.cdf'
+    remote_path = [remote_root,'pwe','efd','l2','pot','%Y','%m']
+    local_path = [local_root,'pwe','efd','l2','pot','%Y','%m']
+    type_dispatch['efd%l2%pot'] = dictionary($
         'pattern', dictionary($
             'local_file', join_path([local_path,base_name]), $
             'local_index_file', join_path([local_path,default_index_file(/sync)]), $
             'remote_file', join_path([remote_path,base_name]), $
             'remote_index_file', join_path([remote_path,''])), $
+        'valid_range', time_double(valid_range), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name) )
+    
+    base_name = 'erg_pwe_efd_l2_E_spin_%Y%m%d_'+version+'.cdf'
+    remote_path = [remote_root,'pwe','efd','l2','E_spin','%Y','%m']
+    local_path = [local_root,'pwe','efd','l2','E_spin','%Y','%m']
+    type_dispatch['efd%l2%E_spin'] = dictionary($
+        'pattern', dictionary($
+        'local_file', join_path([local_path,base_name]), $
+        'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+        'remote_file', join_path([remote_path,base_name]), $
+        'remote_index_file', join_path([remote_path,''])), $
         'valid_range', time_double(valid_range), $
         'sync_threshold', sync_threshold, $
         'cadence', 'day', $
@@ -84,6 +114,6 @@ function arase_load_pwe, input_time_range, probe=probe, id=datatype, $
 
 end
 
-time_range = time_double(['2017-05-20','2017-05-20'])
-files = arase_load_pwe(time_range, id='efd%l2%E_spin', probe=probe)
+time_range = time_double(['2017-05-20','2017-05-21'])
+files = arase_load_pwe(time_range, id='efd%l2%pot8Hz', probe=probe)
 end
