@@ -18,16 +18,16 @@ function mms_read_orbit, input_time_range, probe=probe, $
     if keyword_set(get_name) then return, var
 
     time_range = time_double(input_time_range)
-    files = mms_load_fgm(time_range, probe=probe, errmsg=errmsg, id='l2%survey')
+    files = mms_load_mec(time_range, probe=probe, errmsg=errmsg, id='l2%survey')
     if errmsg ne '' then return, retval
 
 
     var_list = list()
     orig_var = prefix+'r_gsm'
     var_list.add, dictionary($
-        'in_vars', [prefix+'fgm_r_gsm_srvy_l2'], $
+        'in_vars', [prefix+'mec_r_gsm'], $
         'out_vars', [orig_var], $
-        'time_var_name', 'Epoch_state', $
+        'time_var_name', 'Epoch', $
         'time_var_type', 'tt2000')
     read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
     if errmsg ne '' then return, retval
