@@ -7,13 +7,14 @@
 ; 3. The mlat/mlt at SC location does not work.
 ; 4. Madrigal geodetic lat/lon/mlt can be successfully converted to the cdaweb aacgm mlat/mlon/mlt.
 ;    However: Madrigal data have spikes due to #1.
+; 5. Tracing to ionosphere and calculate mlat/mlt is not consistent with aacgm mlat/mlt.
 ;-
 
 probe = 'f18'
 input_time_range = ['2013-05-01','2013-05-01/03:00']
+input_time_range = ['2013-05-01','2013-05-03/00:00']
 
 prefix = 'dmsp'+probe+'_'
-
 
 
 mlat_vars_cdaweb = dmsp_read_mlat_vars_cdaweb(input_time_range, probe=probe)
@@ -21,11 +22,42 @@ mlat_vars_madrigal = dmsp_read_mlat_vars_madrigal(input_time_range, probe=probe)
 orbit_var_cdaweb = dmsp_read_orbit_cdaweb(input_time_range, probe=probe)
 orbit_var_madrigal = dmsp_read_orbit_madrigal(input_time_range, probe=probe)
 
+; This part test despike.
+glat_vars_madrigal = dmsp_read_glat_vars_madrigal(input_time_range, probe=probe)
+time_step = 60
+foreach var1, glat_vars_madrigal do begin
+    var2 = var1+'_despike'
+    copy_data, var1, var2
+    uniform_time, var2, time_step
+    var3 = var1+'_combo'
+    var3 = stplot_merge([var1,var2], output=var3, colors=sgcolor(['red','blue']), labels=['orig','despike'])
+endforeach
+vars = glat_vars_madrigal+'_combo'
+tplot, vars
+stop
+
 ; This part test B field total and B IGRF.
+r_var = dmsp_read_orbit_madrigal(input_time_range, probe=probe, coord='gsm')
+igrf = 1
+vinfo = geopack_trace_to_ionosphere(r_var, models='t89', igrf=igrf, south=1, refine=1, suffix='_south')
+vinfo = geopack_trace_to_ionosphere(r_var, models='t89', igrf=igrf, north=1, refine=1, suffix='_north')
 
 
+get_data, prefix+'mlt_cdaweb', times, mlt
+index = where(mlt ge 12, count)
+if count ne 0 then begin
+    mlt[index] -=24
+    store_data, prefix+'mlt_cdaweb', times, mlt
+endif
 
-
+var = prefix+'fmlt_combo'
+var = stplot_merge(prefix+['mlt_cdaweb','fmlt_'+['north','south']], output=var, $
+    colors=constant('rgb'), labels=['CDAWeb','N','S'])
+var = prefix+'fmlat_combo'
+var = stplot_merge(prefix+['mlat_cdaweb','fmlat_'+['north','south']], output=var, $
+    colors=constant('rgb'), labels=['CDAWeb','N','S'])
+vars = prefix+['fmlt','fmlat']+'_combo'
+foreach var, vars do uniform_time, var, 60
 
 stop
 

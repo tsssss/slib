@@ -78,6 +78,7 @@ function dmsp_load_ssm_madrigal, input_time_range, probe=probe, id=datatype, $
         local_files.add, file_info.local_files, extract=1
     endforeach
     local_files = local_files.toarray()
+    if n_elements(local_files) eq 0 then errmsg = 'No file ...'
     return, local_files
     
 end

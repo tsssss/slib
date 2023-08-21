@@ -15,34 +15,22 @@ function dmsp_read_orbit_madrigal, input_time_range, probe=probe, errmsg=errmsg,
     time_range = time_double(input_time_range)
     if ~check_if_update(var, time_range) then return, var
 
-    files = dmsp_load_ssj_madrigal(time_range, probe=probe, errmsg=errmsg)
-    if errmsg ne '' then return, retval
 
 ;---Read data.
-    glat_var = '/Data/Array Layout/1D Parameters/gdlat'
-    gdlat = hdf_read_var(glat_var, filename=files)
-    glon_var = '/Data/Array Layout/1D Parameters/glon'
-    glon = hdf_read_var(glon_var, filename=files)
-    alt_var = '/Data/Array Layout/1D Parameters/gdalt'
-    gdalt = hdf_read_var(alt_var, filename=files)
+    glat_vars = dmsp_read_glat_vars_madrigal(time_range, probe=probe, errmsg=errmsg)
+    if errmsg ne '' then return, retval
+    gdlat = get_var_data(glat_vars[0], times=times)
+    glon = get_var_data(glat_vars[1])
+    gdalt = get_var_data(glat_vars[2])
 
 
 ;---Calibrate the data.
     rad = constant('rad')
     re = constant('re')
 
-    time_var = '/Data/Array Layout/timestamps'
-    times = hdf_read_var(time_var, filename=files)
-    time_index = lazy_where(times, '[]', time_range, count=count)
-    if count eq 0 then begin
-        errmsg = 'No data in given time_range ...'
-        return, retval
-    endif
-    times = times[time_index]
-    dis = geod2geoc(gdalt, gdlat, glat)  ; convert to geocentric latitude and altitude.
-    glat = glat[time_index]*rad
-    glon = glon[time_index]*rad
-    dis = dis[time_index]
+    dis = geod2geoc(gdalt, gdlat, glat)/re  ; convert to geocentric latitude and altitude.
+    glat = glat*rad
+    glon = glon*rad
     
     
     ntime = n_elements(times)

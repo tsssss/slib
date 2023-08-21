@@ -1,5 +1,6 @@
 ;+
 ; Load SSM data from noaa server.
+; B_xyz has steps, reason unknown.
 ;-
 
 function dmsp_load_ssm_noaa_gen_file, file_time, probe=probe, filename=local_file, remote_root=remote_root, errmsg=errmsg
@@ -58,86 +59,99 @@ function dmsp_load_ssm_noaa_gen_file, file_time, probe=probe, filename=local_fil
         db_xyz[ii,*] = info[13:15]
     endfor
     times = time_double(times, tformat='YYYYDOYhhmmss.ffff')
-    glats = float(glats)
+    gdlats = float(glats)
     glons = float(glons)
-    alts = float(alts)
-    stop
+    gdalts = float(alts)
+    
     b_xyz = float(b_xyz)
     db_xyz = float(db_xyz)
     
-    ;; Get SC position.
-    ;rad = constant('rad')
-    ;re = constant('re')
-    ;diss = alts/re+1
-    ;r_geo = [$
-        ;[diss*cos(glats*rad)*cos(glons*rad)],$
-        ;[diss*cos(glats*rad)*sin(glons*rad)],$
-        ;[diss*sin(glats*rad)]]
-    ;step = 20
-    ;r_geo = sinterpol(r_geo[0:*:step,*], times[0:*:step], times)
-
-    
-    ;; Get the rotation matrix b/w GEO and XYZ (X is down, Y is velocity, Z is orbit normal.)
-    ;v_geo = r_geo
-    ;for ii=0,ndim-1 do v_geo[*,ii] = deriv(times,r_geo[*,ii])*re
-    ;x_hat = -sunitvec(r_geo)    ; approx x.
-    ;;x_hat = sinterpol(x_hat[0:*:step,*], times[0:*:step], times)
-    ;y_hat = sunitvec(v_geo)     ; y.
-    ;y_hat = sinterpol(y_hat[0:*:step,*], times[0:*:step], times)
-    ;z_hat = sunitvec(vec_cross(x_hat,y_hat))    ; z.
-    ;;x_hat = sunitvec(vec_cross(y_hat,z_hat))    ; make sure x,y,z are orthogonal.
-    ;y_hat = sunitvec(vec_cross(z_hat,x_hat))    ; make sure x,y,z are orthogonal.
-    ;m_xyz2geo = fltarr(ntime,ndim,ndim)
-    ;m_xyz2geo[*,*,0] = x_hat
-    ;m_xyz2geo[*,*,1] = y_hat
-    ;m_xyz2geo[*,*,2] = z_hat
-    ;b_geo = rotate_vector(b_xyz, m_xyz2geo)
-    ;b_gsm = cotran(b_geo, times, 'geo2gsm')
-    ;b_var = prefix+'b_gsm_noaa'
-    ;store_data, b_var, times, b_gsm
-    ;add_setting, b_var, smart=1, dictionary($
-        ;'display_type', 'vector', $
-        ;'short_name', 'B', $
-        ;'unit', 'nT', $
-        ;'coord', 'GSM' )
-        
-    ;r_gsm = cotran(r_geo, times, 'geo2gsm')
-    ;r_var = prefix+'r_gsm_noaa'
-    ;store_data, r_var, times, r_gsm
-    ;add_setting, r_var, smart=1, dictionary($
-        ;'display_type', 'vector', $
-        ;'short_name', 'R', $
-        ;'unit', 'Re', $
-        ;'coord', 'GSM' )
-    ;bmod_var = geopack_read_bfield(r_var=r_var, models='igrf')
-    ;get_data, bmod_var, times, bmod_gsm
-    ;db_gsm = b_gsm-bmod_gsm
-    ;db_var = prefix+'db_gsm'
-    ;store_data, db_var, times, db_gsm
-    ;add_setting, db_var, smart=1, dictionary($
-        ;'display_type', 'vector', $
-        ;'short_name', 'dB', $
-        ;'unit', 'nT', $
-        ;'coord', 'GSM' )
-        
-        
-    ;db_var = prefix+'db_xyz'
-    ;store_data, db_var, times, db_xyz
-    ;add_setting, db_var, smart=1, dictionary($
-        ;'display_type', 'vector', $
-        ;'short_name', 'dB', $
-        ;'unit', 'nT', $
-        ;'coord', 'XYZ' )
-        
-        
-        
-    ;db_var = prefix+'db_gsm_noaa'
-    ;store_data, db_var, times, cotran(rotate_vector(db_xyz, m_xyz2geo),times,'geo2gsm')
-    ;add_setting, db_var, smart=1, dictionary($
-        ;'display_type', 'vector', $
-        ;'short_name', 'dB', $
-        ;'unit', 'nT', $
-        ;'coord', 'GSM' )
+;    ; Get SC position.
+;    rad = constant('rad')
+;    re = constant('re')
+;    diss = geod2geoc(gdalts, gdlats, glats)/re
+;    r_geo = [$
+;        [diss*cos(glats*rad)*cos(glons*rad)],$
+;        [diss*cos(glats*rad)*sin(glons*rad)],$
+;        [diss*sin(glats*rad)]]
+;    step = 60
+;    r_geo = sinterpol(r_geo[0:*:step,*], times[0:*:step], times, quadratic=1)
+;
+;    
+;    ; Get the rotation matrix b/w GEO and XYZ (X is down, Y is velocity, Z is orbit normal.)
+;    v_geo = r_geo
+;    for ii=0,ndim-1 do v_geo[*,ii] = deriv(times,r_geo[*,ii])*re
+;    x_hat = -sunitvec(r_geo)    ; approx x.
+;    x_hat = sinterpol(x_hat[0:*:step,*], times[0:*:step], times, quadratic=1)
+;    y_hat = sunitvec(v_geo)     ; y.
+;    y_hat = sinterpol(y_hat[0:*:step,*], times[0:*:step], times, quadratic=1)
+;    z_hat = sunitvec(vec_cross(x_hat,y_hat))    ; z.
+;    x_hat = sunitvec(vec_cross(y_hat,z_hat))    ; make sure x,y,z are orthogonal.
+;    ;y_hat = sunitvec(vec_cross(z_hat,x_hat))    ; make sure x,y,z are orthogonal.
+;    m_xyz2geo = fltarr(ntime,ndim,ndim)
+;    m_xyz2geo[*,*,0] = x_hat
+;    m_xyz2geo[*,*,1] = y_hat
+;    m_xyz2geo[*,*,2] = z_hat
+;    b_geo = rotate_vector(b_xyz, m_xyz2geo)
+;    b_gsm = cotran(b_geo, times, 'geo2gsm')
+;    b_var = prefix+'b_gsm_noaa'
+;    store_data, b_var, times, b_gsm
+;    add_setting, b_var, smart=1, dictionary($
+;        'display_type', 'vector', $
+;        'short_name', 'B', $
+;        'unit', 'nT', $
+;        'coord', 'GSM' )
+;
+;   
+;    r_gsm = cotran(r_geo, times, 'geo2gsm')
+;    r_var = prefix+'r_gsm_noaa'
+;    store_data, r_var, times, r_gsm
+;    add_setting, r_var, smart=1, dictionary($
+;        'display_type', 'vector', $
+;        'short_name', 'R', $
+;        'unit', 'Re', $
+;        'coord', 'GSM' )
+;    bmod_var = geopack_read_bfield(r_var=r_var, models='igrf', igrf=1, t89_par=2)
+;    get_data, bmod_var, times, bmod_gsm
+;    db_gsm = b_gsm-bmod_gsm
+;    db_var = prefix+'db_gsm'
+;    store_data, db_var, times, db_gsm
+;    add_setting, db_var, smart=1, dictionary($
+;        'display_type', 'vector', $
+;        'short_name', 'dB', $
+;        'unit', 'nT', $
+;        'coord', 'GSM' )
+;        
+;        
+;    db_var = prefix+'db_xyz'
+;    store_data, db_var, times, db_xyz
+;    add_setting, db_var, smart=1, dictionary($
+;        'display_type', 'vector', $
+;        'short_name', 'dB', $
+;        'unit', 'nT', $
+;        'coord', 'XYZ' )
+;        
+;        
+;        
+;    db_var = prefix+'db_gsm_noaa'
+;    store_data, db_var, times, cotran(rotate_vector(db_xyz, m_xyz2geo),times,'geo2gsm')
+;    add_setting, db_var, smart=1, dictionary($
+;        'display_type', 'vector', $
+;        'short_name', 'dB', $
+;        'unit', 'nT', $
+;        'coord', 'GSM' )
+;    
+;    b_mag = snorm(b_xyz)
+;    b_mag_igrf = snorm(bmod_gsm)
+;    store_data, prefix+'b_mag', times, [[b_mag],[b_mag_igrf]]
+;    add_setting, prefix+'b_mag', smart=1, dictionary($
+;        'display_type', 'stack', $
+;        'ytitle', '|B| (nT)', $
+;        'labels', ['NOAA','IGRF'], $
+;        'colors', sgcolor(['red','blue']) )
+;    store_data, prefix+'dbmag', times, b_mag-b_mag_igrf
+;    
+;    stop
 
 
     ; Save data to cdf.
@@ -243,7 +257,7 @@ function dmsp_load_ssm_noaa, input_time_range, id=datatype, probe=probe, $
     type_dispatch['l2'] = dictionary($
         'pattern', dictionary($
             'local_file', join_path([local_path,base_name]), $
-            'local_index_file', join_path([local_path,default_index_file(/sync)])), $
+            'local_index_file', join_path([local_path,default_index_file()])), $
         'valid_range', time_double(valid_range), $
         'sync_threshold', sync_threshold, $
         'cadence', 'day', $
@@ -283,9 +297,8 @@ function dmsp_load_ssm_noaa, input_time_range, id=datatype, probe=probe, $
 end
 
 
-time_range = ['2013-05-01','2013-05-02']
+time_range = ['2013-05-02','2013-05-03']
 probe = 'f18'
-b_var = dmsp_read_bfield(time_range, probe=probe)
-r_var = dmsp_read_orbit(time_range, probe=probe)
+
 files = dmsp_load_ssm_noaa(time_range, probe=probe)
 end

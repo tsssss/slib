@@ -11,6 +11,8 @@ function dmsp_load_ssj_madrigal, input_time_range, probe=probe, id=datatype, $
     compile_opt idl2
     on_error, 0
     errmsg = ''
+    retval = []
+    
 
 ;---Check inputs.
     probes = dmsp_probes()
@@ -47,7 +49,8 @@ function dmsp_load_ssj_madrigal, input_time_range, probe=probe, id=datatype, $
     if file_test(mad_path) eq 0 then file_mkdir, mad_path
     madglobaldownload, madurl, mad_path, $
         'Sheng+Tian', 'ts0110@atmost.ucla.edu', 'UCLA', $
-        tr_jd[0],tr_jd[1], instr_id, exp_id, 'hdf5'
+        tr_jd[0],tr_jd[1], instr_id, exp_id, 'hdf5', errmsg=errmsg
+    if errmsg ne '' then return, retval
     index_infos = file_search(mad_path, '*.hdf5')
     foreach file_info, file_request.local_file_list do begin
         ; We need to move the files over to the wanted path.
@@ -78,6 +81,7 @@ function dmsp_load_ssj_madrigal, input_time_range, probe=probe, id=datatype, $
         local_files.add, file_info.local_files, extract=1
     endforeach
     local_files = local_files.toarray()
+    if n_elements(local_files) eq 0 then errmsg = 'No file ...'
     return, local_files
     
 end
@@ -85,5 +89,8 @@ end
 
 time_range = ['2013-05-01','2013-05-03']
 probe = 'f18'
+time_range = ['2015-07-05/00:30','2015-07-05/02:11']
+;time_range = ['2015-07-04/22:48','2015-07-05/00:30']
+probe = 'f16'
 files = dmsp_load_ssj_madrigal(time_range, probe=probe)
 end

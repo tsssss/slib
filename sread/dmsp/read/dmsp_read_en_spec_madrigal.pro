@@ -35,7 +35,7 @@ function dmsp_read_en_spec_madrigal, input_time_range, probe=probe, errmsg=errms
     in_var = '/Data/Array Layout/2D Parameters/'+the_var
     fluxs = hdf_read_var(in_var, filename=files)
     en_var = '/Data/Array Layout/ch_energy'
-    energy_bins = hdf_read_var(en_var, filename=files)
+    energy_bins = hdf_read_var(en_var, filename=files[0])   ; only one file is enough.
 
 ;---Calibrate the data.
     time_var = '/Data/Array Layout/timestamps'
@@ -68,13 +68,13 @@ end
 
 time_range = time_double(['2013-05-01/07:00','2013-05-01/10:00'])
 probes = 'f'+['16','17','18']
-probes = 'f18'
+time_range = time_double(['2015-03-16/07:00','2015-03-16/10:00'])
+probes = 'f17'
 species = 'e'
 foreach probe, probes do begin
     var1 = dmsp_read_en_spec_madrigal(time_range, probe=probe, species=species)
-    var2 = dmsp_read_en_spec_cdaweb(time_range, probe=probe, species=species)
-    vars = [var1,var2]
-    tplot, vars, trange=time_range
+    ;var2 = dmsp_read_en_spec_cdaweb(time_range, probe=probe, species=species)
+    tplot, var1, trange=time_range
 
 stop
 endforeach
