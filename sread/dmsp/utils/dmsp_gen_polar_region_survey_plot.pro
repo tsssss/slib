@@ -46,7 +46,7 @@ function dmsp_gen_polar_region_survey_plot, input_time_range, probe=probe, $
     mlt_var = mlat_vars[1]
     
     ; Generate plot.
-    if n_elements(plot_dir) eq 0 then plot_dir = join_path([homedir(),'dmsp_polar_region_survey'])
+    if n_elements(plot_dir) eq 0 then plot_dir = join_path([default_local_root(),'dmsp','survey_plot_alfven_arc','%Y','%m%d'])
     plot_files = list()
     foreach time, times, time_id do begin
         the_time_range = reform(time_ranges[time_id,*])
@@ -55,10 +55,17 @@ function dmsp_gen_polar_region_survey_plot, input_time_range, probe=probe, $
         hem = hem_flags[time_id]
         
         all_poss = panel_pos(pansize=[1,1]*4, panid=[1,0], xpans=[2,1], xpad=10, margins=[10,4,8,1], fig_size=fig_size)
+        path = apply_time_to_pattern(plot_dir,time)
         base = 'dmsp_polar_region_survey_'+strlowcase(hem)+'_'+strjoin(time_string(the_time_range,tformat='YYYY_MMDD_hhmm'),'_')+'_'+probe+'_v01.pdf'
-        plot_file = join_path([plot_dir,base])
+        plot_file = join_path([path,base])
         if keyword_set(test) then plot_file = 0
         plot_files.add, plot_file
+        if file_test(plot_file) eq 1 then begin
+            print, plot_file+' exists, skip ...'
+            continue
+        endif
+
+
         sgopen, plot_file, size=fig_size, xchsz=xchsz, ychsz=ychsz
         
         ; Left panels.
@@ -197,6 +204,31 @@ function dmsp_gen_polar_region_survey_plot, input_time_range, probe=probe, $
 end
 
 test = 0
+
+
+
+input_time_range = ['2014-11-01','2015-03-01']
+probes = 'f'+['16','17','18','19']
+local_root = join_path([default_local_root(),'dmsp','survey_plot'])
+
+time_range = time_double(input_time_range)
+secofday = constant('secofday')
+days = make_bins(time_range, secofday)
+foreach day, days do begin
+    print, 'Processing '+time_string(day)+' ...'
+    the_time_range = day+[0,secofday]
+    year = time_string(day,tformat='YYYY')
+    monthday = time_string(day,tformat='MMDD')
+    plot_dir = join_path([local_root,year,monthday])
+
+    foreach probe, probes do begin
+        print, 'Processing '+strupcase(probe)+' ...'
+        files = dmsp_gen_polar_region_survey_plot(the_time_range, probe=probe, plot_dir=plot_dir)
+    endforeach
+endforeach
+
+stop
+
 input_time_range = ['2013-05-01','2013-05-02']
 input_time_range = ['2013-01-18','2013-01-19']
 probes = 'f'+['16','17','18']
