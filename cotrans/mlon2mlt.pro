@@ -27,7 +27,7 @@ function mlon2mlt, mlon0, time, radian=radian, errmsg=errmsg
     deg2hour = 12d/180
     mlon = (keyword_set(radian))? mlon*rad2hour: mlon*deg2hour
     
-    sun_coord, time, slon, /mag     ; slon in radian.
+    sun_coord, time, slon, mag=1     ; slon in radian.
     slon *= rad2hour
     
     lct = (mlon-slon+12) mod 24     ; in [0,24].

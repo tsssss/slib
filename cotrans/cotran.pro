@@ -20,6 +20,7 @@ function cotran, vec0, time, msg, errmsg=errmsg, print_coord=print_coord, _extra
     native_functions = [$
         'gei2geo','geo2gei', $
         'gei2gse','gse2gei', $
+        'geo2aacgm', 'aacgm2geo', $
         'geo2mag','mag2geo', $
         'gse2gsm','gsm2gse', $
         'gsm2sm','sm2gsm', $
