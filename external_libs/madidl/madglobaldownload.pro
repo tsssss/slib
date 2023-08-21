@@ -60,7 +60,11 @@
 ;  $Id: madglobaldownload.pro 6852 2019-06-17 15:12:19Z brideout $
 ;
 pro madglobaldownload, madurl, outputDir, user_fullname, user_email, user_affiliation, startDate, endDate, $
-                           inst, kindats, format, expName,  fileDesc
+                           inst, kindats, format, expName,  fileDesc, errmsg=errmsg
+                           
+    errmsg = ''
+    on_error, 0
+    
                            
     ; determine if any default parameters need to be set
     if (n_params() lt 8) then begin
@@ -113,7 +117,8 @@ pro madglobaldownload, madurl, outputDir, user_fullname, user_email, user_affili
     resultSize = size(expArr)
     if (resultSize[0] eq 0) then begin
         close, 10
-        message, 'No experiments found that matched the input arguments'
+        errmsg = 'No experiments found that matched the input arguments'
+        return
     endif
     
     for i=0, n_elements(expArr)-1 do begin

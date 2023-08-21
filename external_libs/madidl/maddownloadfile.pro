@@ -22,6 +22,8 @@
 ;
 PRO maddownloadfile, madurl,  fullFilename, outputFile, user_fullname, user_email, user_affiliation, format
 
+    on_error, 2
+    
     ; determine if needed parameters set
     if (n_params() lt 6) then begin
       message, 'Too few parameters specified - see usage in maddownloadfile.pro'

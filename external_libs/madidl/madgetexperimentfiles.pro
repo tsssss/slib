@@ -29,6 +29,8 @@
 ;
 FUNCTION madGetExperimentFiles, madurl,  expId, getNonDefault
 
+    on_error, 2
+    
     ; convert expId to number if needed
     expId = long64(expId)
 
