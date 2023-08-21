@@ -77,7 +77,7 @@ function geopack_read_bfield, time_range, mission_probe=mission_probe, $
             rz = r_gsm[time_id,2]
             par = reform(pars[time_id,*])
 
-            if keyword_set(igrf) then begin
+            if keyword_set(igrf) or model eq 'igrf' then begin
                 geopack_igrf_gsm, rx,ry,rz, bx,by,bz
             endif else begin
                 geopack_dip, rx,ry,rz, bx,by,bz
