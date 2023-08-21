@@ -48,7 +48,9 @@ function rbsp_plot_pa2d, input_time_range, probe=probe, $
     plot_dir=plot_dir, errmsg=errmsg, position=tpos, $
     no_colorbar=no_colorbar, title=input_title, ztitle=ztitle, $
     xtitle=xtitle, ytitle=ytitle, $
-    xtickformat=xtickformat, ytickformat=ytickformat
+    xtickformat=xtickformat, ytickformat=ytickformat, $
+    color_table=color_table
+    
 
 ;test = 1
 
@@ -540,8 +542,16 @@ time_range = ['2014-09-11/00:04','2014-09-11/00:06']
 probe = 'b'
 the_species = ['e']
 
+; Donglai's event
+time_range = ['2015-12-15/02:41:32','2015-12-15/02:41:50']
+time_range = ['2015-12-15/02:40','2015-12-15/02:43']
+probe = 'b'
+the_species = ['e']
+ct = 40
+
+
 foreach species, the_species do begin
     var = rbsp_plot_pa2d(time_range, probe=probe, $
-      species=species, scale_method='default', unit='energy', zrange=[5e3,5e7], test=0)
+      species=species, scale_method='default', unit='energy', zrange=[5e3,5e7], test=0, color_table=ct)
 endforeach
 end
