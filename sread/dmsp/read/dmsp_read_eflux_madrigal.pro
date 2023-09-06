@@ -37,7 +37,7 @@ function dmsp_read_eflux_madrigal, input_time_range, probe=probe, errmsg=errmsg,
 ;---Calibrate the data.
     time_var = '/Data/Array Layout/timestamps'
     times = hdf_read_var(time_var, filename=files)
-    time_index = lazy_where(times, '[]', time_range, count=count)
+    time_index = where_pro(times, '[]', time_range, count=count)
     if count eq 0 then begin
         errmsg = 'No data in given time_range ...'
         return, retval

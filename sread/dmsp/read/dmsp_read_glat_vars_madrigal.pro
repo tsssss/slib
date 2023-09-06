@@ -40,7 +40,7 @@ function dmsp_read_glat_vars_madrigal, input_time_range, probe=probe, errmsg=err
 ;---Calibrate the data.
     time_var = '/Data/Array Layout/timestamps'
     times = hdf_read_var(time_var, filename=files)
-    time_index = lazy_where(times, '[]', time_range, count=count)
+    time_index = where_pro(times, '[]', time_range, count=count)
     if count eq 0 then begin
         errmsg = 'No data in given time_range ...'
         return, retval
@@ -77,7 +77,7 @@ function dmsp_read_glat_vars_madrigal, input_time_range, probe=probe, errmsg=err
             nrange = n_elements(time_ranges[*,0])
             for ii=0,nrange-1 do begin
                 the_time_range = mean(time_ranges[ii,*])+[-1,1]*time_step*1
-                index = lazy_where(times, '[]', the_time_range, count=count)
+                index = where_pro(times, '[]', the_time_range, count=count)
                 if count eq 0 then continue
                 glon_start = glon[index[0]]
                 glon_end = glon[index[-1]]

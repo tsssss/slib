@@ -27,7 +27,7 @@ function dmsp_read_mlat_vars_madrigal, input_time_range, probe=probe, $
         r_aacgm = cotran(r_geo, times, 'geo2aacgm')
         mlat = r_get_lat(r_aacgm, degree=1)
         mlon = r_get_lon(r_aacgm, degree=1)
-        mlt = mlon2mlt(mlon, times)
+        mlt = aacgm_mlon2mlt(mlon, times)
     endif else begin
         files = dmsp_load_ssj_madrigal(time_range, probe=probe, errmsg=errmsg)
         if errmsg ne '' then return, retval
@@ -44,7 +44,7 @@ function dmsp_read_mlat_vars_madrigal, input_time_range, probe=probe, $
         ;---Calibrate the data.
         time_var = '/Data/Array Layout/timestamps'
         times = hdf_read_var(time_var, filename=files)
-        time_index = lazy_where(times, '[]', time_range, count=count)
+        time_index = where_pro(times, '[]', time_range, count=count)
         if count eq 0 then begin
             errmsg = 'No data in given time_range ...'
             return, retval

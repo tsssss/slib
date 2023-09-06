@@ -56,7 +56,7 @@ function dmsp_read_mlt_image, input_time_range, probe=probe, id=datatype, $
             mlt_image = reform(data[*,*,datatype_index])
             
             mlat_range = (hem eq 'NORTH')? [50,90]: [-90,-50]
-            index = lazy_where(mlats, '[]', mlat_range, count=count)
+            index = where_pro(mlats, '[]', mlat_range, count=count)
             if count eq 0 then continue
             sections = time_to_range(index,time_step=1)
             nsection = n_elements(sections[*,0])
@@ -140,7 +140,22 @@ function dmsp_read_mlt_image, input_time_range, probe=probe, id=datatype, $
     return, mlt_image_var
 end
 
-time_range = ['2013-05-01/00:17','2013-05-01/01:07']
-probe = 'f18'
+
+;; has glitch in ut_s
+;time_range = ['2015-03-12/07:50','2015-03-12/09:10']
+;probe = 'f19'
+;files = dmsp_load_ssusi(time_range, probe=probe)
+;stop
+;var = dmsp_read_mlt_image(time_range, probe=probe)
+
+; ut crossing two days have problem.
+time_range = ['2013-04-30/22:17','2013-05-01/05:07']
+probe = 'f17'
+files = dmsp_load_ssusi(time_range, probe=probe)
+stop
+;time_range = ['2015-03-12/08:50','2015-03-12/09:10']
+;probe = 'f19'
+;time_range = time_double(['2017-09-07/16:04','2017-09-07/16:17'])
+;probe = 'f17'
 var = dmsp_read_mlt_image(time_range, probe=probe)
 end
