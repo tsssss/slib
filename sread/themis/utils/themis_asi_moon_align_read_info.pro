@@ -110,12 +110,12 @@ function themis_asi_moon_align_read_info, input_time_range, site=site, $
     default_target_time = times[index]
     if n_elements(input_target_time) eq 0 then input_target_time = default_target_time
     target_time = time_double(input_target_time)
-    if n_elements(lazy_where(target_time, '[]', time_range)) eq 0 then target_time = default_target_time
+    if n_elements(where_pro(ttarget_time, '[]', time_range)) eq 0 then target_time = default_target_time
     tmp = min(times-target_time, abs=1, target_index)
     rotation_angles = rotation_angles[target_index]-rotation_angles
     
     ; In case there is no moon.
-    index = lazy_where(moon_elevs, 'lt', min_moon_elev, count=count)
+    index = where_pro(moon_elevs, 'lt', min_moon_elev, count=count)
     if count ne 0 then rotation_angles[index] = !values.f_nan
 
     ; Return the results.

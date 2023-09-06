@@ -21,21 +21,21 @@ function themis_read_mlt_image_rect_ewo, time_range, mlat_range=mlat_range, $
 
 ;---Load MLT image.
     if n_elements(mlt_image_var) eq 0 then begin 
-        mlt_image_var = themis_read_asf_mlt_image_rect(time_range, varname=mlt_image_var, _extra=ex)
+        mlt_image_var = themis_asf_read_mlt_image_rect(time_range, varname=mlt_image_var, _extra=ex)
     endif
     get_data, mlt_image_var, times, data, limits=lim
     ntime = n_elements(times)
 
 ;---Preparation.
     mlt_bins = lim.mlt_bins
-    mlt_index = lazy_where(mlt_bins, '[]', mlt_range, count=nxbin)
+    mlt_index = where_pro(mlt_bins, '[]', mlt_range, count=nxbin)
     if nxbin eq 0 then begin
         errmsg = 'Invalid MLT range ...'
         return, retval
     endif
 
     mlat_bins = lim.mlat_bins
-    mlat_index = lazy_where(mlat_bins, '[]', mlat_range, count=nybin)
+    mlat_index = where_pro(mlat_bins, '[]', mlat_range, count=nybin)
     if nybin eq 0 then begin
         errmsg = 'Invalid MLat range ...'
         return, retval

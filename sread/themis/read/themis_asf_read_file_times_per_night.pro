@@ -44,7 +44,7 @@ function themis_asf_read_file_times_per_night, input_time_range, site=site, $
 
     ; The given time is within the file_times of the night.
     if n_elements(file_times) ne 0 then begin
-        index = lazy_where(the_time, '[]', minmax(file_times), count=count)
+        index = where_pro(the_time, '[]', minmax(file_times), count=count)
         if count ne 0 then begin
             return, file_times
         endif
@@ -53,7 +53,7 @@ function themis_asf_read_file_times_per_night, input_time_range, site=site, $
     
     ; The given time is within the file_times of the next night.
     if n_elements(next_file_times) ne 0 then begin
-        index = lazy_where(the_time, '[]', minmax(next_file_times), count=count)
+        index = where_pro(the_time, '[]', minmax(next_file_times), count=count)
         if count ne 0 then begin
             return, next_file_times
         endif

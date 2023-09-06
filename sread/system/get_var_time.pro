@@ -15,7 +15,7 @@ function get_var_time, var, in=time_range, limits=lim
     get_data, var, times, limits=lim
 
     if n_elements(time_range) eq 2 then begin
-        index = lazy_where(times, time_range, count=count)
+        index = where_pro(times, time_range, count=count)
         if count eq 0 then return, retval
         times = times[index]
     endif

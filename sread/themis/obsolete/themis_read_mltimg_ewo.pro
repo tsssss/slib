@@ -29,7 +29,7 @@ pro themis_read_mltimg_ewo, time_range, mlat_range=mlat_range, $
 
 
 ;---Gen ewo.
-    mlat_index = lazy_where(mlat_bins, '[]', mlat_range, count=mlat_count)
+    mlat_index = where_pro(mlat_bins, '[]', mlat_range, count=mlat_count)
     if mlat_count eq 0 then return
     ewo = total(j_new[*,*,mlat_index],3)/mlat_count
 

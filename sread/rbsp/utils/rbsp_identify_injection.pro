@@ -78,7 +78,7 @@ function rbsp_identify_injection, time_range, mission_probe=mission_probe, $
         endfor
     endif
     store_data, flux_var, full_times, full_fluxs, energys
-    time_index = lazy_where(full_times, '[]', time_range)
+    time_index = where_pro(full_times, '[]', time_range)
     common_times = full_times[time_index]
     fluxs = full_fluxs[time_index,*]
 
@@ -132,7 +132,7 @@ function rbsp_identify_injection, time_range, mission_probe=mission_probe, $
     flux_apogee = full_fluxs[*,energy_index_apogee-1]
     flux_long = 10.^smooth(alog10(flux_apogee), nan=1, window_long/time_step, edge_zero=1)
     flux_short = 10.^smooth(alog10(flux_apogee), nan=1, window_short/time_step, edge_zero=1)
-    time_index = lazy_where(full_times, '[]', time_range)
+    time_index = where_pro(full_times, '[]', time_range)
     flux_long = flux_long[time_index]
     flux_short = flux_short[time_index]
     flux_apogee = flux_apogee[time_index]

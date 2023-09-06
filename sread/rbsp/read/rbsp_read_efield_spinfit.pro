@@ -52,5 +52,5 @@ end
 
 time_range = time_double(['2013-05-01/07:20','2013-05-01/07:50'])         ; a longer time range for test purpose.
 probe = 'b'
-var = rbsp_read_efield_spinfit(time_range, probe=probe, coord='gsm')
+var = rbsp_read_efield_spinfit(time_range, probe=probe)
 end

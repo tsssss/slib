@@ -24,6 +24,7 @@ function constant, name
         'full_ychsz': retval = 0.7
         'half_ychsz': retval = 0.35
         '4space': retval = '    '
+        'mu0': retval = 1.25663796212d-6    ; N*A^-2.
         else: ; do nothing.
     endcase
     return, retval

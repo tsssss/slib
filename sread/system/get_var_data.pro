@@ -27,7 +27,7 @@ function get_var_data, var, val, in=time_range, at=time, raw=raw, times=times, l
     endif
     
     if n_elements(time_range) eq 2 then begin
-        index = lazy_where(times, time_range, count=count)
+        index = where_pro(times, time_range, count=count)
         if count eq 0 then return, retval
         dat = dat[index,*,*,*,*,*,*,*]
         times = times[index]

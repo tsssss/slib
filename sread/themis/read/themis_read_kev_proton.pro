@@ -51,10 +51,10 @@ function themis_read_kev_proton, time_range, probe=probe, $
         endif
         energy_ratio = 1.5
         the_energy_range = energy_range[0]*[energy_ratio,1/energy_ratio]
-        index = lazy_where(energy_bins[energy_index], '[]', the_energy_range, count=count) 
+        index = where_pro(energy_bins[energy_index], '[]', the_energy_range, count=count) 
         if count eq 0 then return, retval
     endif else if nenergy_range eq 2 then begin
-        energy_index = lazy_where(energy_bins, '[]', energy_range, count=count)
+        energy_index = where_pro(energy_bins, '[]', energy_range, count=count)
         if count eq 0 then begin
             errmsg = 'no energy in given range ...'
             return, retval

@@ -116,7 +116,7 @@ pro read_files, time, files=files, request=request, errmsg=errmsg
                         rec_infos.add, index
                     endelse
                 endif else begin
-                    index = lazy_where(the_times, '[]', time_info, count=count)
+                    index = where_pro(the_times, '[]', time_info, count=count)
                     if count eq 0 then rec_infos.add, !null else rec_infos.add, minmax(index)
                 endelse
             endforeach

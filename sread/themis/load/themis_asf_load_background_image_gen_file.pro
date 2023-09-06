@@ -68,7 +68,7 @@ function themis_asf_load_background_image_gen_file, input_time_range, site=site,
     secofhour = constant('secofhour')
     foreach file_time, file_times, file_id do begin
         the_time_range = file_time+[0,secofhour]
-        time_index = lazy_where(times, '[)', the_time_range, count=count)
+        time_index = where_pro(times, '[)', the_time_range, count=count)
         if count eq 0 then continue
 
         file = files[file_id]

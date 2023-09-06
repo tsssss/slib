@@ -70,7 +70,7 @@ function rbsp_read_pa_spec, input_time_range, probe=probe, errmsg=errmsg, $
     endif else if nenergy_input eq 2 then begin
         the_fluxs = fltarr(ntime,npitch_angle)
         for time_id=0,ntime-1 do begin
-            index = lazy_where(energys[time_id,*], '[]', energy_range, count=count)
+            index = where_pro(energys[time_id,*], '[]', energy_range, count=count)
             if count eq 0 then continue
             the_fluxs[time_id,*] = total(fluxs[time_id,index,*],2, nan=1)/count
         endfor

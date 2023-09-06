@@ -17,7 +17,7 @@ pro interp_time, var, times, to=new_var, data_gap_window=data_gap_window, _extra
     ; Treat data gap on beginning and end.
     fillval = !values.d_nan
     bad_index = []
-    index = lazy_where(times,')(',minmax(old_times), count=count)
+    index = where_pro(times,')(',minmax(old_times), count=count)
     if count ne 0 then bad_index = [bad_index,index]
     
     ; Treat NaN.
@@ -31,7 +31,7 @@ pro interp_time, var, times, to=new_var, data_gap_window=data_gap_window, _extra
         nan_time_ranges = old_times[time_to_range(index,time_step=1)]
         nnan_time_range = n_elements(nan_time_ranges)*0.5
         for ii=0,nnan_time_range-1 do begin
-            index = lazy_where(times, '[]', nan_time_ranges[ii,*], count=count)
+            index = where_pro(times, '[]', nan_time_ranges[ii,*], count=count)
             if count eq 0 then continue
             bad_index = [bad_index,index]
         endfor
@@ -48,7 +48,7 @@ pro interp_time, var, times, to=new_var, data_gap_window=data_gap_window, _extra
         gap_time_ranges = [[old_times[index]],[old_times[index+1]]]
         ngap_time_range = n_elements(gap_time_ranges)*0.5
         for ii=0, ngap_time_range-1 do begin
-            index = lazy_where(times, '[]', gap_time_ranges[ii,*], count=count)
+            index = where_pro(times, '[]', gap_time_ranges[ii,*], count=count)
             if count eq 0 then continue
             bad_index = [bad_index,index]
         endfor

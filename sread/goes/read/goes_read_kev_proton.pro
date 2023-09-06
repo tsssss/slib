@@ -48,7 +48,7 @@ function goes_read_kev_proton, input_time_range, probe=probe, $
         case n_elements(energy) of
             1: tmp = min(energy_bins-energy[0], /absolute, energy_index)
             2: begin
-                energy_index = lazy_where(energy_bins, energy, count=count)
+                energy_index = where_pro(energy_bins, energy, count=count)
                 if count eq 0 then begin
                     errmsg = handle_error('No energy in given range ...')
                     return, retval

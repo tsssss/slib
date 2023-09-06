@@ -39,7 +39,7 @@ function test_themis_asf_flag_cloud, input_time_range, site=site
         endfor
 
         hist_range = ncenter_index*[0.002,0.2]
-        index = lazy_where(hist, '[]', hist_range)
+        index = where_pro(hist, '[]', hist_range)
         min_values[time_id] = value_bins[min(index)]
         max_values[time_id] = value_bins[max(index)]
     endforeach

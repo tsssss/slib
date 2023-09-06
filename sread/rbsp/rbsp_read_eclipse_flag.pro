@@ -90,7 +90,7 @@ pro rbsp_read_eclipse_flag_gen_file, time, probe=probe, filename=data_file, errm
         the_time_range = time_ranges[*,ii]
         the_time_range = the_time_range-(the_time_range mod data_rate)
         if (time_ranges[1,ii] mod data_rate) eq 0 then the_time_range[1] += data_rate
-        index = lazy_where(common_times, '[]', the_time_range, count=count)
+        index = where_pro(common_times, '[]', the_time_range, count=count)
         if count eq 0 then continue
         eclipse_flags[index] = 1
     endfor

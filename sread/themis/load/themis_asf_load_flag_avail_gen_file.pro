@@ -14,7 +14,7 @@ function themis_asf_load_flag_avail_gen_file, input_time_range, site=site, filen
     file_time_range = time_double(string(file_year+[0,1]))
     file_times = themis_asi_read_available_file_times(file_time_range, site=site, id='l1%asf')
     if n_elements(file_times) gt 0 then begin
-        index = lazy_where(file_times, '[]', file_time_range, count=count)
+        index = where_pro(file_times, '[]', file_time_range, count=count)
         if count eq 0 then file_times = !null else file_times = file_times[index]
     endif
 

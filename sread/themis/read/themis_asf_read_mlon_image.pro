@@ -3,7 +3,7 @@
 ; This is to replace themis_read_mlonimg_per_site
 ;-
 
-function themis_read_asf_mlon_image, input_time_range, sites=sites, $
+function themis_asf_read_mlon_image, input_time_range, sites=sites, $
     min_elev=min_elev, merge_method=merge_method, errmsg=errmsg, get_name=get_name, $
     calibration_method=calibration_method
 
@@ -19,7 +19,7 @@ function themis_read_asf_mlon_image, input_time_range, sites=sites, $
 
 
     ; Collect merge info for the given sites.
-    merge_weight = get_var_data(themis_read_asf_mlon_image_gen_merge_info($
+    merge_weight = get_var_data(themis_asf_read_mlon_image_gen_merge_info($
         sites=sites, min_elev=min_elev, merge_method=merge_method))
 
     ; Load and merge mlon image at each site.
@@ -35,7 +35,7 @@ function themis_read_asf_mlon_image, input_time_range, sites=sites, $
         index = where(weight ne 0, count)
         if count eq 0 then continue
 
-        the_var = themis_read_mlon_image_per_site(time_range, site=site, errmsg=errmsg, calibration_method=calibration_method)
+        the_var = themis_asf_read_mlon_image_per_site(time_range, site=site, errmsg=errmsg, calibration_method=calibration_method)
         if errmsg ne '' then continue
         get_data, the_var, uts, images, limits=lim
         
@@ -47,7 +47,7 @@ function themis_read_asf_mlon_image, input_time_range, sites=sites, $
         index_crop = where(weight ne 0, count)
         
         ; Map to common time.
-        index = lazy_where(uts, '[]', common_times[[0,ntime-1]], count=count)
+        index = where_pro(uts, '[]', common_times[[0,ntime-1]], count=count)
         if count eq 0 then continue
         uts = uts[index]
         images = images[index,*,*]        
@@ -78,5 +78,5 @@ end
 ;    sites = ['inuv','whit','atha','tpas','gill','rank']
     sites = ['inuv','whit']
     
-themis_read_asf_mlon_image, time_range, sites=sites, merge_method='merge_elev', min_elev=2.5
+themis_asf_read_mlon_image, time_range, sites=sites, merge_method='merge_elev', min_elev=2.5
 end

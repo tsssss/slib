@@ -1,5 +1,5 @@
 
-function themis_read_asf_mlon_image_rect_gen_merge_info, sites=sites, $
+function themis_asf_read_mlon_image_rect_gen_merge_info, sites=sites, $
     min_elev=min_elev, merge_method=merge_method, get_name=get_name
 
     the_var = 'thg_mlon_image_rect_merge_weight'
@@ -52,5 +52,5 @@ end
 
 
 sites = ['atha','fsim']
-var = themis_read_asf_mlon_image_rect_gen_merge_info(sites=sites, min_elev=5, merge_method='merge_elev')
+var = themis_asf_read_mlon_image_rect_gen_merge_info(sites=sites, min_elev=5, merge_method='merge_elev')
 end

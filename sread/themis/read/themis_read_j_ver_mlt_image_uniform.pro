@@ -49,16 +49,16 @@ function themis_read_j_ver_mlt_image_uniform, input_time_range, mlat_range=mlat_
                 i0 = index_ranges[0,ii]
                 i1 = index_ranges[1,ii]
                 if i0 eq i1 then continue   ; only 1 bin.
-                index = lazy_where(mlt_bins, '[]', minmax(the_mlt[i0:i1]), count=count)
+                index = where_pro(mlt_bins, '[]', minmax(the_mlt[i0:i1]), count=count)
                 if count eq 0 then continue
                 mltimg[index,*] = sinterpol(mlonimg[i0:i1,*], the_mlt[i0:i1], mlt_bins[index])
             endfor
         endif else begin
-            index = lazy_where(mlt_bins, '[]', minmax(the_mlt), count=count)
+            index = where_pro(mlt_bins, '[]', minmax(the_mlt), count=count)
             if count eq 0 then continue
             mltimg[index,*] = sinterpol(mlonimg, the_mlt, mlt_bins[index])
         endelse
-        ;index = lazy_where(mlt_bins,'][', minmax(the_mlt), count=count)
+        ;index = where_pro(mlt_bins,'][', minmax(the_mlt), count=count)
         ;if count ne 0 then mltimg[index,*] = 0
         j_mltimg[time_id,*,*] = mltimg
     endforeach

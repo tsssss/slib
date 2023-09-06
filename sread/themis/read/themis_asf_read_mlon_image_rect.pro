@@ -2,8 +2,9 @@
 ; Adopted from themis_read_mlonimg.
 ;-
 
-function themis_read_asf_mlon_image_rect, input_time_range, sites=sites, $
-    min_elev=min_elev, merge_method=merge_method, calibration_method=calibration_method, errmsg=errmsg, get_name=get_name
+function themis_asf_read_mlon_image_rect, input_time_range, sites=sites, $
+    min_elev=min_elev, merge_method=merge_method, calibration_method=calibration_method, $
+    errmsg=errmsg, get_name=get_name
 
 
     errmsg = ''
@@ -18,7 +19,7 @@ function themis_read_asf_mlon_image_rect, input_time_range, sites=sites, $
 
 
     ; Collect merge info for the given sites.
-    merge_weight = get_var_data(themis_read_asf_mlon_image_rect_gen_merge_info($
+    merge_weight = get_var_data(themis_asf_read_mlon_image_rect_gen_merge_info($
         sites=sites, min_elev=min_elev, merge_method=merge_method))
 
     ; Load and merge mlon image at each site.
@@ -46,7 +47,7 @@ function themis_read_asf_mlon_image_rect, input_time_range, sites=sites, $
         index_crop = where(weight ne 0, count)
 
         ; Map to common time.
-        index = lazy_where(uts, '[]', common_times[[0,ntime-1]], count=count)
+        index = where_pro(uts, '[]', common_times[[0,ntime-1]], count=count)
         if count eq 0 then continue
         uts = uts[index]
         images = images[index,*,*]
@@ -74,5 +75,5 @@ sites = ['atha']
 site = 'atha'
 the_var = themis_read_mlon_image_rect_per_site(time_range, site=site, errmsg=errmsg)
 stop
-var = themis_read_asf_mlon_image_rect(time_range, sites=sites)
+var = themis_asf_read_mlon_image_rect(time_range, sites=sites)
 end

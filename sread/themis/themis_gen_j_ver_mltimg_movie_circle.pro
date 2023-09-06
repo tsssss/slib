@@ -18,7 +18,7 @@ pro themis_gen_j_ver_mltimg_movie_circle, time_range, filename=movie_file, $
     if n_elements(mlt_range) ne 2 then begin
         mlt_range = get_setting(mltimg_var, 'mlt_range')
     endif else begin
-        index = lazy_where(mlt_bins, '[]', mlt_range, count=count)
+        index = where_pro(mlt_bins, '[]', mlt_range, count=count)
         if count eq 0 then begin
             errmsg = 'No data in mlt_range ...'
             return
@@ -29,7 +29,7 @@ pro themis_gen_j_ver_mltimg_movie_circle, time_range, filename=movie_file, $
     if n_elements(mlat_range) ne 2 then begin
         mlat_range = get_setting(mltimg_var, 'mlat_range')
     endif else begin
-        index = lazy_where(mlat_bins, '[]', mlat_range, count=count)
+        index = where_pro(mlat_bins, '[]', mlat_range, count=count)
         if count eq 0 then begin
             errmsg = 'No data in mlat_range ...'
             return

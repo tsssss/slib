@@ -28,7 +28,7 @@ function themis_read_j_ver_ewogram, input_time_range, mlat_range=mlat_range, mlt
     ; J is positive for upward current.
     ; For downward current, we want negative value, then flip ewo to positive to let color works better.
     ewo = fltarr(ntime,nmlt_bin)
-    mlat_index = lazy_where(mlat_bins, '[]', mlat_range, count=mlat_count)
+    mlat_index = where_pro(mlat_bins, '[]', mlat_range, count=mlat_count)
     if mlat_count eq 0 then return, ''
     if direction eq 'up' then begin
         j_new = j_new>0

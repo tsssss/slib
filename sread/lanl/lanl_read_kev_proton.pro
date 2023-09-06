@@ -32,7 +32,7 @@ pro lanl_read_kev_proton, time_range, probe=probe, errmsg=errmsg, energy=energy,
                 if count eq 0 then tmp = min(energy_bins-energy[0], /absolute, energy_index)
             end
             2: begin
-                energy_index = lazy_where(energy_bins, energy, count=count)
+                energy_index = where_pro(energy_bins, energy, count=count)
                 if count eq 0 then begin
                     errmsg = 'no energy in given range ...'
                     return

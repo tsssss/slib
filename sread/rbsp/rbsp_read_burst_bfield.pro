@@ -31,7 +31,7 @@ pro rbsp_read_burst_bfield, time, probe=probe, prefix=pre0, datarate=dt
     ntime_range = n_elements(time_ranges)/2
     for ii=0, ntime_range-1 do begin
         time_range = reform(time_ranges[ii,*])
-        index = lazy_where(times, time_range, count=count)
+        index = where_pro(times, time_range, count=count)
         if count eq 0 then continue
         data[index,*] = data[index,*]*10^(19./20.)
     endfor

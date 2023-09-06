@@ -3,7 +3,7 @@
 ; To replace themis_read_mlonimg_metadata.
 ;-
 
-pro themis_read_asf_mlon_image_rect_read_mapping_info_gen_file, input_time_range, $
+pro themis_asf_read_mlon_image_read_mapping_info_gen_file, input_time_range, $
     site=site, filename=file
 
 ;---Get pixel info for ASF image.
@@ -22,10 +22,10 @@ pro themis_read_asf_mlon_image_rect_read_mapping_info_gen_file, input_time_range
 
 
 ;---Get pixel info for the MLat-MLon plane center image.
-    mlon_image_rect_info = mlon_image_rect_info()
-    new_image_size = mlon_image_rect_info.image_size
-    new_mlons = mlon_image_rect_info.pixel_mlon
-    new_mlats = mlon_image_rect_info.pixel_mlat
+    mlon_image_info = mlon_image_info()
+    new_image_size = mlon_image_info.image_size
+    new_mlons = mlon_image_info.pixel_mlon
+    new_mlats = mlon_image_info.pixel_mlat
 
 
 ;---Map old image to new image.
@@ -37,14 +37,10 @@ pro themis_read_asf_mlon_image_rect_read_mapping_info_gen_file, input_time_range
         old_index_2d = array_indices(old_image_size, old_index_1d, dimensions=1)
         pixel_mlons = corner_mlons[old_index_2d[0]:old_index_2d[0]+1,old_index_2d[1]:old_index_2d[1]+1]
         pixel_mlats = corner_mlats[old_index_2d[0]:old_index_2d[0]+1,old_index_2d[1]:old_index_2d[1]+1]
-        mlon_image_rect_lonlat2xy, mlon=pixel_mlons, mlat=pixel_mlats, xpos=pixel_xpos, ypos=pixel_ypos, info=mlon_image_rect_info
+        mlon_image_lonlat2xy, mlon=pixel_mlons, mlat=pixel_mlats, xpos=pixel_xpos, ypos=pixel_ypos, info=mlon_image_info
         ; Round works better than floor.
         xpos_range = minmax(round(pixel_xpos))
         ypos_range = minmax(round(pixel_ypos))
-        xpos_range >= 0
-        ypos_range >= 0
-        xpos_range <= (new_image_size[0]-1)      
-        ypos_range <= (new_image_size[1]-1)
 
         foreach xpos, make_bins(xpos_range,1) do begin
             foreach ypos, make_bins(ypos_range,1) do begin
@@ -96,7 +92,7 @@ pro themis_read_asf_mlon_image_rect_read_mapping_info_gen_file, input_time_range
 
 
 ;---Save the mapping info to tplot.
-    prefix = 'thg_'+site+'_mlon_image_rect_'
+    prefix = 'thg_'+site+'_mlon_image_'
     ; It selects all non-duplicate pixels in the old/new image.
     store_data, prefix+'old_uniq_pixels', 0, old_uniq_pixels
     store_data, prefix+'new_uniq_pixels', 0, new_uniq_pixels
@@ -134,13 +130,13 @@ pro themis_read_asf_mlon_image_rect_read_mapping_info_gen_file, input_time_range
 end
 
 
-pro themis_read_asf_mlon_image_rect_read_mapping_info, input_time_range, site=site
+pro themis_asf_read_mlon_image_read_mapping_info, input_time_range, site=site
 
     compile_opt idl2
     on_error, 0
     errmsg = ''
 
-    prefix = 'thg_'+site+'_mlon_image_rect_'
+    prefix = 'thg_'+site+'_mlon_image_'
     vars = ['uniq_pixels','image_size','pixel_index']
     save_vars = prefix+['old_'+vars,'new_'+vars, $
         'map_old2new'+['','_count','_uniq','_mult'], $
@@ -160,8 +156,8 @@ pro themis_read_asf_mlon_image_rect_read_mapping_info, input_time_range, site=si
     ; Prepare file name.
     version = 'v01'
     local_root = join_path([default_local_root(),'sdata','themis'])
-    base_name = 'thg_mlon_image_rect_mapping_info_'+site+'_'+version+'.tplot'
-    local_dir = join_path([local_root,'thg','mlon_image_rect','mapping_info'])
+    base_name = 'thg_mlon_image_mapping_info_'+site+'_'+version+'.tplot'
+    local_dir = join_path([local_root,'thg','mlon_image','mapping_info'])
     file = join_path([local_dir,base_name])
     if file_test(local_dir,/directory) eq 0 then file_mkdir, local_dir
     if keyword_set(renew) then if file_test(file) eq 1 then file_delete, file
@@ -169,7 +165,7 @@ pro themis_read_asf_mlon_image_rect_read_mapping_info, input_time_range, site=si
 
     if file_test(file) eq 0 then begin
         lprmsg, 'Generating '+file[0]+' ...'
-        themis_read_asf_mlon_image_rect_read_mapping_info_gen_file, input_time_range, site=site, filename=file
+        themis_asf_read_mlon_image_read_mapping_info_gen_file, input_time_range, site=site, filename=file
     endif
 
     if file_test(file) eq 0 then begin
@@ -198,8 +194,8 @@ end
 ;endforeach
 ;stop
 
-time_range = time_double(['2013-05-01/07:00','2013-05-01/08:00'])
-site = 'atha'
+time_range = time_double(['2013-03-17/07:00','2013-03-17/08:00'])
+site = 'fsmi'
 file = join_path([homedir(),'asf_mlon_image_metadata.tplot'])
-themis_read_asf_mlon_image_rect_read_mapping_info_gen_file, time_range, site=site, filename=file
+themis_read_asf_mlon_image_read_mapping_info_gen_file, time_range, site=site, filename=file
 end

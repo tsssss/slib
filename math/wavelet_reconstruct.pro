@@ -21,7 +21,7 @@ function wavelet_reconstruct, cwt_info, filter=filter, index=freq_index
     f_j = 1d/(s_j*s2t)
     rw_nj = real_part(cwt_info.w_nj)
 
-    if n_elements(filter) eq 2 then index = lazy_where(f_j, filter)
+    if n_elements(filter) eq 2 then index = where_pro(f_j, filter)
     if n_elements(freq_index) ne 0 then index = freq_index
     
     count = n_elements(index)

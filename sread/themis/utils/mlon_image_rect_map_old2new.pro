@@ -5,7 +5,7 @@
 function mlon_image_rect_map_old2new, old_images, site=site, crop=crop
 
     input_time_range = [0d,0]
-    themis_read_asf_mlon_image_rect_read_mapping_info, input_time_range, site=site
+    themis_asf_read_mlon_image_rect_read_mapping_info, input_time_range, site=site
     prefix = 'thg_'+site+'_mlon_image_rect_'
 
     old_image_size = get_var_data(prefix+'old_image_size')

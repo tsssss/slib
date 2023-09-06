@@ -7,7 +7,7 @@
 ;   Similarly, it can be [],[),(],(),[,(,),].
 ;-
 
-function lazy_where, data, relation, range, count=count, _extra=ex
+function where_pro, data, relation, range, count=count, _extra=ex
 
     if n_params() eq 2 then begin
         rel = 'in'
@@ -45,11 +45,11 @@ end
 
 
 data = [1,2,3,4,5,6]
-print, lazy_where(data, 'in', [1,5])
-print, lazy_where(data, 'within', [1,5])
-print, lazy_where(data, 'gt', 1)
-print, lazy_where(data, 'ge', 1)
-print, lazy_where(data, 'lt', 1, count=count), count
-print, lazy_where(data, 'le', 1)
-print, lazy_where(data, '[]', [2,4], count=count)
+print, where_pro(data, 'in', [1,5])
+print, where_pro(data, 'within', [1,5])
+print, where_pro(data, 'gt', 1)
+print, where_pro(data, 'ge', 1)
+print, where_pro(data, 'lt', 1, count=count), count
+print, where_pro(data, 'le', 1)
+print, where_pro(data, '[]', [2,4], count=count)
 end

@@ -2,7 +2,9 @@
 ; Load calibrated mlon image.
 ;-
 
-pro themis_load_asf_mlon_image_rect_per_site_gen_file, time, site=site, filename=file, errmsg=errmsg, calibration_method=calibration_method
+pro themis_asf_load_mlon_image_per_site_gen_file, time, site=site, filename=file, errmsg=errmsg, $
+    calibration_method=calibration_method
+    
 
 ;---Init settings.
     errmsg = ''
@@ -35,7 +37,7 @@ pro themis_load_asf_mlon_image_rect_per_site_gen_file, time, site=site, filename
     ; Calibrate brightness before mapping works better.
     asf_cal_var = asf_var+'_cal'
     themis_asi_cal_brightness, asf_var, newname=asf_cal_var, calibration_method=calibration_method
-    themis_calc_asf_mlon_image_rect_per_site, asf_cal_var, errmsg=errmsg
+    themis_calc_asf_mlon_image_per_site, asf_cal_var, errmsg=errmsg
     if errmsg ne '' then return
     
 ;    ; Calibrate brightness after mapping runs much faster.
@@ -44,9 +46,9 @@ pro themis_load_asf_mlon_image_rect_per_site_gen_file, time, site=site, filename
 ;    themis_asi_cal_brightness, mlon_image_var, newname=mlon_image_var
 ;    if errmsg ne '' then return
 
-    mlon_image_var = 'thg_'+site+'_mlon_image_rect'
+    mlon_image_var = 'thg_'+site+'_mlon_image'
     get_data, mlon_image_var, times, mlon_images, limits=lim
-    index = lazy_where(times, '[)', time_range, count=ntime)
+    index = where_pro(times, '[)', time_range, count=ntime)
     if ntime eq 0 then begin
         errmsg = 'Inconsistency ...'
         return
@@ -184,9 +186,6 @@ site = 'fykn'
 time_range = time_double(['2016-11-24/13:00','2016-11-24/14:00'])
 site = 'tpas'
 
-time_range = time_double(['2013-05-01/07:25','2013-05-01/07:55'])
-site = 'atha'
-
 file = join_path([homedir(),'test','test_mlon_image.cdf'])
-themis_load_asf_mlon_image_rect_per_site_gen_file, time_range, site=site, filename=file, errmsg=errmsg
+themis_asf_load_mlon_image_per_site_gen_file, time_range, site=site, filename=file, errmsg=errmsg
 end

@@ -17,7 +17,7 @@ pro themis_read_mlonimg_ewo, mlonimg_var, to=ewo_var, $
     mlat_bins = get_setting(mlonimg_var, 'mlat_bins')
     mlon_bins = get_setting(mlonimg_var, 'mlon_bins')
     if n_elements(mlat_range) eq 2 then begin
-        index = lazy_where(mlat_bins, mlat_range, count=count)
+        index = where_pro(mlat_bins, mlat_range, count=count)
         if count eq 0 then begin
             errmsg = handle_error('No pixel in given range ...')
             return

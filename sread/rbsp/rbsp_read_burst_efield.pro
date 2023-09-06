@@ -87,7 +87,7 @@ probe = 'b'
     rbsp_read_efield, time, probe=probe, resolution='hires'
     e0var = pre0+'e0_gsm'
     get_data, e0var, times, egsm
-    index = lazy_where(times, bad_time)
+    index = where_pro(times, bad_time)
     egsm[index,*] = !values.d_nan
     store_data, e0var, times, egsm
 

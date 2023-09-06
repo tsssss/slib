@@ -15,6 +15,8 @@ function get_setting, var, key, exist
         return, retval
     endif
     
+    if n_elements(key) eq 0 then return, dictionary(lims)
+    
     keys = strlowcase(tag_names(lims))
     idx = where(keys eq key, cnt)
     if cnt eq 0 then begin

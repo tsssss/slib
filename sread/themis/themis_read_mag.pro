@@ -108,7 +108,7 @@ pro themis_read_mag, time, sites=sites, errmsg=errmsg, $
     sites = site_infos.id
 
     if n_elements(mlon_range) eq 2 then begin
-        index = lazy_where(site_infos.mlon, 'in', mlon_range, count=count)
+        index = where_pro(site_infos.mlon, 'in', mlon_range, count=count)
         if count eq 0 then begin
             errmsg = handle_error('No site in MLon range: '+mlon_range+' ...')
             return
@@ -118,7 +118,7 @@ pro themis_read_mag, time, sites=sites, errmsg=errmsg, $
     endif
 
     if n_elements(mlat_range) eq 2 then begin
-        index = lazy_where(site_infos.mlat, 'in', mlat_range, count=count)
+        index = where_pro(site_infos.mlat, 'in', mlat_range, count=count)
         if count eq 0 then begin
             errmsg = handle_error('No site in MLat range: '+mlat_range+' ...')
             return

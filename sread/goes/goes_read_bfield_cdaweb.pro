@@ -37,7 +37,7 @@ pro goes_read_bfield_cdaweb, time, probe=probe, errmsg=errmsg, coord=coord
     
     ; Trim to wanted time.
     if n_elements(time) eq 2 then begin
-        index = lazy_where(times, '[]', time, count=count)
+        index = where_pro(times, '[]', time, count=count)
         if count eq 0 then begin
             errmsg = 'No data in time ...'
             return

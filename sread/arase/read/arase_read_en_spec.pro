@@ -63,7 +63,7 @@ function arase_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
         tmp = min(pitch_angles-pitch_angle_range[0], abs=1, pitch_index)
         npitch_index = 1
     endif else if n_elements(pitch_angle_range) eq 2 then begin
-        pitch_index = lazy_where(pitch_angles, '[]', pitch_angle_range, count=npitch_index)
+        pitch_index = where_pro(pitch_angles, '[]', pitch_angle_range, count=npitch_index)
         if npitch_index eq 0 then begin
             errmsg = 'Invalid pitch angle range ...'
             return, retval

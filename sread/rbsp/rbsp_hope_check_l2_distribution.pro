@@ -115,7 +115,7 @@
     test_time_range = time_double(['2015-02-18/02:10','2015-02-18/02:20'])
     test_time_range = time_double(['2015-02-18/02:00','2015-02-18/02:50'])
 ;    test_time_range = time_double(['2015-02-18/06:20','2015-02-18/06:50'])
-    index = lazy_where(times, '[]', test_time_range, count=ntest_time)
+    index = where_pro(times, '[]', test_time_range, count=ntest_time)
     test_times = times[index]
     foreach test_time, test_times, test_id do begin
         tmp = min(times-test_time, index, /absolute)

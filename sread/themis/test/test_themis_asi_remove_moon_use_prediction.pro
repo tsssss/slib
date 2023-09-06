@@ -67,7 +67,7 @@
 
 
 ;---Apply rotation info.
-    time_index = lazy_where(times, '[]', the_times)
+    time_index = where_pro(times, '[]', the_times)
     orig_images = asf_images[time_index,*,*]
     rotation_angles = interpol([0,rotation_angle], the_times, times[time_index])
     aligned_images = orig_images

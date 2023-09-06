@@ -28,7 +28,7 @@ function themis_read_j_ver_keogram, input_time_range, mlat_range=mlat_range, mlt
     ; J is positive for upward current.
     ; For downward current, we want negative value, then flip keo to positive to let color works better.
     keo = fltarr(ntime,nmlat_bin)
-    mlt_index = lazy_where(mlt_bins, '[]', mlt_range, count=mlt_count)
+    mlt_index = where_pro(mlt_bins, '[]', mlt_range, count=mlt_count)
     if mlt_count eq 0 then return, ''
     if direction eq 'up' then begin
         j_new = j_new>0

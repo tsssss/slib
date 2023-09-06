@@ -1,5 +1,5 @@
 
-function themis_read_asf_mlon_image_gen_merge_info, sites=sites, $
+function themis_asf_read_mlon_image_gen_merge_info, sites=sites, $
     min_elev=min_elev, merge_method=merge_method, get_name=get_name
 
     the_var = 'thg_mlon_image_merge_weight'

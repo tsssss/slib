@@ -17,7 +17,7 @@ function themis_calc_mlt_image, input_time_range, sites=sites, $
     if n_elements(smooth_window) eq 1 then calibrate_method = 'smooth'
 
     ; Collect merge info for the given sites.
-    themis_read_asf_mlon_image_gen_merge_info, sites=sites, min_elev=min_elev, merge_method=merge_method
+    themis_asf_read_mlon_image_gen_merge_info, sites=sites, min_elev=min_elev, merge_method=merge_method
     merge_weight = get_var_data('thg_mlon_image_merge_weight')
 
     ; Load and merge mlon image at each site.
@@ -61,7 +61,7 @@ function themis_calc_mlt_image, input_time_range, sites=sites, $
         index_crop = where(weight ne 0, count)
         
         ; Map to common time.
-        index = lazy_where(uts, '[]', common_times[[0,ntime-1]], count=count)
+        index = where_pro(uts, '[]', common_times[[0,ntime-1]], count=count)
         if count eq 0 then continue
         uts = uts[index]
         images = images[index,*,*]        

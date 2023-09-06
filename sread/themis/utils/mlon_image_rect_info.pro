@@ -11,9 +11,13 @@ function mlon_image_rect_info
 ;    endforeach
 ;    mlon_range = minmax(mlon_range.toarray())
 ;    mlat_range = minmax(mlat_range.toarray())
+;    IDL> print, mlon_range
+;       -132.872      76.8257
+;    IDL> print, mlat_range
+;       48.1060      88.9711
 
-    mlon_range = [-135d,45]
-    mlat_range = [50,85]
+    mlon_range = [-133d,77]
+    mlat_range = [48d,89]
 
     if n_elements(dmlat) eq 0 then dmlat = 0.1d
     if n_elements(dmlon) eq 0 then dmlon = 0.2d

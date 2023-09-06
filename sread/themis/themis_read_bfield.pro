@@ -59,7 +59,7 @@ pro themis_read_bfield, time, probe=probe, resolution=resolution, coord=coord, e
         bad_times[*,0] -= pad
         bad_times[*,1] += pad
         nbad_time = n_elements(bad_times)/2
-        for ii=0, nbad_time-1 do bgsm[lazy_where(times,'[]',reform(bad_times[ii,*])),*] = !values.f_nan
+        for ii=0, nbad_time-1 do bgsm[where_pro(times,'[]',reform(bad_times[ii,*])),*] = !values.f_nan
         store_data, var, times, bgsm
     endif
 

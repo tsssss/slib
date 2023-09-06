@@ -49,10 +49,10 @@ function rbsp_read_kev_proton, input_time_range, probe=probe, $
         endif
         energy_ratio = 1.5
         the_energy_range = energy_range[0]*[energy_ratio,1/energy_ratio]
-        index = lazy_where(energy_bins[energy_index], '[]', the_energy_range, count=count) 
+        index = where_pro(energy_bins[energy_index], '[]', the_energy_range, count=count) 
         if count eq 0 then return, retval
     endif else if nenergy_range eq 2 then begin
-        energy_index = lazy_where(energy_bins, '[]', energy_range, count=count)
+        energy_index = where_pro(energy_bins, '[]', energy_range, count=count)
         if count eq 0 then begin
             errmsg = 'no energy in given range ...'
             return, retval
@@ -78,7 +78,7 @@ function rbsp_read_kev_proton, input_time_range, probe=probe, $
             tmp = min(pitch_angle_bins-pitch_angle_range[0], absolute=1, pitch_angle_index)
         endif
     endif else if npitch_angle_range eq 2 then begin
-        pitch_angle_index = lazy_where(pitch_angle_bins, '[]', pitch_angle_range, count=count)
+        pitch_angle_index = where_pro(pitch_angle_bins, '[]', pitch_angle_range, count=count)
         if count eq 0 then begin
             errmsg = 'no pitch angle in given range ...'
             return, retval

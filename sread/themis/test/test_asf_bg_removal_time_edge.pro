@@ -15,7 +15,7 @@ if check_if_update(mlon_image_raw_var, time_range) then begin
 endif
 mlon_image_cal_var = prefix+'mlon_image_cal'
 if check_if_update(mlon_image_cal_var) then begin
-    themis_read_mlon_image_per_site, time_range, site=site, errmsg=errmsg
+    themis_asf_read_mlon_image_per_site, time_range, site=site, errmsg=errmsg
     rename_var, mlon_image_var, to=mlon_image_cal_var
 endif
 end

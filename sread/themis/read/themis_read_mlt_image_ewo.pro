@@ -21,7 +21,7 @@ function themis_read_mlt_image_ewo, time_range, mlat_range=mlat_range, $
 
 ;---Load MLT image.
     if n_elements(mlt_image_var) eq 0 then begin 
-        mlt_image_var = themis_read_asf_mlt_image(time_range, varname=mlt_image_var, _extra=ex)
+        mlt_image_var = themis_asf_read_mlt_image(time_range, varname=mlt_image_var, _extra=ex)
     endif
     get_data, mlt_image_var, times, data, limits=lim
     ntime = n_elements(times)

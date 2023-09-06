@@ -1,5 +1,5 @@
 
-pro themis_read_asf_glon_image_gen_merge_info, sites=sites, $
+pro themis_asf_read_glon_image_gen_merge_info, sites=sites, $
     min_elev=min_elev, merge_method=merge_method
 
     glon_image_info = glon_image_info()

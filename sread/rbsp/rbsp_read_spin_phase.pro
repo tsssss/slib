@@ -39,7 +39,7 @@ pro rbsp_read_spin_phase, time, probe=probe, errmsg=errmsg, times=common_times, 
     for ii=0,nboundary-1 do begin
         i0 = boundary_index[ii]
         the_time = times[i0:i0+1]
-        index = lazy_where(common_times, '[]', the_time, count=count)
+        index = where_pro(common_times, '[]', the_time, count=count)
         if count eq 0 then continue
         the_data = data[i0:i0+1]+[0,360]
         spin_phase[index] = interpol(the_data, the_time, common_times[index])

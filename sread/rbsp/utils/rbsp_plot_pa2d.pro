@@ -457,7 +457,7 @@ function rbsp_plot_pa2d, input_time_range, probe=probe, $
             if n_elements(orig_xtickv) ne 0 then begin
                 for ii=0,xticks do begin
                     minor_vals = smkgmtrc(orig_xtickv[ii]*0.1,orig_xtickv[ii],10,'n')
-                    index = lazy_where(minor_vals, '()', orig_xtickv[ii]*[0.1,1], count=count)
+                    index = where_pro(minor_vals, '()', orig_xtickv[ii]*[0.1,1], count=count)
                     if count eq 0 then continue
                     minor_vals = minor_vals[index]
                     scaled_minor_vals = scale_dis(minor_vals,scale_method)
@@ -486,7 +486,7 @@ function rbsp_plot_pa2d, input_time_range, probe=probe, $
                     
                     if orig_xtickv[ii] ne max(orig_xtickv) then continue
                     minor_vals = smkgmtrc(orig_xtickv[ii],orig_xtickv[ii]*10,10,'n')
-                    index = lazy_where(minor_vals, '()', [orig_xtickv[ii],xrange[1]], count=count)
+                    index = where_pro(minor_vals, '()', [orig_xtickv[ii],xrange[1]], count=count)
                     if count eq 0 then continue
                     minor_vals = minor_vals[index]
                     scaled_minor_vals = scale_dis(minor_vals,scale_method)

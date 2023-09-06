@@ -75,7 +75,7 @@ ncommon_time = n_elements(common_times)
                 ntime = n_elements(times)
                 if ntime eq 1 then continue
                 if ntime ne ncommon_time then begin
-                    index = lazy_where(times, '[]', time_range, count=ntime)
+                    index = where_pro(times, '[]', time_range, count=ntime)
                     times = times[index]
                     imgs = imgs[index,*,*]
                     if ntime eq ncommon_time then begin

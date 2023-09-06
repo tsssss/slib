@@ -3,7 +3,7 @@
 ;
 ; input_time_range.
 ; probe=. 'a', 'b'.
-; resolution=. 'hires', 'survey', 'burst'.
+; resolution=. 'hires', 'survey', 'burst','spinfit','spinfit_phasef'.
 ; coord=. 'gsm','ges','gei','sm'
 ;-
 
@@ -17,7 +17,7 @@ resolution=resolution, errmsg=errmsg, coord=coord, get_name=get_name, _extra=ex
     default_coord = 'mgse'
     if n_elements(coord) eq 0 then coord = default_coord
     if n_elements(resolution) eq 0 then resolution = 'survey'
-    resolutions = ['spinfit','survey','burst']
+    resolutions = ['spinfit','survey','burst','spinfit_phasef']
     index = where(resolutions eq resolution, count)
     if count eq 0 then begin
         errmsg = 'Invalid resolution: '+resolution+' ...'

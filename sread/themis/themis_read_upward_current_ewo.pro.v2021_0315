@@ -35,7 +35,7 @@ pro themis_read_upward_current_ewo, time_range, mlat_range=mlat_range, $
     ; Get EWOgram in terms of mlon.
     ; J is positive for upward current.
     ; For downward current, we want negative value, then flip ewo to positive to let color works better.
-    mlat_index = lazy_where(mlat_bins, '[]', mlat_range)
+    mlat_index = where_pro(mlat_bins, '[]', mlat_range)
     ;ewo = total(-j_new[*,*,mlat_index], 3)/n_elements(mlat_index)
     ewo = fltarr(ntime,nmlon_bin)
     foreach time, times, ii do begin

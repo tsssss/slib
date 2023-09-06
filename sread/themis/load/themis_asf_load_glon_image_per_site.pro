@@ -2,7 +2,7 @@
 ; Load calibrated glon image.
 ;-
 
-function themis_load_asf_glon_image_per_site, input_time_range, site=site, id=datatype, $
+function themis_asf_load_glon_image_per_site, input_time_range, site=site, id=datatype, $
     print_datatype=print_datatype, errmsg=errmsg, $
     local_files=files, file_times=file_times, version=version, $
     local_root=local_root, remote_root=remote_root, $
@@ -58,7 +58,7 @@ function themis_load_asf_glon_image_per_site, input_time_range, site=site, id=da
         foreach file, request.nonexist_files do begin
             file_time = file.file_time
             local_file = file.local_file
-            themis_load_asf_glon_image_per_site_gen_file, file_time, site=site, filename=local_file
+            themis_asf_load_glon_image_per_site_gen_file, file_time, site=site, filename=local_file
         endforeach
         files = prepare_files(request=request, errmsg=errmsg, local_files=files, $
             file_times=file_times, time=time_range, nonexist_files=nonexist_files)
@@ -72,5 +72,5 @@ end
 time_range = time_double(['2013-03-17/07:00','2013-03-17/09:00'])
 sites = ['kian','mcgr','fykn','gako','fsim',$
     'talo','snap','fsmi','tpas','gill','snkq']
-foreach site, sites do files = themis_load_asf_glon_image_per_site(time_range, site=site)
+foreach site, sites do files = themis_asf_load_glon_image_per_site(time_range, site=site)
 end

@@ -77,7 +77,7 @@ function themis_read_bfield, input_time_range, id=datatype, probe=probe, errmsg=
         bad_times[*,0] -= pad
         bad_times[*,1] += pad
         nbad_time = n_elements(bad_times)/2
-        for ii=0, nbad_time-1 do vec_coord[lazy_where(times,'[]',reform(bad_times[ii,*])),*] = !values.f_nan
+        for ii=0, nbad_time-1 do vec_coord[where_pro(times,'[]',reform(bad_times[ii,*])),*] = !values.f_nan
         store_data, var, times, vec_coord
     endif
 

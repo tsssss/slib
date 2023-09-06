@@ -2,7 +2,7 @@
 ; Read ASF glon image.
 ;-
 
-pro themis_read_asf_glon_image, input_time_range, sites=sites, $
+pro themis_asf_read_glon_image, input_time_range, sites=sites, $
     min_elev=min_elev, merge_method=merge_method, errmsg=errmsg
 
 
@@ -14,7 +14,7 @@ pro themis_read_asf_glon_image, input_time_range, sites=sites, $
     if n_elements(merge_method) eq 0 then merge_method = 'merge_elev'
 
     ; Collect merge info for the given sites.
-    themis_read_asf_glon_image_gen_merge_info, sites=sites, min_elev=min_elev, merge_method=merge_method
+    themis_asf_read_glon_image_gen_merge_info, sites=sites, min_elev=min_elev, merge_method=merge_method
     merge_weight = get_var_data('thg_glon_image_merge_weight')
 
     ; Load and merge glon image at each site.
@@ -30,7 +30,7 @@ pro themis_read_asf_glon_image, input_time_range, sites=sites, $
         index = where(weight ne 0, count)
         if count eq 0 then continue
 
-        themis_read_glon_image_per_site, time_range, site=site, errmsg=errmsg
+        themis_asf_read_glon_image_per_site, time_range, site=site, errmsg=errmsg
         if errmsg ne '' then continue
         the_var = 'thg_'+site+'_glon_image'
         get_data, the_var, uts, images, limits=lim
@@ -43,7 +43,7 @@ pro themis_read_asf_glon_image, input_time_range, sites=sites, $
         index_crop = where(weight ne 0, count)
         
         ; Map to common time.
-        index = lazy_where(uts, '[]', common_times[[0,ntime-1]], count=count)
+        index = where_pro(uts, '[]', common_times[[0,ntime-1]], count=count)
         if count eq 0 then continue
         uts = uts[index]
         images = images[index,*,*]        
@@ -68,5 +68,5 @@ end
 ; James Weygand's event.
 time_range = time_double(['2018-02-23/08:30','2018-02-23/09:50'])
 sites = ['fsim','fsmi','atha','tpas','gill']
-themis_read_asf_glon_image, time_range, sites=sites
+themis_asf_read_glon_image, time_range, sites=sites
 end
