@@ -6,7 +6,7 @@
 ; smart. A boolean to turn on smart settings. Usually set smart only once.
 ;-
 
-pro add_setting, var, settings, smart=smart
+pro add_setting, var, settings, smart=smart, id=id
     
     if tnames(var) eq '' then return
     ; style settings.
@@ -16,6 +16,7 @@ pro add_setting, var, settings, smart=smart
     options, var, 'xticklen', -0.02
     options, var, 'yticklen', -0.01
     
+    if n_elements(id) ne 0 then smart = 1    
     if n_elements(settings) eq 0 then return
     
     if size(settings, /type) eq 8 then settings = dictionary(settings)
@@ -26,7 +27,37 @@ pro add_setting, var, settings, smart=smart
     
     ; do smart things.
     if not keyword_set(smart) then return
-
+    if n_elements(id) ne 0 then begin
+        default_settings = dictionary()
+        if id eq 'efield' then begin
+            default_settings = dictionary($
+                'display_type', 'vector', $
+                'short_name', 'E', $
+                'unit', 'mV/m' )
+        endif else if id eq 'bfield' then begin
+            default_settings = dictionary($
+                'display_type', 'vector', $
+                'short_name', 'B', $
+                'unit', 'nT' )
+        endif else if id eq 'pflux' then begin
+            default_settings = dictionary($
+                'display_type', 'vector', $
+                'short_name', 'S', $
+                'unit', 'mW/m!U2!N' )
+        endif else if id eq 'velocity' then begin
+            default_settings = dictionary($
+                'display_type', 'vector', $
+                'short_name', 'U', $
+                'unit', 'km/s' )
+        endif
+        
+        
+        foreach key, default_settings.keys() do begin
+            if ~settings.haskey(key) then options, var, key, default_settings[key]
+        endforeach
+    endif
+    
+    
     ; use display type to init labels.
     dtype = get_setting(var, 'display_type', exist)
     ; Try to guess
@@ -134,7 +165,7 @@ pro add_setting, var, settings, smart=smart
                 coord = get_setting(var, 'coord')
                 clabels = get_setting(var, 'coord_labels')
                 if n_elements(clabels) ne 3 then clabels = constant('xyz')
-                options, var, 'labels', coord+' '+tname+'!D'+clabels+'!N'
+                options, var, 'labels', strupcase(coord)+' '+tname+'!D'+clabels+'!N'
                 
                 ; use unit to init ytitle.
                 unit = get_setting(var, 'unit', exist)
