@@ -151,6 +151,7 @@ pro add_setting, var, settings, smart=smart, id=id
             'spec': begin
                 options, var, 'spec', 1
                 options, var, 'no_interp', 1
+                options, var, 'zcharsize', 0.8
                 ;options, var, 'ylog', 1
                 ;options, var, 'zlog', 1
                 
