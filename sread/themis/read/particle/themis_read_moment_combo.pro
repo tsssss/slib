@@ -19,7 +19,7 @@ function themis_read_moment_combo, input_time_range, probe=probe, $
 
 
 ;---Read data and convert coord.
-    if n_elements(id) eq 0 then id = 'esa_sst'
+    if n_elements(id) eq 0 then id = 'esa_sst_integrate'
     routine = 'themis_read_moment_combo_'+id
     time_range = time_double(input_time_range)
     vinfo = call_function(routine, time_range, probe=probe, errmsg=errmsg, $

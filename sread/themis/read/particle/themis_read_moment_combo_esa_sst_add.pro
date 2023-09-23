@@ -1,13 +1,11 @@
 ;+
-; Calculate moments use esa and sst.
+; Calculate moments by adding esa and sst moments.
+; This is adopted from Jiang Liu's thm_load_esansst2
 ;
-; Internal function, does not check input closely.
-; This is a wrapper of Jiang Liu's thm_load_esansst2
-;
-; Vectors returned are in gsm.
+; Vectors returned are in themis_dsl.
 ;-
 
-function themis_read_moment_combo_esa_sst, input_time_range, probe=probe, $
+function themis_read_moment_combo_esa_sst_add, input_time_range, probe=probe, $
     errmsg=errmsg, species=species0, update=update, get_name=get_name
 
     errmsg = ''
@@ -303,5 +301,5 @@ end
 time_range = time_double(['2017-03-09/06:30','2017-03-09/09:00'])
 probe = 'e'
 
-vinfo = themis_read_moment_combo_esa_sst(time_range, probe=probe, species='i')
+vinfo = themis_read_moment_combo_esa_sst_add(time_range, probe=probe, species='i')
 end

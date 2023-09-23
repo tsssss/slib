@@ -57,10 +57,12 @@ function themis_read_mom_dist, input_time_range, probe=probe, $
         orig_esa=esa_dist, orig_sst=sst_dist, $
         sst_sun_bins=sst_mask, energies=energy_bins, unit=unit)
     dist_info = dictionary($
+        'requested_time_range', time_range, $
         'esa_sst', combo_dist, $
         'esa', esa_dist, $
         'sst', sst_dist )
-    store_data, var_out, 0, dist_info
+    store_data, var_out, 0,0
+    add_setting, var_out, dist_info
 
     return, var_out
 
