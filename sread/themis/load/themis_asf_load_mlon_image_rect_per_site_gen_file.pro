@@ -39,7 +39,7 @@ pro themis_asf_load_mlon_image_rect_per_site_gen_file, time, site=site, filename
     if errmsg ne '' then return
     
 ;    ; Calibrate brightness after mapping runs much faster.
-;    themis_calc_asf_mlon_image_per_site, asf_var, errmsg=errmsg
+;    themis_asf_calc_mlon_image_per_site, asf_var, errmsg=errmsg
 ;    mlon_image_var = 'thg_'+site+'_mlon_image'
 ;    themis_asi_cal_brightness, mlon_image_var, newname=mlon_image_var
 ;    if errmsg ne '' then return

@@ -3,7 +3,7 @@
 ;-
 
 pro themis_asf_load_mlon_image_per_site_gen_file, time, site=site, filename=file, errmsg=errmsg, $
-    calibration_method=calibration_method
+    calibration_method=calibration_method, _extra=ex
     
 
 ;---Init settings.
@@ -36,12 +36,17 @@ pro themis_asf_load_mlon_image_per_site_gen_file, time, site=site, filename=file
     
     ; Calibrate brightness before mapping works better.
     asf_cal_var = asf_var+'_cal'
-    themis_asi_cal_brightness, asf_var, newname=asf_cal_var, calibration_method=calibration_method
-    themis_calc_asf_mlon_image_per_site, asf_cal_var, errmsg=errmsg
+    if calibration_method eq 'moon_smooth' then begin
+        themis_asi_cal_brightness_smooth, asf_var, newname=asf_cal_var, _extra=ex
+    endif else begin
+        themis_asi_cal_brightness, asf_var, newname=asf_cal_var, calibration_method=calibration_method
+    endelse
+    ; Apply skymap to convert fish-eye perspective to a normal perspective.
+    themis_asf_calc_mlon_image_per_site, asf_cal_var, errmsg=errmsg
     if errmsg ne '' then return
     
 ;    ; Calibrate brightness after mapping runs much faster.
-;    themis_calc_asf_mlon_image_per_site, asf_var, errmsg=errmsg
+;    themis_asf_calc_mlon_image_per_site, asf_var, errmsg=errmsg
 ;    mlon_image_var = 'thg_'+site+'_mlon_image'
 ;    themis_asi_cal_brightness, mlon_image_var, newname=mlon_image_var
 ;    if errmsg ne '' then return

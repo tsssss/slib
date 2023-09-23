@@ -34,10 +34,15 @@ function themis_asi_read_pixel_info, time_range, site=site, id=datatype, thumbna
         map_index = binr+binc*nr
         image_size = [nr,nc]
         foreach key, ['glon','glat','mlon','mlat'] do begin
+            ; center position.
             raw = pixel_info['ast_'+key]
             pos = fltarr(image_size)+!values.f_nan
             pos[map_index] = total(raw,1)*0.25
             pixel_info['pixel_'+key] = pos
+            ; corner position.
+            pos = fltarr([4,product(image_size)])+!values.f_nan
+            pos[*,map_index] = raw
+            pixel_info['corner_'+key] = reform(pos,[4,image_size])
         endforeach
         foreach key, ['elev','azim'] do begin
             raw = pixel_info['ast_'+key]

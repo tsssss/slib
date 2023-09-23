@@ -25,7 +25,7 @@ function themis_load_sst, input_time_range, id=datatype, probe=probe, $
 
 ;---Check inputs.
     sync_threshold = 0
-    probes = themis_probes()
+    probes = themis_get_probes()
     index = where(probes eq probe, count)
     if count eq 0 then begin
         errmsg = 'Invalid probe: '+probe[0]+' ...'

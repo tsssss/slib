@@ -14,7 +14,7 @@ function themis_load_ssc, input_time_range, id=datatype, probe=probe, $
 
 ;---Check inputs.
     sync_threshold = 0
-    probes = themis_probes()
+    probes = themis_get_probes()
     index = where(probes eq probe, count)
     if count eq 0 then begin
         errmsg = 'Invalid probe: '+probe[0]+' ...'
@@ -35,6 +35,7 @@ function themis_load_ssc, input_time_range, id=datatype, probe=probe, $
     thx = 'th'+probe
     type_dispatch = hash()
 
+    ; SC coord.
     valid_range = ['2007-02-23']    ; the start date applies to tha-the.
     base_name = thx+'_or_ssc_%Y%m01_'+version+'.cdf'
     local_path = [local_root,thx,'ssc','%Y']
@@ -47,8 +48,41 @@ function themis_load_ssc, input_time_range, id=datatype, probe=probe, $
             'local_index_file', join_path([local_path,default_index_file(/sync)])), $
         'valid_range', time_double(valid_range), $
         'sync_threshold', sync_threshold, $
+        'cadence', 'month', $
+        'extension', fgetext(base_name) )
+
+    ; L1 state.
+    valid_range = ['2007-02-23']    ; the start date applies to tha-the.
+    base_name = thx+'_l1_state_%Y%m%d_'+version+'.cdf'
+    local_path = [local_root,thx,'l1','state','%Y']
+    remote_path = [remote_root,thx,'l1','state','%Y']
+    type_dispatch['l1%state'] = dictionary($
+        'pattern', dictionary($
+        'remote_file', join_path([remote_path,base_name]), $
+        'remote_index_file', join_path([remote_path,'']), $
+        'local_file', join_path([local_path,base_name]), $
+        'local_index_file', join_path([local_path,default_index_file(/sync)])), $
+        'valid_range', time_double(valid_range), $
+        'sync_threshold', sync_threshold, $
         'cadence', 'day', $
         'extension', fgetext(base_name) )
+
+    ; L1 spin.
+    valid_range = ['2007-02-23']    ; the start date applies to tha-the.
+    base_name = thx+'_l1_spin_%Y%m%d_'+version+'.cdf'
+    local_path = [local_root,thx,'l1','spin','%Y']
+    remote_path = [remote_root,thx,'l1','spin','%Y']
+    type_dispatch['l1%spin'] = dictionary($
+        'pattern', dictionary($
+        'remote_file', join_path([remote_path,base_name]), $
+        'remote_index_file', join_path([remote_path,'']), $
+        'local_file', join_path([local_path,base_name]), $
+        'local_index_file', join_path([local_path,default_index_file(/sync)])), $
+        'valid_range', time_double(valid_range), $
+        'sync_threshold', sync_threshold, $
+        'cadence', 'day', $
+        'extension', fgetext(base_name) )
+
 
     if keyword_set(print_datatype) then begin
         print, 'Suported data type: '
@@ -56,6 +90,8 @@ function themis_load_ssc, input_time_range, id=datatype, probe=probe, $
         foreach id, ids do print, '  * '+id
         return, ''
     endif
+    
+    
 
 ;---Dispatch patterns.
     if n_elements(datatype) eq 0 then datatype = 'l2'

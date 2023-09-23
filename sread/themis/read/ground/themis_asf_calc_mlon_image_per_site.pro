@@ -7,7 +7,7 @@
 ;   By default, we return the cropped image for the mlon/mlat covered by the current ASI.
 ;-
 
-pro themis_calc_asf_mlon_image_per_site, asf_var, errmsg=errmsg, no_crop=no_crop
+pro themis_asf_calc_mlon_image_per_site, asf_var, errmsg=errmsg, no_crop=no_crop
 
 ;---Map ASF image to MLon-MLat image.
     if n_elements(asf_var) eq 0 then begin
@@ -74,6 +74,6 @@ time_range = time_double(['2013-03-17/07:00','2013-03-17/08:00'])
 site = 'fykn'
 time_range = time_double(input_time_range)
 asf_var = themis_read_asf(time_range, site=site, errmsg=errmsg)
-themis_calc_asf_mlon_image_per_site, asf_var, crop=1
+themis_asf_calc_mlon_image_per_site, asf_var, crop=1
 themis_asi_cal_brightness, mlon_image_var, newname=mlon_image_var+'_norm'
 end

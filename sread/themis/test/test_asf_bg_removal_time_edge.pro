@@ -10,7 +10,7 @@ if check_if_update(asf_var, time_range) then themis_read_asf, time_range, site=s
 mlon_image_var = prefix+'mlon_image'
 mlon_image_raw_var = prefix+'mlon_image_raw'
 if check_if_update(mlon_image_raw_var, time_range) then begin
-    themis_calc_asf_mlon_image_per_site, asf_var
+    themis_asf_calc_mlon_image_per_site, asf_var
     rename_var, mlon_image_var, to=mlon_image_raw_var
 endif
 mlon_image_cal_var = prefix+'mlon_image_cal'

@@ -46,7 +46,7 @@ function themis_calc_mlt_image, input_time_range, sites=sites, $
         endif else begin
             themis_asi_cal_brightness_smooth, asf_var, newname=asf_cal_var, smooth_window=smooth_window
         endelse
-        themis_calc_asf_mlon_image_per_site, asf_cal_var, errmsg=errmsg
+        themis_asf_calc_mlon_image_per_site, asf_cal_var, errmsg=errmsg
         if errmsg ne '' then return, retval
 
         ; Map calibrate images to the wanted times.

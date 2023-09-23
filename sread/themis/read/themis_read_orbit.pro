@@ -12,6 +12,7 @@ function themis_read_orbit, input_time_range, probe=probe, errmsg=errmsg, coord=
     if keyword_set(get_name) then return, var
 
     time_range = time_double(input_time_range)
+    if ~check_if_update(var, time_range) then return, var
     files = themis_load_ssc(time_range, probe=probe, id='l2')
 
 ;---Read data.

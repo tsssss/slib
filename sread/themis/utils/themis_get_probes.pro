@@ -1,3 +1,3 @@
-function themis_probes
+function themis_get_probes
     return, letters('e')
 end

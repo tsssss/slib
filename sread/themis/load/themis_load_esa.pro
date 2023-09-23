@@ -1,12 +1,12 @@
 ;+
-; Read FGM data.
+; Read Themis ESA data.
 ;-
 
-function themis_load_fgm, input_time_range, id=datatype, probe=probe, $
+function themis_load_esa, input_time_range, id=datatype, probe=probe, $
     print_datatype=print_datatype, errmsg=errmsg, $
     local_files=files, file_times=file_times, version=version, $
     local_root=local_root, remote_root=remote_root, $
-    return_request=return_request
+    return=return_request
 
     compile_opt idl2
     on_error, 0
@@ -20,7 +20,7 @@ function themis_load_fgm, input_time_range, id=datatype, probe=probe, $
         return, retval
     endif
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'themis'])
-    if n_elements(remote_root) eq 0 then remote_root = 'http://themis.ssl.berkeley.edu/data/themis'
+    if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/themis'
     if n_elements(version) eq 0 then version = 'v[0-9]{2}'
 
     if size(input_time_range[0],type=1) eq 7 then begin
@@ -34,10 +34,10 @@ function themis_load_fgm, input_time_range, id=datatype, probe=probe, $
     type_dispatch = hash()
 
     ; Level 2.
-    valid_range = ['2007-02-23']    ; the start date applies to tha-the.
-    base_name = thx+'_l2_fgm_%Y%m%d_'+version+'.cdf'
-    local_path = [local_root,thx,'l2','fgm','%Y']
-    remote_path = [remote_root,thx,'l2','fgm','%Y']
+    valid_range = ['2007-03-07']    ; the start date applies to tha-the.
+    base_name = thx+'_l2_esa_%Y%m%d_'+version+'.cdf'
+    local_path = [local_root,thx,'l2','esa','%Y']
+    remote_path = [remote_root,thx,'l2','esa','%Y']
     type_dispatch['l2'] = dictionary($
         'pattern', dictionary($
             'remote_file', join_path([remote_path,base_name]), $
@@ -53,14 +53,15 @@ function themis_load_fgm, input_time_range, id=datatype, probe=probe, $
         print, 'Suported data type: '
         ids = type_dispatch.keys()
         foreach id, ids do print, '  * '+id
-        return, ''
+        return, ids
     endif
+
 
 ;---Dispatch patterns.
     if n_elements(datatype) eq 0 then datatype = 'l2'
     if not type_dispatch.haskey(datatype) then begin
         errmsg = handle_error('Do not support type '+datatype+' yet ...')
-        return, ''
+        return, retval
     endif
     request = type_dispatch[datatype]
     if keyword_set(return_request) then return, request
@@ -71,9 +72,4 @@ function themis_load_fgm, input_time_range, id=datatype, probe=probe, $
 
     if n_elements(files) eq 0 then return, '' else return, files
 
-end
-
-time_range = ['2008-01-19','2008-01-20']
-probe = 'a'
-files = themis_load_fgm(time_range, probe=probe)
 end

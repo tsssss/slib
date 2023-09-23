@@ -2,11 +2,17 @@
 ; Map the old image to new image using the mapping info.
 ;-
 
-function mlon_image_map_old2new, old_images, site=site, crop=crop
+function mlon_image_map_old2new, old_images, site=site, crop=crop, id=datatype
 
     input_time_range = [0d,0]
-    themis_asf_read_mlon_image_read_mapping_info, input_time_range, site=site
+    if n_elements(datatype) eq 0 then datatype = 'asf'
+    if datatype eq 'asf' then begin
+        themis_asf_read_mlon_image_read_mapping_info, input_time_range, site=site
+    endif else begin
+        themis_ast_read_mlon_image_read_mapping_info, input_time_range, site=site
+    endelse
     prefix = 'thg_'+site+'_mlon_image_'
+    if datatype eq 'ast' then prefix = 'thg_'+datatype+'_'+site+'_mlon_image_'  ; TODO: unify ast and asf.
 
     old_image_size = get_var_data(prefix+'old_image_size')
     old_1d_size = product(old_image_size)

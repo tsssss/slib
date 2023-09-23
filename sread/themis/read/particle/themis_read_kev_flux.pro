@@ -23,7 +23,7 @@ function themis_read_kev_flux, input_time_range, probe=probe, $
 end
 
 time_range = ['2008-01-19/06:00','2008-01-19/09:00']
-probes = themis_probes()
+probes = themis_get_probes()
 probes = ['e','d','a']
 plot_vars = list()
 foreach probe, probes do begin
