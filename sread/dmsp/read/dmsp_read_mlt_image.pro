@@ -23,7 +23,7 @@ function dmsp_read_mlt_image, input_time_range, probe=probe, id=datatype, $
         return, retval
     endif
 
-    all_datatypes = ['','1216','1356','lbhs','lbhl']
+    all_datatypes = ['','1216','1356','lbhs','lbhl','energy']
     datatype_index = where(all_datatypes eq datatype, count)
     if count eq 0 then return, retval
     
@@ -52,8 +52,14 @@ function dmsp_read_mlt_image, input_time_range, probe=probe, id=datatype, $
             doy = netcdf_read_var('DOY', filename=file)
             date = sfmdate(string(year,format='(I4)')+string(doy,format='(I03)'),'%Y%j')
             
-            data = netcdf_read_var('DISK_RADIANCEDATA_INTENSITY'+suffix, filename=file)
-            mlt_image = reform(data[*,*,datatype_index])
+            if datatype eq 'energy' then begin
+                the_var = 'ENERGY_FLUX'+suffix+'_MAP'
+                mlt_image = netcdf_read_var(the_var, filename=file)
+            endif else begin
+                the_var = 'DISK_RADIANCEDATA_INTENSITY'+suffix
+                data = netcdf_read_var(the_var, filename=file)
+                mlt_image = reform(data[*,*,datatype_index])
+            endelse
             
             mlat_range = (hem eq 'NORTH')? [50,90]: [-90,-50]
             index = where_pro(mlats, '[]', mlat_range, count=count)
@@ -92,7 +98,13 @@ function dmsp_read_mlt_image, input_time_range, probe=probe, id=datatype, $
     endif
     hem_time_ranges = hem_time_ranges.toarray()
     hem_tags = hem_tags.toarray()
-    mlt_images = mlt_images.toarray()*1e-3  ; convert R to kR.
+    if datatype eq 'energy' then begin
+        unit = 'mW/m!U2!N'
+        mlt_images = mlt_images.toarray()
+    endif else begin
+        unit = 'kR'
+        mlt_images = mlt_images.toarray()*1e-3  ; convert R to kR.
+    endelse
     common_times = total(hem_time_ranges,2)*0.5
     store_data, mlt_image_var, common_times, mlt_images
     
@@ -122,16 +134,25 @@ function dmsp_read_mlt_image, input_time_range, probe=probe, id=datatype, $
     pixel_mlt = mlt_bin_centers
     pixel_mlat = mlat_bin_centers
 
+    zrange = [0.05,5]
+    zlog = 1
+    ct = 49
+    if datatype eq 'energy' then begin
+        zrange = [-1,1]*20
+        zlog = 0
+        ct = 70
+    endif
+    
     add_setting, mlt_image_var, smart=1, dictionary($
         'requested_time_range', time_range, $
         'display_type', 'mlt_image', $
         'pixel_mlt', pixel_mlt, $
         'pixel_mlat', pixel_mlat, $
-        'zlog', 1, $
-        'zrange', [0.05,5], $
-        'unit', 'kR', $
+        'zlog', zlog, $
+        'zrange', zrange, $
+        'unit', unit, $
         'wavelength', strupcase(datatype), $
-        'color_table', 49, $
+        'color_table', ct, $
         'mlat_range', mlat_range, $
         'mlt_range', mlt_range, $
         'time_range', hem_time_ranges, $
@@ -140,6 +161,10 @@ function dmsp_read_mlt_image, input_time_range, probe=probe, id=datatype, $
     return, mlt_image_var
 end
 
+time_range = time_double(['2015-03-07/06:00','2015-03-07/06:46'])
+probe = 'f19'
+var = dmsp_read_mlt_image(time_range, probe=probe, id='energy')
+stop
 
 ;; has glitch in ut_s
 ;time_range = ['2015-03-12/07:50','2015-03-12/09:10']

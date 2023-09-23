@@ -25,6 +25,7 @@ function constant, name
         'half_ychsz': retval = 0.35
         '4space': retval = '    '
         'mu0': retval = 1.25663796212d-6    ; N*A^-2.
+        'kb': retval = 1.380649d-23         ; Boltzman constant
         else: ; do nothing.
     endcase
     return, retval

@@ -16,7 +16,7 @@ function dmsp_gen_polar_region_survey_plot_v02, input_time_range, probe=probe, $
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'themis','thg','survey_plot','dmsp'])
 
     ; Load data.
-    mlt_image_var = dmsp_read_mlt_image(time_range, probe=probe, errmsg=errmsg)
+    mlt_image_var = dmsp_read_mlt_image(time_range, probe=probe, errmsg=errmsg, id='energy')
     if errmsg ne '' then return, retval
     mlt_images = get_var_data(mlt_image_var, times=times, limits=lim)
     

@@ -4,38 +4,42 @@
 ; 
 ; input_time_range.
 ; probe=. 'a', 'b'.
-; resolution=. 'hires', '1sec', '4sec'.
+; id=. 'hires','1sec','4sec'.
+; resolution=. 'hires', '1sec', '4sec'. To be deprecated.
 ; coord=. 'gsm','ges','gei','sm'
 ;-
 
-function rbsp_read_bfield, input_time_range, probe=probe, $
-resolution=resolution, errmsg=errmsg, coord=coord, get_name=get_name, _extra=ex
+function rbsp_read_bfield, input_time_range, probe=probe, id=datatype, $
+resolution=datatype, errmsg=errmsg, coord=coord, get_name=get_name, _extra=ex
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
     retval = ''
 
+    ; Prepare var name.
     default_coord = 'gsm'
     if n_elements(coord) eq 0 then coord = default_coord
     vec_coord_var = prefix+'b_'+coord
     if keyword_set(get_name) then return, vec_coord_var
 
-    resolution = (keyword_set(resolution))? strlowcase(resolution): '4sec'
-    case resolution of
+    ; Load files.
+    time_range = time_double(input_time_range)
+    if ~check_if_update(vec_coord_var, time_range) then return, vec_coord_var
+    files = rbsp_load_emfisis(time_range, probe=probe, $
+        id='l3%magnetometer', $
+        resolution=datatype, coord=default_coord, errmsg=errmsg)
+    if errmsg ne '' then return, retval
+
+    datatype = (keyword_set(datatype))? strlowcase(datatype): '4sec'
+    case datatype of
         'hires': time_step = 1d/64
         '1sec': time_step = 1d
         '4sec': time_step = 4d
     endcase
 
-    ; read 'rbspx_b_gsm'
-    time_range = time_double(input_time_range)
-    files = rbsp_load_emfisis(time_range, probe=probe, $
-        id='l3%magnetometer', $
-        resolution=resolution, coord=default_coord, errmsg=errmsg)
-    if errmsg ne '' then return, retval
 
+;---Read data.
     var_list = list()
-
     vec_default_var = prefix+'b_'+default_coord
     var_list.add, dictionary($
         'in_vars', ['Mag'], $
@@ -45,6 +49,8 @@ resolution=resolution, errmsg=errmsg, coord=coord, get_name=get_name, _extra=ex
     read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
     if errmsg ne '' then return, retval
 
+
+;---Calibrate the data.
     ; Remove invalid values.
     get_data, vec_default_var, times, vec_default
     index = where(abs(vec_default) ge 65536, count)

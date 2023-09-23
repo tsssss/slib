@@ -29,7 +29,7 @@ errmsg=errmsg, get_name=get_name, species=species
         'out_vars', var, $
         'time_var_name', time_var, $
         'time_var_type', 'epoch')
-    read_vars, time_range, files=files, var_list=var_list, errmsg=errmsgm
+    read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
     if errmsg ne '' then return, retval
     
     get_data, var, times, data
