@@ -18,13 +18,23 @@ function cotran, vec0, time, msg, errmsg=errmsg, print_coord=print_coord, _extra
 
     ; Call existing functions.
     native_functions = [$
+    ;---mission specific
+        ; THEMIS.
+        'themis_smc2themis_spg', 'themis_spg2themis_smc', $
+        'themis_spg2themis_ssl', 'themis_ssl2themis_spg', $
+        'themis_ssl2themis_dsl', 'themis_dsl2themis_ssl', $
+        ; RBSP.
+        'rbsp_uvw2gse', 'rbsp_gse2uvw', $
+        'rbsp_mgse2gse', 'rbsp_gse2mgse', $
+        'rbsp_uvw2mgse', 'rbsp_mgse2uvw', $
+    ;---General
         'gei2geo','geo2gei', $
         'gei2gse','gse2gei', $
         'geo2aacgm', 'aacgm2geo', $
         'geo2mag','mag2geo', $
         'gse2gsm','gsm2gse', $
         'gsm2sm','sm2gsm', $
-        'mgse2gse','gse2mgse', $
+        'mgse2gse','gse2mgse', $    ; These are rbsp specific, needs to be updated.
         'uvw2gse','gse2uvw']
         
     supported_coord = strsplit(native_functions,'2',/extract)

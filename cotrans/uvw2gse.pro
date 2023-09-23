@@ -25,10 +25,10 @@ function uvw2gse, vec0, time, probe=probe, use_orig_quaternion=use_orig_quaterni
     endelse
     q_uvw2gse = get_var_data(q_var, times=ut_cotran)
     quvw2gse = qslerp(q_uvw2gse, ut_cotran, time)
-    muvw2gse = qtom(quvw2gse)
+    m_uvw2gse = qtom(quvw2gse)
 
     ; do rotation.
-    vec1 = rotate_vector(vec1, muvw2gse)
+    vec1 = rotate_vector(vec1, m_uvw2gse)
     return, vec1
 
 end

@@ -5,7 +5,7 @@
 ; times. An array of UT sec, in [n].
 ;-
 
-function sm2gsm, vec0, time
+function sm2gsm, vec0, time, _extra=ex
     compile_opt idl2 & on_error, 2
 
     vec1 = double(vec0)

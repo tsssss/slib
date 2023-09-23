@@ -10,7 +10,7 @@
 ; degrre. A boolean sets glat/glon in degree.
 ;-
 
-function hor2geo, vec0, glat0, glon0, degree=degree
+function hor2geo, vec0, glat0, glon0, degree=degree, _extra=ex
     compile_opt idl2 & on_error, 2
 
     vec1 = double(vec0)

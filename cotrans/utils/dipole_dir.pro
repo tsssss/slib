@@ -48,7 +48,7 @@ pro dipole_dir, time, v1, v2, v3, degree=degree, radian=radian
 
 
     ; Use IGRF coefficient.
-    url = 'http://wdc.kugi.kyoto-u.ac.jp/igrf/coef/igrf12coeffs.txt'
+    url = 'http://wdc.kugi.kyoto-u.ac.jp/igrf/coef/igrf13coeffs.txt'
     base_name = file_basename(url)
     file = join_path([srootdir(),base_name])
     if file_test(file) eq 0 then download_file, file, url

@@ -2,7 +2,7 @@
 ; Convert geodetic altitude latitude to geocentric distance and latitude.
 ; Adopted from SDT geoc2geod.
 ;-
-function geod2geoc, gd_alt, gd_lat, gc_lat
+function geod2geoc, gd_alt, gd_lat, gc_lat, _extra=ex
 
     biga = 6378.137d
     finverse = 298.257223563d

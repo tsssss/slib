@@ -1,11 +1,11 @@
 ;+
-; Convert vector from GEI to GSE.
+; Convert vector from GSE to GEI.
 ;
-; vec0. An array in [3] or [n,3]. In GEI, in any unit.
+; vec0. An array in [3] or [n,3]. In GSE, in any unit.
 ; times. An array of UT sec, in [n].
 ;-
 
-function gei2gse, vec0, time
+function gse2gei, vec0, time, _extra=ex
     compile_opt idl2 & on_error, 2
 
     vec1 = double(vec0)
@@ -14,7 +14,7 @@ function gei2gse, vec0, time
     vy0 = vec1[n1:n2-1]
     vz0 = vec1[n2:n3-1]
 
-    ; get t2.
+    ; get transpose(t2).
     sun_dir, time, e, l
     sine = sin(e)
     cose = cos(e)
@@ -22,10 +22,10 @@ function gei2gse, vec0, time
     cosl = cos(l)
 
     ; vectorized, so should be faster than matrix ##.
-    tmp =  cose*vy0 + sine*vz0
-    vx1 =  cosl*vx0 + sinl*tmp
-    vy1 = -sinl*vx0 + cosl*tmp
-    vz1 = -sine*vy0 + cose*vz0
+    tmp =  sinl*vx0 + cosl*vy0
+    vx1 =  cosl*vx0 - sinl*vy0
+    vy1 =  cose*tmp - sine*vz0
+    vz1 =  sine*tmp + cose*vz0
 
     vec1[0:n1-1] = temporary(vx1)
     vec1[n1:n2-1] = temporary(vy1)
@@ -33,7 +33,6 @@ function gei2gse, vec0, time
     return, vec1
 
 end
-
 
 ; <l,z> = [[ cosl, sinl, 0D], $
 ;          [-sinl, cosl, 0D], $
