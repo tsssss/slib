@@ -1,23 +1,27 @@
 ;+
-; Read E field.
+; Read E field in survey resolution (~1/8 S/sec).
+;
+; keep_e56=. By default is to set e56=0. Set to 1 to keep original e56.
+; edot0_e56=. Set to calculate e56 by edot0.
 ;-
 
 function themis_read_efield_survey, input_time_range, probe=probe, $
-    get_name=get_name, coord=coord, keep_e56=keep_e56, _extra=ex
+    get_name=get_name, coord=coord, keep_e56=keep_e56, edot0_e56=edot0_e56, _extra=ex
 
     prefix = 'th'+probe+'_'
     errmsg = ''
     retval = ''
 
-    coord = 'themis_dsl'
+    if n_elements(coord) eq 0 then coord = 'themis_dsl'
     vec_coord_var = prefix+'e_'+coord
+    if keyword_set(edot0_e56) then vec_coord_var = prefix+'edot0_'+coord
     if keyword_set(get_name) then return, vec_coord_var
+    if ~check_if_update(vec_coord_var, time_range) then return, vec_coord_var
 
     ; Get E in SPG then convert to DSL.
-    default_coord = 'themis_spg'
-    vec_default_var = prefix+'e_'+default_coord
+    orig_coord = 'themis_spg'
+    vec_orig_var = prefix+'e_'+orig_coord
     time_range = time_double(input_time_range)
-    if ~check_if_update(vec_coord_var, time_range) then return, vec_coord_var
     
     files = themis_load_efi(time_range, probe=probe, errmsg=errmsg, id='l1%eff')
     if errmsg ne '' then return, retval
@@ -46,25 +50,36 @@ function themis_read_efield_survey, input_time_range, probe=probe, $
         e_comp = e_spg[*,ii]*gain[ii]/boom_lengths[ii]
         e_spg[*,ii] = e_comp-efield_calc_dc_offset(e_comp, width)
     endfor
-    if ~keyword_set(keep_e56) then e_spg[*,2] = 0
-    store_data, vec_default_var, times, e_spg
-    add_setting, vec_default_var, smart=1, dictionary($
-        'display_type', 'vector', $
-        'unit', 'mV/m', $
-        'short_name', 'E', $
-        'coord', strupcase(default_coord), $
-        'coord_labels', constant('xyz') )
+    store_data, vec_orig_var, times, e_spg
+    add_setting, vec_orig_var, id='efield', dictionary('coord', orig_coord)
 
-    msg = default_coord+'2'+coord
-    e_coord = cotran_pro(e_spg, times, msg, probe=probe)
-    store_data, vec_coord_var, times, e_coord
-    add_setting, vec_coord_var, smart=1, dictionary($
-        'requested_time_range', time_range, $
-        'display_type', 'vector', $
-        'unit', 'mV/m', $
-        'short_name', 'E', $
-        'coord', strupcase(coord), $
-        'coord_labels', constant('xyz') )
+    ; convert to themis_dsl and treat e56.
+    default_coord = 'themis_dsl'
+    vec_default_var = prefix+'e_'+default_coord
+    if keyword_set(edot0_e56) then vec_default_var = prefix+'edot0_'+default_coord
+    msg = orig_coord+'2'+default_coord
+    vec_default = cotran_pro(e_spg, times, msg, probe=probe)
+    ; treat e56.
+    if ~keyword_set(keep_e56) then vec_default[*,2] = 0
+    if keyword_set(edot0_e56) then begin
+        b_var = themis_read_bfield(time_range, probe=probe, coord=default_coord, id='fgs', errmsg=errmsg)
+        if errmsg ne '' then return, retval
+        interp_time, b_var, times
+        b_vec = get_var_data(b_var)
+        vec_default[*,2] = total(vec_default[*,0:1]*b_vec[*,0:1],2)/b_vec[*,2]
+    endif
+    store_data, vec_default_var, times, vec_default
+    add_setting, vec_default_var, id='efield', dictionary('coord', default_coord)
+
+    ; convert to wanted coord.
+    if coord ne default_coord then begin
+        msg = default_coord+'2'+coord
+        e_coord = cotran_pro(vec_default, times, msg, probe=probe)
+        store_data, vec_coord_var, times, e_coord
+        add_setting, vec_coord_var, id='efield', dictionary('coord', coord)
+    endif
+
+    return, vec_coord_var
     
 ;    e_gse = cotran_pro(e_dsl, times, 'themis_dsl2gse', probe=probe)
 ;    store_data, prefix+'e_gse', times, e_gse
@@ -91,7 +106,6 @@ function themis_read_efield_survey, input_time_range, probe=probe, $
 ;    tplot, prefix+['eff','e_dsl','e_gse']
     
 
-    return, vec_coord_var
 
 end
 
@@ -100,6 +114,8 @@ probe = 'd'
 
 prefix = 'th'+probe+'_'
 evar = themis_read_efield_survey(time_range, probe=probe)
+edot0_var = themis_read_efield_survey(time_range, probe=probe, edot0_e56=1, coord='gsm')
+stop
 bvar = themis_read_bfield(time_range, probe=probe, id='fgl', coord='gsm')
 
 e_dsl = get_var_data(evar, times=times, limits=lim)
