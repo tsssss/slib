@@ -1,10 +1,12 @@
 ;+
 ; Read Themis ESA+SST moments.
+; 
+; id=. 'esa_sst_integrate', 'esa_sst_add'
 ;-
 
 function themis_read_moment_combo, input_time_range, probe=probe, $
     errmsg=errmsg, id=id, update=update, $
-    species=species0, coord=coord, get_name=get_name
+    species=species0, coord=coord, get_name=get_name, suffix=suffix
 
     errmsg = ''
     retval = dictionary()
@@ -16,6 +18,7 @@ function themis_read_moment_combo, input_time_range, probe=probe, $
         return, retval
     endif
     prefix = 'th'+probe+'_'
+    if n_elements(suffix) eq 0 then suffix = ''
 
 
 ;---Read data and convert coord.
@@ -23,7 +26,10 @@ function themis_read_moment_combo, input_time_range, probe=probe, $
     routine = 'themis_read_moment_combo_'+id
     time_range = time_double(input_time_range)
     vinfo = call_function(routine, time_range, probe=probe, errmsg=errmsg, $
-        species=species0, update=update, get_name=get_name)
+        species=species0, update=update, get_name=get_name, suffix=suffix)
+
+    ; log vars.
+    
 
     ; vectors.
     default_coord = 'gsm'

@@ -52,6 +52,9 @@ function themis_read_mom_dist, input_time_range, probe=probe, $
 ;---Load data.
     esa_type = 'pe'+species+'r'
     sst_type = 'ps'+species+'f'
+    sst_mask_ion = [0,8,16,24,32,40,47,48,55,56]
+    sst_mask_ele = [0,8,24,32,40,47,48,55,56]
+    sst_mask = (species eq 'e')? sst_mask_ele: sst_mask_ion
     combo_dist = thm_part_combine(probe=probe, trange=time_range, $
         esa_datatype=esa_type, sst_datatype=sst_type, $
         orig_esa=esa_dist, orig_sst=sst_dist, $

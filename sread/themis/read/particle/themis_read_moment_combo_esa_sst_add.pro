@@ -6,7 +6,7 @@
 ;-
 
 function themis_read_moment_combo_esa_sst_add, input_time_range, probe=probe, $
-    errmsg=errmsg, species=species0, update=update, get_name=get_name
+    errmsg=errmsg, species=species0, update=update, get_name=get_name, suffix=suffix
 
     errmsg = ''
     retval = dictionary()
@@ -19,18 +19,22 @@ function themis_read_moment_combo_esa_sst_add, input_time_range, probe=probe, $
         return, retval
     endif
     prefix = 'th'+probe+'_'
+    if n_elements(suffix) eq 0 then suffix = '_esa_sst_add'
 
     ; species.
     if n_elements(species0) eq 0 then species0 = 'i'
     species = species0
+    ; species is used for original spedas routines. in 'e' and 'i'.
     if species eq 'p' then species = 'i'
     if ~themis_esa_species_is_valid(species) then begin
         errmsg = 'Invalid species: '+species+' ...'
         return, retval
     endif
+    ; species1 is used for uniformed species info. in 'e' and 'p'.
     species1 = species
     if species1 eq 'i' then species1 = 'p'
     
+
     ; time_range and coord.
     time_range = time_double(input_time_range)
     coord = 'themis_dsl'
@@ -60,7 +64,8 @@ function themis_read_moment_combo_esa_sst_add, input_time_range, probe=probe, $
             ;'t3', prefix2+'t3', $           ; temperature in DSL.
             ;'magt3, prefix2+'magt3', $      ; temperature in FAC.
             'ptens', prefix2+'ptens' )      ; pressure tensor, nPa, for completeness.
-            
+        foreach key, vinfo.keys() do vinfo[key] = vinfo[key]+suffix
+        
         the_vinfo[the_species] = vinfo
 
         foreach key, vinfo.keys() do begin
@@ -153,6 +158,7 @@ function themis_read_moment_combo_esa_sst_add, input_time_range, probe=probe, $
         var = vinfo['n']
         tmp = rename_var(prefix1+'density', output=var)
         add_setting, var, smart=1, dictionary($
+            'ylog', 1, $
             'display_type', 'scalar', $
             'short_name', 'N', $
             'unit', 'cm!U-3!N' )
@@ -233,6 +239,7 @@ function themis_read_moment_combo_esa_sst_add, input_time_range, probe=probe, $
         var = vinfo['tavg']
         store_data, var, times, tavg
         add_setting, var, smart=1, dictionary($
+            'ylog', 1, $
             'display_type', 'scalar', $
             'short_name', 'T', $
             'unit', 'eV' )
@@ -242,6 +249,7 @@ function themis_read_moment_combo_esa_sst_add, input_time_range, probe=probe, $
         var = vinfo['pavg']
         store_data, var, times, pavg
         add_setting, var, smart=1, dictionary($
+            'ylog', 1, $
             'display_type', 'scalar', $
             'short_name', 'P', $
             'unit', 'nPa' )
@@ -251,6 +259,7 @@ function themis_read_moment_combo_esa_sst_add, input_time_range, probe=probe, $
         var = vinfo['vth']
         store_data, var, times, vth
         add_setting, var, smart=1, dictionary($
+            'ylog', 1, $
             'display_type', 'scalar', $
             'short_name', 'V!Dth!N', $
             'unit', 'km/s' )

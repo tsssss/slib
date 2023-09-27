@@ -5,12 +5,12 @@
 ; Vectors returned are in themis_dsl.
 ;-
 
-function themis_read_moment_combo_esa_sst_integrate, input_time_range, probe=probe, $
-    id=id, species=species0, $
-    errmsg=errmsg, get_name=get_name, update=update
+function themis_read_moment_combo_esa_sst_integrate, input_time_range, probe=probe, id=id, $
+    errmsg=errmsg, species=species0, update=update, get_name=get_name, suffix=suffix
 
     errmsg = ''
-    retval = ''
+    retval = dictionary()
+
 
 ;---Check input.
     ; probe.
@@ -19,6 +19,7 @@ function themis_read_moment_combo_esa_sst_integrate, input_time_range, probe=pro
         return, retval
     endif
     prefix = 'th'+probe+'_'
+    if n_elements(suffix) eq 0 then suffix = '_esa_sst_integrate'
 
     ; species.
     if n_elements(species0) eq 0 then species0 = 'i'
@@ -60,6 +61,7 @@ function themis_read_moment_combo_esa_sst_integrate, input_time_range, probe=pro
         ;'t3', prefix1+'t3', $           ; temperature in DSL.
         ;'magt3, prefix1+'magt3', $      ; temperature in FAC.
         'ptens', prefix1+'ptens' )      ; pressure tensor, nPa, for completeness.
+        foreach key, vinfo.keys() do vinfo[key] = vinfo[key]+suffix
         
     foreach key, vinfo.keys() do begin
         var = vinfo[key]
@@ -103,6 +105,7 @@ function themis_read_moment_combo_esa_sst_integrate, input_time_range, probe=pro
     var = vinfo['n']
     tmp = rename_var(prefix2+'density', output=var)
     add_setting, var, smart=1, dictionary($
+        'ylog', 1, $
         'display_type', 'scalar', $
         'short_name', 'N', $
         'unit', 'cm!U-3!N' )
@@ -183,6 +186,7 @@ function themis_read_moment_combo_esa_sst_integrate, input_time_range, probe=pro
     var = vinfo['tavg']
     store_data, var, times, tavg
     add_setting, var, smart=1, dictionary($
+        'ylog', 1, $
         'display_type', 'scalar', $
         'short_name', 'T', $
         'unit', 'eV' )
@@ -192,6 +196,7 @@ function themis_read_moment_combo_esa_sst_integrate, input_time_range, probe=pro
     var = vinfo['pavg']
     store_data, var, times, pavg
     add_setting, var, smart=1, dictionary($
+        'ylog', 1, $
         'display_type', 'scalar', $
         'short_name', 'P', $
         'unit', 'nPa' )
@@ -201,6 +206,7 @@ function themis_read_moment_combo_esa_sst_integrate, input_time_range, probe=pro
     var = vinfo['vth']
     store_data, var, times, vth
     add_setting, var, smart=1, dictionary($
+        'ylog', 1, $
         'display_type', 'scalar', $
         'short_name', 'V!Dth!N', $
         'unit', 'km/s' )
@@ -251,10 +257,7 @@ end
 time_range = time_double(['2017-03-09/06:30','2017-03-09/09:00'])
 probe = 'e'
 
-species = 'i'
-vinfo = themis_read_moment_combo_esa_sst_integrate(time_range, probe=probe, species=species)
-foreach key, vinfo.keys() do begin
-    vinfo[key] = rename_var(vinfo[key],output=vinfo[key]+'_int')
-endforeach
-vinfo_add = themis_read_moment_combo_esa_sst(time_range, probe=probe, species=species, update=1) 
+species = 'e'
+vinfo_int = themis_read_moment_combo_esa_sst_integrate(time_range, probe=probe, species=species, suffix='_int')
+vinfo_add = themis_read_moment_combo_esa_sst_add(time_range, probe=probe, species=species, suffix='_add') 
 end
