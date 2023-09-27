@@ -4,7 +4,7 @@
 ; id=. 'fgs','fgh','fgl'. Default is 'fgl'.
 ;-
 function themis_read_bfield, input_time_range, id=datatype, probe=probe, $
-    errmsg=errmsg, coord=coord, get_name=get_name, _extra=ex
+    errmsg=errmsg, coord=coord, get_name=get_name, update=update, _extra=ex
 
 
     errmsg = ''
@@ -21,6 +21,8 @@ function themis_read_bfield, input_time_range, id=datatype, probe=probe, $
     if n_elements(coord) eq 0 then coord = default_coord
     vec_coord_var = prefix+'b_'+coord
     if keyword_set(get_name) then return, vec_coord_var
+    if keyword_set(update) then del_data, vec_coord_var
+    
 
     ; Load files.
     time_range = time_double(input_time_range)
@@ -28,7 +30,7 @@ function themis_read_bfield, input_time_range, id=datatype, probe=probe, $
     files = themis_load_fgm(time_range, probe=probe, id='l2', errmsg=errmsg)
     if errmsg ne '' then return, retval
 
-    datatype = (keyword_set(datatype))? strlowcase(datatype): 'fge'
+    datatype = (keyword_set(datatype))? strlowcase(datatype): 'fgl'
     case datatype of
         'fgs': time_step = 3d       ; Spin resolution.
         'fgl': time_step = 1d/4     ; Low resolution.
@@ -49,7 +51,9 @@ function themis_read_bfield, input_time_range, id=datatype, probe=probe, $
         'time_var_type', 'unix' )
     read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
     if errmsg ne '' then return, ''
-
+    add_setting, out_vars[0], id='bfield', dictionary($
+        'requested_time_range', time_range, $
+        'coord', default_coord )
 
 
 ;---Calibrate the data.
@@ -60,13 +64,9 @@ function themis_read_bfield, input_time_range, id=datatype, probe=probe, $
         store_data, vec_coord_var, times, vec_coord, limits=lim
     endif
 
-    add_setting, vec_coord_var, smart=1, dictionary($
+    add_setting, vec_coord_var, id='bfield', dictionary($
         'requested_time_range', time_range, $
-        'display_type', 'vector', $
-        'unit', 'nT', $
-        'short_name', 'B', $
-        'coord', strupcase(coord), $
-        'coord_labels', constant('xyz') )
+        'coord', coord )
 
     ; To uniform time.
     uniform_time, vec_coord_var, time_step
