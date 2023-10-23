@@ -8,7 +8,7 @@
 ;-
 
 function rbsp_read_efield, input_time_range, probe=probe, $
-resolution=resolution, errmsg=errmsg, coord=coord, get_name=get_name, _extra=ex
+resolution=resolution, errmsg=errmsg, coord=coord, get_name=get_name, suffix=suffix, _extra=ex
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
@@ -24,13 +24,14 @@ resolution=resolution, errmsg=errmsg, coord=coord, get_name=get_name, _extra=ex
         return, retval
     endif
 
-    vec_coord_var = prefix+'e_'+coord
+    if n_elements(suffix) eq 0 then suffix = ''
+    vec_coord_var = prefix+'e_'+coord+suffix
     if keyword_set(get_name) then begin
         return, vec_coord_var
     endif
 
     routine = 'rbsp_read_efield_'+resolution
-    vec_default_var = call_function(routine, input_time_range, probe=probe, errmsg=errmsg, _extra=ex)
+    vec_default_var = call_function(routine, input_time_range, probe=probe, errmsg=errmsg, suffix=suffix, _extra=ex)
 
     ; Convert to the wanted coord.
     if coord ne default_coord then begin

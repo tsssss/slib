@@ -4,15 +4,24 @@
 ; Do not use L2 E despun b/c cotran does a slightly more accurate job to convert UVW to mGSE.
 ;-
 
-function rbsp_read_efield_survey, input_time_range, probe=probe, get_name=get_name, _extra=ex
+function rbsp_read_efield_survey, input_time_range, probe=probe, $
+    get_name=get_name, update=update, suffix=suffix, $
+    keep_e56=keep_e56, edot0_e56=edot0_e56, coord=coord, _extra=ex
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
     retval = ''
 
-    coord = 'mgse'
-    vec_coord_var = prefix+'e_'+coord
+    default_coord = 'mgse'
+    if n_elements(suffix) eq 0 then suffix = '_survey'
+    vec_default_var = prefix+'e_'+default_coord+suffix
+    if n_elements(coord) eq 0 then coord = default_coord
+    vec_coord_var = prefix+'e_'+coord+suffix
     if keyword_set(get_name) then return, vec_coord_var
+    if keyword_set(update) then del_data, vec_coord_var
+    time_range = time_double(input_time_range)
+    if ~check_if_update(vec_coord_var, time_range) then return, vec_coord_var
+    
 
 ;    time_range = time_double(input_time_range)
 ;    files = rbsp_load_efw(time_range, probe=probe, $
@@ -21,50 +30,59 @@ function rbsp_read_efield_survey, input_time_range, probe=probe, get_name=get_na
 ;
 ;    var_list = list()
 ;
-;    default_coord = 'uvw'
-;    vec_default_var = prefix+'e_'+default_coord
+;    orig_coord = 'uvw'
+;    vec_orig_var = prefix+'e_'+orig_coord
 ;    var_list.add, dictionary($
 ;        'in_vars', ['e_hires_uvw'], $
-;        'out_vars', [vec_default_var], $
+;        'out_vars', [vec_orig_var], $
 ;        'time_var_name', 'epoch', $
 ;        'time_var_type', 'epoch16')
 ;    
 ;    read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
 ;    if errmsg ne '' then return, retval
 
-    default_coord = 'uvw'
-    vec_default_var = prefix+'e_uvw'
-    time_range = time_double(input_time_range)
+    orig_coord = 'uvw'
+    vec_orig_var = prefix+'e_'+orig_coord
     rbsp_efw_phasef_read_e_uvw, time_range, probe=probe
 
-    get_data, vec_default_var, times, vec_default
-    index = where(abs(vec_default) ge 1e30, count)
+    get_data, vec_orig_var, times, vec_uvw
+    index = where(abs(vec_uvw) ge 1e30, count)
     if count ne 0 then begin
-        vec_default[index] = !values.f_nan
-        store_data, vec_default_var, times, vec_default
+        vec_uvw[index] = !values.f_nan
+        store_data, vec_orig_var, times, vec_uvw
     endif
-    add_setting, vec_default_var, /smart, {$
+    add_setting, vec_orig_var, /smart, {$
         display_type: 'vector', $
         unit: 'mV/m', $
         short_name: 'E', $
-        coord: strupcase(default_coord), $
+        coord: orig_coord, $
         coord_labels: ['u','v','w'], $
         colors: constant('rgb') }
         
-    msg = default_coord+'2'+coord
-    vec_coord = cotran(vec_default, times, msg, probe=probe, _extra=ex)
+    msg = orig_coord+'2'+default_coord
+    vec_default = cotran(vec_uvw, times, msg, probe=probe, _extra=ex)
+    ; treat e56.
+    e_spinaxis = vec_default[*,0]
+    if ~keyword_set(keep_e56) then vec_default[*,0] = 0
+    if keyword_set(edot0_e56) then begin
+        b_var = rbsp_read_bfield(time_range, probe=probe, coord=coord, errmsg=errmsg)
+        if errmsg ne '' then return, retval
+        interp_time, b_var, times
+        b_vec = get_var_data(b_var)
+        vec_default[*,0] = total(vec_default[*,1:2]*b_vec[*,1:2],2)/b_vec[*,0]
+    endif
+    store_data, vec_default_var, times, vec_default
+    add_setting, vec_coord_var, smart=1, id='efield', dictionary($
+        'coord', default_coord, $
+        'e_spin_axis', e_spinaxis )
 
-    e_spinaxis = vec_coord[*,0]
-    vec_coord[*,0] = 0
-    store_data, vec_coord_var, times, vec_coord, e_spinaxis
-
-    add_setting, vec_coord_var, /smart, {$
-        display_type: 'vector', $
-        unit: 'mV/m', $
-        short_name: 'E', $
-        coord: strupcase(coord), $
-        coord_labels: ['x','y','z'], $
-        colors: constant('rgb') }
+    ; convert to wanted coord.
+    if coord ne default_coord then begin
+        msg = default_coord+'2'+coord
+        e_coord = cotran(vec_default, times, msg, probe=probe)
+        store_data, vec_coord_var, times, e_coord
+        add_setting, vec_coord_var, id='efield', dictionary('coord', coord)
+    endif
 
     return, vec_coord_var
 

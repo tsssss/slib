@@ -2,14 +2,16 @@
 ; Read spinfit E field.
 ;-
 
-function rbsp_read_efield_spinfit, input_time_range, probe=probe, get_name=get_name, coord=coord, _extra=ex
+function rbsp_read_efield_spinfit, input_time_range, probe=probe, $
+    get_name=get_name, coord=coord, suffix=suffix, _extra=ex
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
     retval = ''
 
     if n_elements(coord) eq 0 then coord = 'mgse'
-    vec_coord_var = prefix+'e_'+coord
+    if n_elements(suffix) eq 0 then suffix = '_spinfit'
+    vec_coord_var = prefix+'e_'+coord+suffix
     if keyword_set(get_name) then return, vec_coord_var
     
     time_range = time_double(input_time_range)
@@ -38,13 +40,7 @@ function rbsp_read_efield_spinfit, input_time_range, probe=probe, get_name=get_n
         store_data, vec_coord_var, times, vec_coord, limits=lim
     endif
 
-    add_setting, vec_coord_var, smart=1, {$
-        display_type: 'vector', $
-        unit: 'mV/m', $
-        short_name: 'E', $
-        coord: strupcase(coord), $
-        coord_labels: ['x','y','z'], $
-        colors: constant('rgb') }
+    add_setting, vec_coord_var, smart=1, dictionary('coord', coord)
 
     return, vec_coord_var
 
