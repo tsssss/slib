@@ -11,9 +11,9 @@ function omni_read_symh, input_time_range, errmsg=errmsg, get_name=get_name, coo
     prefix = 'omni_'
     var = prefix+'dst'
     if keyword_set(get_name) then return, var
-    if not check_if_update(var, time_range) then return, var
-
     time_range = time_double(input_time_range)
+    if ~check_if_update(var, time_range) then return, var
+
     if n_elements(resolution) eq 0 then resolution = '1min'
     files = omni_load(time_range, errmsg=errmsg, id='cdaweb%hro%'+resolution)
     if errmsg ne '' then return, retval
@@ -37,6 +37,7 @@ function omni_read_symh, input_time_range, errmsg=errmsg, get_name=get_name, coo
     endif
 
     add_setting, var, smart=1, dictionary($
+        'requested_time_range', time_range, $
         'display_type', 'scalar', $
         'unit', 'nT', $
         'short_name', 'SymH' )
