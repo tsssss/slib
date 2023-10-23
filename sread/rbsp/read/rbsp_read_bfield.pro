@@ -9,8 +9,8 @@
 ; coord=. 'gsm','ges','gei','sm'
 ;-
 
-function rbsp_read_bfield, input_time_range, probe=probe, id=datatype, $
-resolution=datatype, errmsg=errmsg, coord=coord, get_name=get_name, _extra=ex
+function rbsp_read_bfield, input_time_range, probe=probe, id=id, $
+    resolution=datatype0, errmsg=errmsg, coord=coord, get_name=get_name, _extra=ex
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
@@ -21,6 +21,14 @@ resolution=datatype, errmsg=errmsg, coord=coord, get_name=get_name, _extra=ex
     if n_elements(coord) eq 0 then coord = default_coord
     vec_coord_var = prefix+'b_'+coord
     if keyword_set(get_name) then return, vec_coord_var
+    
+    if n_elements(datatype0) eq 0 then datatype0 = '4sec'
+    datatype = strlowcase(datatype0)
+    case datatype of
+        'hires': time_step = 1d/64
+        '1sec': time_step = 1d
+        '4sec': time_step = 4d
+    endcase
 
     ; Load files.
     time_range = time_double(input_time_range)
@@ -29,13 +37,6 @@ resolution=datatype, errmsg=errmsg, coord=coord, get_name=get_name, _extra=ex
         id='l3%magnetometer', $
         resolution=datatype, coord=default_coord, errmsg=errmsg)
     if errmsg ne '' then return, retval
-
-    datatype = (keyword_set(datatype))? strlowcase(datatype): '4sec'
-    case datatype of
-        'hires': time_step = 1d/64
-        '1sec': time_step = 1d
-        '4sec': time_step = 4d
-    endcase
 
 
 ;---Read data.

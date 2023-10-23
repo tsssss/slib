@@ -8,7 +8,7 @@
 ;-
 
 function rbsp_read_en_spec_combo, input_time_range, probe=probe, $
-    errmsg=errmsg, species=species0, get_name=get_name
+    errmsg=errmsg, species=species, get_name=get_name
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''

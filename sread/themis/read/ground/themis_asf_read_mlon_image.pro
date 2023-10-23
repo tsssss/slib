@@ -4,14 +4,17 @@
 ;-
 
 function themis_asf_read_mlon_image, input_time_range, sites=sites, $
-    min_elev=min_elev, merge_method=merge_method, errmsg=errmsg, get_name=get_name, $
-    calibration_method=calibration_method
+    errmsg=errmsg, get_name=get_name, update=update, $
+    calibration_method=calibration_method, min_elev=min_elev, merge_method=merge_method
 
     errmsg = ''
+    retval = ''
     mlon_image_var = 'thg_asf_mlon_image'
     if keyword_set(get_name) then return, mlon_image_var
-    
+    if keyword_set(update) then del_data, mlon_image_var
     time_range = time_double(input_time_range)
+    if ~check_if_update(mlon_image_var, time_range) then return, mlon_image_var
+    
     if n_elements(sites) eq 0 then sites = themis_asi_read_available_sites(time_range)
     if n_elements(min_elev) eq 0 then min_elev = 5d
     if n_elements(merge_method) eq 0 then merge_method = 'merge_elev'

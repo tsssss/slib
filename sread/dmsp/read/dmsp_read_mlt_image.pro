@@ -3,7 +3,7 @@
 ;-
 
 function dmsp_read_mlt_image, input_time_range, probe=probe, id=datatype, $
-    errmsg=errmsg, get_name=get_name
+    errmsg=errmsg, get_name=get_name, update=update
 
     prefix = 'dmsp'+probe+'_'
     errmsg = ''
@@ -16,6 +16,7 @@ function dmsp_read_mlt_image, input_time_range, probe=probe, id=datatype, $
 
     pad_time = 1*3600d
     time_range = time_double(input_time_range)+[-1,1]*pad_time
+    if keyword_set(update) then del_data, mlt_image_var
     if ~check_if_update(mlt_image_var, time_range) then return, mlt_image_var
     files = dmsp_load_ssusi(time_range, probe=probe, errmsg=errmsg)
     if errmsg ne '' then begin
@@ -108,7 +109,7 @@ function dmsp_read_mlt_image, input_time_range, probe=probe, id=datatype, $
     common_times = total(hem_time_ranges,2)*0.5
     store_data, mlt_image_var, common_times, mlt_images
     
-    image_size = size(mlt_images[0,*,*],dimensions=1)
+    image_size = size(reform(mlt_images[0,*,*]),dimensions=1)
     imgsz = image_size[0]
     mlt_range = [-1,1]*12d
     mlat_range = [50d,90]

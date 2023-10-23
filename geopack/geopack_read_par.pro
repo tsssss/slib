@@ -1,5 +1,8 @@
 ;+
 ; Read par for given model.
+; 
+; model=.
+; get_name=.
 ;-
 
 function geopack_read_par, input_time_range, model=model, get_name=get_name, $
@@ -11,6 +14,7 @@ function geopack_read_par, input_time_range, model=model, get_name=get_name, $
     if keyword_set(get_name) then return, par_var
 
     tr = time_double(input_time_range)
+    if ~check_if_update(par_var, tr) then return, par_var
     if model eq 't89' then begin
         if n_elements(t89_par) ne 0 then begin
             store_data, par_var, tr, [0,0]+t89_par
@@ -61,6 +65,7 @@ function geopack_read_par, input_time_range, model=model, get_name=get_name, $
     endfor
     store_data, par_var, times, pars
     add_setting, par_var, smart=1, dictionary($
+        'requested_time_range', tr, $
         'display_type', 'stack', $
         'labels', string(findgen(ndim),format='(I0)'), $
         'ytitle', strupcase(model)+' Par' )

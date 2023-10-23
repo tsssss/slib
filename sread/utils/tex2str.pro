@@ -20,6 +20,7 @@ function tex2str, input
         'delta': output = '!9'+string(100b)+'!X'
         'Delta': output = '!9'+string(68b)+'!X'
         'phi': output = '!9'+string(102b)+'!X'
+        'Phi': output = '!9'+string(70b)+'!X'
         'varphi': output = '!9'+string(106b)+'!X'
         'mu': output = '!9'+string(109b)+'!X'
         'pi': output = '!9'+string(112b)+'!X'
@@ -41,6 +42,7 @@ function tex2str, input
         'sim': output = '!9'+string(126b)+'!X'
         'int': output = '!9'+string(242b)+'!X'
         'pm': output = '!9'+string(177b)+'!X'
+        'circ': output = '!9'+string(176b)+'!X'
         else: message, 'Does not support '+input+' yet ...'
     endcase
 

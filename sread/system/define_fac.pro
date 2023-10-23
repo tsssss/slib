@@ -13,8 +13,8 @@ pro define_fac, b_var, r_var, time_var=time_var
     if tnames(b_var) eq '' then message, 'Invalid b_var ...'
     if tnames(r_var) eq '' then message, 'Invalid r_var ...'
 
-    coord = get_setting(b_var, 'coord')
-    if coord ne get_setting(r_var, 'coord') then $
+    coord = strlowcase(get_setting(b_var, 'coord'))
+    if coord ne strlowcase(get_setting(r_var, 'coord')) then $
         message, 'B and R are in different coord ...'
 
 
@@ -42,6 +42,7 @@ pro define_fac, b_var, r_var, time_var=time_var
     store_data, q_var, times, q_xxx2fac
 
     coord_labels = get_setting(b_var, 'coord_labels')
+    if n_elements(coord_labels) ne 3 then coord_labels = constant('xyz')
     fac_labels = ['b','w','o']
     add_setting, q_var, {$
         in_coord: coord, $

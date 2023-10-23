@@ -3,24 +3,26 @@
 ;-
 
 function themis_read_efield_spinfit, input_time_range, probe=probe, $
-    get_name=get_name, coord=coord, keep_e56=keep_e56, edot0_e56=edot0_e56, _extra=ex
+    get_name=get_name, coord=coord, keep_e56=keep_e56, edot0_e56=edot0_e56, suffix=suffix, _extra=ex
 
 
     prefix = 'th'+probe+'_'
     errmsg = ''
     retval = ''
 
-    if n_elements(coord) eq 0 then coord = 'themis_dsl'
+    default_coord = 'themis_dsl'
+    if n_elements(coord) eq 0 then coord = default_coord
     vec_coord_var = prefix+'e_'+coord
-    if keyword_set(edot0_e56) then vec_coord_var = prefix+'edot0_'+coord
+    if n_elements(suffix) eq 0 then suffix = '_spinfit'
+    if keyword_set(edot0_e56) then vec_coord_var = prefix+'edot0_'+coord+suffix
     if keyword_set(get_name) then return, vec_coord_var
+    if keyword_set(update) then del_data, vec_coord_var
+    time_range = time_double(input_time_range)
     if ~check_if_update(vec_coord_var, time_range) then return, vec_coord_var
 
     ; Get E in DSL.
-    default_coord = 'themis_dsl'
-    vec_default_var = prefix+'e_'+default_coord
+    vec_default_var = prefix+'e_'+default_coord+suffix
     if keyword_set(edot0_e56) then vec_default_var = prefix+'edot0_'+default_coord
-    time_range = time_double(input_time_range)
 
     files = themis_load_efi(time_range, probe=probe, errmsg=errmsg)
     if errmsg ne '' then return, retval
@@ -39,6 +41,7 @@ function themis_read_efield_spinfit, input_time_range, probe=probe, $
     
     vec_default = get_var_data(vec_default_var, times=times)
     ; treat e56.
+    e_spinaxis = vec_default[*,2]
     if ~keyword_set(keep_e56) then vec_default[*,2] = 0
     if keyword_set(edot0_e56) then begin
         b_var = themis_read_bfield(time_range, probe=probe, coord=default_coord, id='fgs', errmsg=errmsg)
@@ -48,7 +51,9 @@ function themis_read_efield_spinfit, input_time_range, probe=probe, $
         vec_default[*,2] = total(vec_default[*,0:1]*b_vec[*,0:1],2)/b_vec[*,2]
     endif
     store_data, vec_default_var, times, vec_default
-    add_setting, vec_default_var, id='efield', dictionary('coord', default_coord)
+    add_setting, vec_default_var, id='efield', dictionary($
+        'coord', default_coord, $
+        'e_spin_axis', e_spinaxis )
 
     ; convert to wanted coord.
     if coord ne default_coord then begin
