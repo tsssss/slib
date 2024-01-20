@@ -7,6 +7,7 @@
 ; times. An array of UT sec, in [n].
 ; msg. A string in the format of 'gsm2gse', where 2 separates the
 ;   input and output coordinates.
+; coord_msg=. An array in [2], containing [in_coord,out_coord].
 ; print_coord=. A boolean to return all supported coords.
 ;-
 
@@ -19,6 +20,10 @@ function cotran_pro_find_path, path, stop_coord, supported_funcs, $
     if n_elements(parsed_coords) eq 0 then parsed_coords = list(current_coord)
     if current_coord eq stop_coord then return, path
 
+    ; Return if it's directly available.
+    index = where(supported_funcs eq path[-1]+'2'+stop_coord, count)
+    if count ne 0 then return, [path,stop_coord]
+    
 
     index = where(stregex(supported_funcs, current_coord+'2') ne -1, count)
     if count eq 0 then return, !null
@@ -38,7 +43,7 @@ function cotran_pro_find_path, path, stop_coord, supported_funcs, $
 end
 
 
-function cotran_pro, input_vec, times, msg, errmsg=errmsg, print_coord=print_coord, probe=probe, mission=mission, _extra=ex
+function cotran_pro, input_vec, times, msg, coord_msg=coord_msg, errmsg=errmsg, print_coord=print_coord, probe=probe, mission=mission, _extra=ex
 
     compile_opt idl2
     on_error, 2
@@ -84,9 +89,10 @@ function cotran_pro, input_vec, times, msg, errmsg=errmsg, print_coord=print_coo
     if keyword_set(print_coord) then return, supported_coord
 
 
-    coord_msg = strsplit(msg,'2',extract=1)
+    if n_elements(coord_msg) eq 0 then coord_msg = strsplit(msg,'2',extract=1)
     input_coord = coord_msg[0]
     output_coord = coord_msg[1]
+    if input_coord eq output_coord then return, input_vec
 
 ;    supported_coord = [ $
 ;        'rbsp_'+['uvw','mgse'], $
