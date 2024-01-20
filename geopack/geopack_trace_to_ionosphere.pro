@@ -135,7 +135,7 @@ function geopack_trace_to_ionosphere, r_var, models=models, $
 
     foreach model, models do begin
         bf_var = prefix+'bf_gsm_'+model+the_suffix
-        vinfo[bf_var] = bf_var
+        vinfo['bf_gsm_'+model+the_suffix] = bf_var
     endforeach
     
 

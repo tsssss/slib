@@ -7,15 +7,25 @@
 ; raw=. A boolean. By default, the program shrinks unnecessary dimensions. Set raw to preserve all dimensions.
 ; times=. An array of times as output.
 ; limits=. A structure of options.
+; settings=. A dictionary of options (essentially the same as limits but in dict).
 ;-
 ;
-function get_var_data, var, val, in=time_range, at=time, raw=raw, times=times, limits=lim, _extra=ex
+function get_var_data, var, val, in=time_range, at=time, raw=raw, times=times, limits=lim, settings=settings, _extra=ex
 
     retval = !null
     if n_elements(var) ne 1 then message, 'Invalid input var ...'   ; want to stop instead of return.
     if tnames(var) eq '' then return, retval
     
-    get_data, var, times, dat, val, limits=lim
+    get_data, var, data=info, limits=lim
+    tags = strlowcase(tag_names(info))
+    index = where(tags eq 'x', count)
+    if count eq 0 then times = !null else times = info.(index)
+    index = where(tags eq 'y', count)
+    if count eq 0 then dat = !null else dat = info.(index)
+    index = where(tags eq 'v', count)
+    if count eq 0 then val = !null else val = info.(index)
+    
+    if size(lim,type=1) ne 8 then settings = !null else settings = dictionary(lim)
     
     if keyword_set(time) ne 0 then begin
         if n_elements(time) eq 1 then begin

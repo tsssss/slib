@@ -54,6 +54,8 @@ function resolve_probe, probe
         mission['probe'] = the_probe
         mission['prefix'] = mission.prefix_name+the_probe+'_'
         mission['short_name'] = mission.short_name+the_probe
+        mission['mission'] = mission.name
+        mission['mission_probe'] = probe
     endif else mission = !null
 
     return, mission
