@@ -41,6 +41,7 @@ function where_pro, data, relation, range, count=count, _extra=ex
     endcase
     
     if count eq 0 then res = !null
+    if count eq 1 then res = res[0]
     return, res
 
 end
