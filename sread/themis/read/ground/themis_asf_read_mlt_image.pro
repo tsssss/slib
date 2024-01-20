@@ -24,6 +24,7 @@ function themis_asf_read_mlt_image, input_time_range, sites=sites, $
     mlt_image_var = mlon_image_to_mlt_image(mlon_image_var, output=mlt_image_var)
     options, mlt_image_var, 'requested_time_range', time_range
     return, mlt_image_var
+    
 end
 
 

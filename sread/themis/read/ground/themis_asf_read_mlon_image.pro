@@ -61,6 +61,8 @@ function themis_asf_read_mlon_image, input_time_range, sites=sites, $
         illuminated_pixels[crop_xrange[0]:crop_xrange[1],crop_yrange[0]:crop_yrange[1]] += weight_crop
     endforeach
 
+    index = where(finite(mlon_images,nan=1), count)
+    if count ne 0 then mlon_images[index] = 0   ; nan cause problem in rot to mlt_images.
     store_data, mlon_image_var, common_times, mlon_images
     mlon_image_info = mlon_image_info()
     mlon_image_info['display_type'] = 'image'

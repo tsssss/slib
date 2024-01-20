@@ -7,13 +7,14 @@
 
 function themis_read_mlt_image, input_time_range, sites=sites, $
     min_elevs=min_elevs, resolutions=resolutiosn, $
-    merge_method=merge_method, $
+    merge_method=merge_method, update=update, $
     get_name=get_name, calibration_method=calibration_method, _extra=extra
 
     errmsg = ''
     retval = ''
     mlt_image_var = 'thg_mlt_image'
     if keyword_set(get_name) then return, mlt_image_var
+    if keyword_set(update) then del_data, mlt_image_var
     time_range = time_double(input_time_range)
     if ~check_if_update(mlt_image_var, time_range) then return, mlt_image_var
 

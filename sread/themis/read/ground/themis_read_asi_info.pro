@@ -50,7 +50,7 @@ end
 
 
 function themis_read_asi_info_asf, input_time_range, site=site, $
-    errmsg=errmsg, input_site_info=site_info, version=version
+    errmsg=errmsg, input_site_info=site_info, version=version, emission_height=emission_height
 
     time_range = time_double(input_time_range)
     files = themis_load_asi(time_range, id='l2%asc', site=site, $
@@ -67,6 +67,10 @@ function themis_read_asi_info_asf, input_time_range, site=site, $
     in_vars = 'thg_asf_'+site+'_'+vars
     out_vars = 'asf_'+vars
     alti_var = 'thg_asf_'+site+'_alti'
+    altis = cdf_read_var(alti_var, filename=cdfid)*1e-3  ; in km.
+    if n_elements(emission_height) eq 0 then emission_height = 110d
+    tmp = min(altis-emission_height, alti_index, abs=1)
+    
     time_var = 'thg_asf_'+site+'_time'
     times = cdf_read_var(time_var, filename=cdfid)
     index = where(times lt time_range[0], count)
@@ -76,17 +80,13 @@ function themis_read_asi_info_asf, input_time_range, site=site, $
         time_index = index[count-1] ; last time before time_range[0]
     endelse
 
-    h0 = 110d
     foreach var, in_vars, var_id do begin
         if cdf_has_var(var, filename=cdfid) then begin
             ; There are multiple records. Need to filter down to one.
             val = cdf_read_var(var, filename=cdfid)
             val = reform(val[time_index,*,*,*])
-            val_setting = cdf_read_setting(var, filename=cdfid)
-            if val_setting.haskey('depend_3') then begin
-                ; glat, glon in v01 cal file depends one alti.
-                alti = cdf_read_var(alti_var, filename=cdfid)*1e-3  ; in km.
-                tmp = min(alti-h0, alti_index, abs=1)
+            ndim = size(val, n_dimensions=1)
+            if ndim eq 3 then begin
                 val = reform(val[alti_index,*,*])
             endif
             site_info[out_vars[var_id]] = val
@@ -135,12 +135,12 @@ end
 
 
 function themis_read_asi_info, input_time_range, site=site, id=datatype, $
-    errmsg=errmsg, input_site_info=site_info, version=version
+    errmsg=errmsg, input_site_info=site_info, version=version, emission_height=emission_height
 
     if n_elements(datatype) eq 0 then datatype = 'asc'
     if datatype eq 'asf' then $
         return, themis_read_asi_info_asf(input_time_range, site=site, $
-        errmsg=errmsg, input_site_info=site_info, version=version)
+        errmsg=errmsg, input_site_info=site_info, version=version, emission_height=emission_height)
 
     if datatype eq 'ast' then $
         return, themis_read_asi_info_ast(input_time_range, site=site, $

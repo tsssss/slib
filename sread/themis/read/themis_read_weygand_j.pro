@@ -53,7 +53,7 @@ function themis_read_weygand_j, input_time_range, id=datatype, get_name=get_name
         options, j_var, 'glat_bins', glat_bins
         
         vatt = cdf_read_setting(j_var, filename=files[0])
-        options, j_var, 'unit', vatt.unit
+        options, j_var, 'unit', vatt['unit']
     endforeach
 
     if datatype eq 'j_hor_mag' then begin

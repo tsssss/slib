@@ -5,12 +5,16 @@
 ; input_site_info=. Input to modify site_info.
 ;-
 
-function themis_asi_read_pixel_info, time_range, site=site, id=datatype, thumbnail=thumbnail, errmsg=errmsg, input_site_info=site_info
+function themis_asi_read_pixel_info, time_range, site=site, $
+    id=datatype, thumbnail=thumbnail, errmsg=errmsg, input_site_info=site_info, emission_height=emission_height
 
     if n_elements(datatype) eq 0 then datatype = 'asf'
     if keyword_set(thumbnail) then datatype = 'ast'
     if n_elements(time_range) eq 0 then time_range = [0d,0]
-    pixel_info = themis_read_asi_info(time_range, site=site, id=datatype, errmsg=errmsg, input_site_info=site_info)
+    if n_elements(emission_height) eq 0 then emission_height = 110d ; km.
+    pixel_info = themis_read_asi_info(time_range, site=site, id=datatype, errmsg=errmsg, $
+        input_site_info=site_info, emission_height=emission_height)
+    if n_elements(height_index) eq 0 then height_index = 1
     
     ; Get the position values at the center of each pixel.
     ; This unifies the different formats of asf and ast.
@@ -54,4 +58,8 @@ function themis_asi_read_pixel_info, time_range, site=site, id=datatype, thumbna
     
     return, pixel_info
 
+end
+
+
+info = themis_asi_read_pixel_info(site='gbay')
 end

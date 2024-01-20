@@ -22,11 +22,11 @@ function themis_read_bfield, input_time_range, id=datatype, probe=probe, $
     vec_coord_var = prefix+'b_'+coord
     if keyword_set(get_name) then return, vec_coord_var
     if keyword_set(update) then del_data, vec_coord_var
+    time_range = time_double(input_time_range)
+    if ~check_if_update(vec_coord_var, time_range) then return, vec_coord_var
     
 
     ; Load files.
-    time_range = time_double(input_time_range)
-    if ~check_if_update(vec_coord_var, time_range) then return, vec_coord_var
     files = themis_load_fgm(time_range, probe=probe, id='l2', errmsg=errmsg)
     if errmsg ne '' then return, retval
 

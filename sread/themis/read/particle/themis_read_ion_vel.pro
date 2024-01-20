@@ -67,6 +67,7 @@ function themis_read_ion_vel, input_time_range, probe=probe, id=datatype, $
         'coord', strupcase(coord), $
         'coord_labels', constant('xyz') )
 
+    return, vec_coord_var
 end
 
 time_range = time_double(['2014-08-28','2014-08-29'])

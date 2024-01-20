@@ -3,7 +3,7 @@
 ;-
 
 function themis_read_density_esa, input_time_range, probe=probe, $
-    errmsg=errmsg, get_name=get_name, id=datatype, species=species
+    errmsg=errmsg, get_name=get_name, id=datatype, species=species, suffix=suffix
 
 
     errmsg = ''
@@ -23,7 +23,8 @@ function themis_read_density_esa, input_time_range, probe=probe, $
         return, retval
     endif
     species_name = themis_esa_get_species_name(species)
-    var = prefix+species+'_density'
+    if n_elements(suffix) eq 0 then suffix = '_esa'
+    var = prefix+species+'_density'+suffix
     if keyword_set(get_name) then return, var
 
     ; Load files.
