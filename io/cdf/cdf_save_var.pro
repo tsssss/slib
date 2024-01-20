@@ -12,8 +12,9 @@
 ;-
 pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
     compress=compress, cdf_type=cdf_type, $
-    save_as_one=save_as_one
+    save_as_one=save_as_one, errmsg=errmsg
 
+    errmsg = ''
     compile_opt idl2
     catch, error
     if error ne 0 then begin

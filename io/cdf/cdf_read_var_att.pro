@@ -39,7 +39,7 @@ function cdf_read_var_att, var, filename=cdf0, errmsg=errmsg
         return, retval
     endif
 
-    vatt = dictionary()
+    vatt = hash()
     cdf_control, cdfid, get_numattrs=natt
     natt = total(natt)
     for ii=0, natt-1 do begin
