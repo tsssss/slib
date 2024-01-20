@@ -43,6 +43,7 @@ local_root = join_path([default_local_root(),'dmsp','survey_plot'])
 
 ; Time range.
 input_time_range = ['2017-12-26','2018-12-31']
+input_time_range = ['2013-06-06','2013-06-10']
 ;input_time_range = ['2015-03-04','2015-05-31']
 ; '2015-03-03 has problem.
 secofday = constant('secofday')

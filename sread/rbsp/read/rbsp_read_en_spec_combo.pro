@@ -32,11 +32,13 @@ function rbsp_read_en_spec_combo, input_time_range, probe=probe, $
         vinfo[key] = prefix+species+'_en_spec_'+key
     endforeach
     if keyword_set(get_name) then return, vinfo
+    time_range = time_double(input_time_range)
 
     foreach key, settings.keys() do begin
+        if ~check_if_update(vinfo[key], time_range) then continue
         info = settings[key]
         pitch_angle_range = info[0]
-        var = rbsp_read_en_spec(input_time_range, probe=probe, errmsg=errmsg, species=species, pitch_angle_range=pitch_angle_range)
+        var = rbsp_read_en_spec(time_range, probe=probe, errmsg=errmsg, species=species, pitch_angle_range=pitch_angle_range)
         if errmsg ne '' then return, retval
         tmp = rename_var(var, output=vinfo[key])
     endforeach

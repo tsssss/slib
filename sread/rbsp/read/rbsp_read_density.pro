@@ -5,7 +5,7 @@
 ; id=. 'emfisis','hope','efw'. Default is 'hope'
 ;-
 
-function rbsp_read_density, input_time_range, probe=probe, id=id, errmsg=errmsg
+function rbsp_read_density, input_time_range, probe=probe, id=id, errmsg=errmsg, suffix=suffix
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
@@ -19,8 +19,9 @@ function rbsp_read_density, input_time_range, probe=probe, id=id, errmsg=errmsg
         return, retval
     endif
 
+    if n_elements(suffix) eq 0 then suffix = ''
     routine = 'rbsp_read_density_'+id
-    return, call_function(routine, input_time_range, probe=probe, errmsg=errmsg)
+    return, call_function(routine, input_time_range, probe=probe, errmsg=errmsg, suffix=suffix)
 
 end
 

@@ -7,16 +7,18 @@ function omni_read_sw_v, input_time_range, errmsg=errmsg, get_name=get_name, coo
     errmsg = ''
     retval = ''
 
+    prefix = 'omni_'
+    if n_elements(coord) eq 0 then coord = 'gsm'
+    var = prefix+'sw_v_'+coord
+    if keyword_set(get_name) then return, var
     time_range = time_double(input_time_range)
+    if ~check_if_update(var, time_range) then return, var
+
     if n_elements(resolution) eq 0 then resolution = '1min'
     files = omni_load(time_range, errmsg=errmsg, id='cdaweb%hro%'+resolution)
     if errmsg ne '' then return, retval
 
 
-    prefix = 'omni_'
-    if n_elements(coord) eq 0 then coord = 'gsm'
-    var = prefix+'sw_v_'+coord
-    if keyword_set(get_name) then return, var
 
     in_vars = ['Vx','Vy','Vz']
     coord_orig = 'gse'
@@ -53,6 +55,7 @@ function omni_read_sw_v, input_time_range, errmsg=errmsg, get_name=get_name, coo
 
     store_data, var, times, vec_coord
     add_setting, var, smart=1, dictionary($
+        'requested_time_range', time_range, $
         'display_type', 'vector', $
         'unit', 'km/s', $
         'short_name', 'SW V', $

@@ -375,7 +375,8 @@ function rbsp_gen_polar_region_survey_plot_v05, input_time_range, probe=probe, $
 end
 
 the_time_range = time_double(['2013-05-01','2013-05-02'])
-probe = 'b'
+the_time_range = time_double(['2015-04-16','2015-04-17'])
+probe = 'a'
 test = 1
 files = rbsp_gen_polar_region_survey_plot(the_time_range, probe=probe, xpansize=6, test=test)
 end

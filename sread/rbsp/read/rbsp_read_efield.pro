@@ -14,7 +14,7 @@ resolution=resolution, errmsg=errmsg, coord=coord, get_name=get_name, suffix=suf
     errmsg = ''
     retval = ''
 
-    default_coord = 'mgse'
+    default_coord = 'rbsp_mgse'
     if n_elements(coord) eq 0 then coord = default_coord
     if n_elements(resolution) eq 0 then resolution = 'survey'
     resolutions = ['spinfit','survey','burst','spinfit_phasef']
@@ -36,7 +36,7 @@ resolution=resolution, errmsg=errmsg, coord=coord, get_name=get_name, suffix=suf
     ; Convert to the wanted coord.
     if coord ne default_coord then begin
         get_data, vec_default_var, times, vec_default, limits=lim
-        vec_coord = cotran(vec_coord, times, default_coord+'2'+coord, probe=probe)
+        vec_coord = cotran_pro(vec_coord, times, default_coord+'2'+coord, probe=probe)
         store_data, vec_coord_var, times, vec_coord, limits=lim
     endif
 
@@ -44,7 +44,9 @@ resolution=resolution, errmsg=errmsg, coord=coord, get_name=get_name, suffix=suf
         'display_type', 'vector', $
         'unit', 'mV/m', $
         'short_name', 'E', $
-        'coord', strupcase(coord), $
+        'probe', probe, $
+        'spin_axis', 'x', $
+        'coord', strlowcase(coord), $
         'coord_labels', constant('xyz') )
 
     return, vec_coord_var

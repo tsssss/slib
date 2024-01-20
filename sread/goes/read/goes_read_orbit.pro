@@ -13,8 +13,9 @@ function goes_read_orbit, input_time_range, probe=input_probe, errmsg=errmsg, co
     if n_elements(coord) eq 0 then coord = 'gsm'
     var = prefix+'r_'+coord
     if keyword_set(get_name) then return, var
-
     time_range = time_double(input_time_range)
+    if ~check_if_update(var, time_range) then return, var
+
     files = goes_load_ssc(time_range, probe=probe)
     if errmsg ne '' then return, retval
 
@@ -36,6 +37,7 @@ function goes_read_orbit, input_time_range, probe=input_probe, errmsg=errmsg, co
     endif
 
     add_setting, var, smart=1, dictionary($
+        'requested_time_range', time_range, $
         'display_type', 'vector', $
         'short_name', 'R', $
         'unit', 'Re', $

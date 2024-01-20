@@ -65,6 +65,8 @@ time_range = ['2013-05-01','2013-05-02']
 probe = 'f18'
 time_range = ['2015-03-12','2015-03-13']
 probe = 'f19'
+time_range = ['2015-03-17','2015-03-18']
+probe = 'f18'
 b_var = dmsp_read_bfield_madrigal(time_range, probe=probe)
 v_var = dmsp_read_ion_vel_madrigal(time_range, probe=probe)
 end

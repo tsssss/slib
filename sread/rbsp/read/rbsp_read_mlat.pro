@@ -2,15 +2,17 @@
 ; Read RBSP MLat. Save as 'rbspx_mlat'
 ;-
 
-function rbsp_read_mlat, input_time_range, probe=probe, errmsg=errmsg, get_name=get_name
+function rbsp_read_mlat, input_time_range, probe=probe, errmsg=errmsg, get_name=get_name, update=update
 
     errmsg = ''
     
     prefix = 'rbsp'+probe+'_'
     var = prefix+'mlat'
     if keyword_set(get_name) then return, var
-
+    if keyword_set(update) then del_data, var
     time_range = time_double(input_time_range)
+    if ~check_if_update(var, time_range) then return, var
+
     r_var = rbsp_read_orbit(time_range, probe=probe, coord='mag', get_name=1)
     if check_if_update(r_var, time_range) then begin
         r_var = rbsp_read_orbit(time_range, probe=probe, coord='mag', errmsg=errmsg)
@@ -21,6 +23,7 @@ function rbsp_read_mlat, input_time_range, probe=probe, errmsg=errmsg, get_name=
     mlat = asin(r_mag[*,2]/snorm(r_mag))*constant('deg')
     store_data, var, times, mlat
     add_setting, var, smart=1, dictionary($
+        'requested_time_range', time_range, $
         'display_type', 'scalar', $
         'short_name', 'MLat', $
         'unit', 'deg' )

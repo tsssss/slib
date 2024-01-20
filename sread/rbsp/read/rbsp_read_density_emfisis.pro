@@ -1,13 +1,15 @@
-function rbsp_read_density_emfisis, input_time_range, probe=probe, errmsg=errmsg, get_name=get_name
+function rbsp_read_density_emfisis, input_time_range, probe=probe, errmsg=errmsg, get_name=get_name, suffix=suffix
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
     retval = ''
 
-    var = prefix+'density_emfisis'
+    if n_elements(suffix) eq 0 then suffix = '_emfisis'
+    var = prefix+'density'+suffix
     if keyword_set(get_name) then return, var
-
     time_range = time_double(input_time_range)
+    if ~check_if_update(var, time_range) then return, var
+    
     files = rbsp_load_emfisis(time_range, probe=probe, id='l4%density', errmsg=errmsg)
     if errmsg ne '' then return, retval
 
@@ -20,7 +22,8 @@ function rbsp_read_density_emfisis, input_time_range, probe=probe, errmsg=errmsg
     read_vars, time_range, files=files, var_list=var_list, errmsg=errmsgm
     if errmsg ne '' then return, retval
     
-    add_setting, var, /smart, dictionary($
+    add_setting, var, smart=1, dictionary($
+        'requested_time_range', time_range, $
         'display_type', 'scalar', $
         'unit', 'cm!U-3!N', $
         'ylog', 1, $

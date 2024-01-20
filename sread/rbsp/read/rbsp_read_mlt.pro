@@ -9,8 +9,9 @@ function rbsp_read_mlt, input_time_range, probe=probe, errmsg=errmsg, get_name=g
     prefix = 'rbsp'+probe+'_'
     var = prefix+'mlt'
     if keyword_set(get_name) then return, var
-
     time_range = time_double(input_time_range)
+    if ~check_if_update(var, time_range) then return, var
+    
     r_var = rbsp_read_orbit(time_range, probe=probe, coord='mag', get_name=1)
     if check_if_update(r_var, time_range) then begin
         r_var = rbsp_read_orbit(time_range, probe=probe, coord='mag', errmsg=errmsg)
@@ -22,6 +23,7 @@ function rbsp_read_mlt, input_time_range, probe=probe, errmsg=errmsg, get_name=g
     mlt = mlon2mlt(mlon, times)
     store_data, var, times, mlt
     add_setting, var, smart=1, dictionary($
+        'requested_time_range', time_range, $
         'display_type', 'scalar', $
         'short_name', 'MLT', $
         'unit', 'h' )

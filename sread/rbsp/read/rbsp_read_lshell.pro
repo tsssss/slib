@@ -7,8 +7,8 @@ function rbsp_read_lshell, input_time_range, probe=probe, errmsg=errmsg, get_nam
     prefix = 'rbsp'+probe+'_'
     var = prefix+'lshell'
     if keyword_set(get_name) then return, var
-
     time_range = time_double(input_time_range)
+    if ~check_if_update(var, time_range) then return, var
     files = rbsp_load_spice(time_range, probe=probe, errmsg=errmsg)
     if errmsg ne '' then return, var
 
@@ -22,6 +22,7 @@ function rbsp_read_lshell, input_time_range, probe=probe, errmsg=errmsg, get_nam
     if errmsg ne '' then return, var
 
     add_setting, var, smart=1, dictionary($
+        'requested_time_range', time_range, $
         'display_type', 'scalar', $
         'short_name', 'L', $
         'unit', '#' )

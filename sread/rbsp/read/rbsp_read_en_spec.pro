@@ -5,7 +5,7 @@
 ;-
 
 function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
-    species=species, get_name=get_name, $
+    species=species, get_name=get_name, update=update, $
     pitch_angle_range=pitch_angle_range
 
     prefix = 'rbsp'+probe+'_'
@@ -22,8 +22,10 @@ function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
 
     spec_var = prefix+species+'_en_spec'
     if keyword_set(get_name) then return, spec_var
-
+    if keyword_set(update) then del_data, spec_var
     time_range = time_double(input_time_range)
+    if ~check_if_update(spec_var, time_range) then return, spec_var
+    
     files = rbsp_load_hope(time_range, id='l3%pa', probe=probe, errmsg=errmsg)
     if errmsg ne '' then return, retval
 
@@ -111,9 +113,10 @@ function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
     endif else begin
         pitch_msg = '['+sgnum2str(pitch_angle_range[0])+','+sgnum2str(pitch_angle_range[1])+']'
     endelse
-    add_setting, spec_var, {$
-        pitch_angle: pitch_angles[pitch_index], $
-        ytitle: 'Energy (eV)!C'+species_name+', PA '+pitch_msg+' deg'}
+    add_setting, spec_var, dictionary($
+        'requested_time_range', time_range, $
+        'pitch_angle', pitch_angles[pitch_index], $
+        'ytitle', 'Energy (eV)!C'+species_name+', PA '+pitch_msg+' deg')
 
     return, spec_var
 

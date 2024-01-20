@@ -61,6 +61,41 @@ function rbsp_load_emfisis, input_time_range, id=datatype, probe=probe, $
         'sync_threshold', sync_threshold, $
         'cadence', 'day', $
         'extension', fgetext(base_name) )
+    
+    ; Level 2, HFR.
+    foreach the_id, ['waveform','spectra','spectra-burst','spectra-merged'] do begin
+        base_name = 'rbsp-'+probe+'_hfr-'+the_id+'_emfisis-l2_%Y%m%d_'+version+'.cdf'
+        local_path = [local_root,rbspx,'emfisis','%Y','l2','hfr',the_id]
+        remote_path = [remote_root,rbspx,'l2','emfisis','hfr',the_id,'%Y']
+        type_dispatch['l2%hfr%'+the_id] = dictionary($
+            'pattern', dictionary($
+                'local_file', join_path([local_path,base_name]), $
+                'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+                'remote_file', join_path([remote_path,base_name]), $
+                'remote_index_file', join_path([remote_path,''])), $
+            'valid_range', time_double(valid_range), $
+            'sync_threshold', sync_threshold, $
+            'cadence', 'day', $
+            'extension', fgetext(base_name) )
+    endforeach
+
+    ; Level 2, WFR.
+    foreach the_id, ['spectral-matrix-diagonal-merged','spectral-matrix-diagonal','spectral-matrix','waveform','waveform-continuous-burst'] do begin
+        base_name = 'rbsp-'+probe+'_wfr-'+the_id+'_emfisis-l2_%Y%m%d_'+version+'.cdf'
+        local_path = [local_root,rbspx,'emfisis','%Y','l2','hfr',the_id]
+        remote_path = [remote_root,rbspx,'l2','emfisis','wfr',the_id,'%Y']
+        type_dispatch['l2%wfr%'+the_id] = dictionary($
+            'pattern', dictionary($
+                'local_file', join_path([local_path,base_name]), $
+                'local_index_file', join_path([local_path,default_index_file(/sync)]), $
+                'remote_file', join_path([remote_path,base_name]), $
+                'remote_index_file', join_path([remote_path,''])), $
+            'valid_range', time_double(valid_range), $
+            'sync_threshold', sync_threshold, $
+            'cadence', 'day', $
+            'extension', fgetext(base_name) )
+    endforeach
+
 
     ; Level 3, B in given coord.
     resolutions = ['1sec','4sec','hires']
@@ -151,7 +186,13 @@ end
 
 print, rbsp_load_emfisis(/print_datatype)
 time_range = time_double(['2013-06-07/04:52','2013-06-07/05:02'])
-probe = 'b'
+time_range = time_double(['2015-03-17','2015-03-18'])
+probe = 'a'
+
+file = rbsp_load_emfisis(time_range, id='l2%wfr%spectral-matrix-diagonal-merged')
+stop
+file = rbsp_load_emfisis(time_range, id='l2%hfr%spectra')
+stop
 
 resolutions = ['1sec','4sec','hires']
 foreach res, resolutions do begin

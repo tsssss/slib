@@ -2,24 +2,23 @@
 ; Read omni solar wind parameters.
 ;-
 
-function omni_read_sw_n, input_time_range, errmsg=errmsg, get_name=get_name, _extra=ex
+function omni_read_sw_p, input_time_range, errmsg=errmsg, get_name=get_name, _extra=ex
 
     errmsg = ''
     retval = ''
 
     prefix = 'omni_'
-    var = prefix+'sw_n'
+    var = prefix+'sw_p'
     if keyword_set(get_name) then return, var
     time_range = time_double(input_time_range)
     if ~check_if_update(var, time_range) then return, var
-
 
     if n_elements(resolution) eq 0 then resolution = '1min'
     files = omni_load(time_range, errmsg=errmsg, id='cdaweb%hro%'+resolution)
     if errmsg ne '' then return, retval
 
 
-    in_var = 'proton_density'
+    in_var = 'Pressure'
     var_list = list()
     var_list.add, dictionary($
         'in_vars', [in_var], $
@@ -42,13 +41,14 @@ function omni_read_sw_n, input_time_range, errmsg=errmsg, get_name=get_name, _ex
     add_setting, var, smart=1, dictionary($
         'requested_time_range', time_range, $
         'display_type', 'scalar', $
-        'unit', 'cm!U-3', $
-        'short_name', 'SW N' )
+        'unit', 'nPa', $
+        'ylog', 1, $
+        'short_name', 'SW P' )
     return, var
 
 end
 
 
 time_range = ['2019-01-01','2019-01-02']
-var = omni_read_sw_n(time_range)
+var = omni_read_sw_p(time_range)
 end

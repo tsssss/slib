@@ -15,13 +15,14 @@ function rbsp_read_orbit, input_time_range, probe=probe, $
     if n_elements(coord) eq 0 then coord = 'gsm'
     var = prefix+'r_'+coord
     if keyword_set(get_name) then return, var
+    time_range = time_double(input_time_range)
+    if ~check_if_update(var, time_range) then return, var
     
     if n_elements(resolution) eq 0 then resolution = 60d
     if resolution eq 60 or resolution eq 5*60d then begin
-        return, ml_rbsp_read_pos(input_time_range, probe=probe, coord=coord, errmsg=errmsg, resolution=resolution)
+        return, ml_rbsp_read_pos(time_range, probe=probe, coord=coord, errmsg=errmsg, resolution=resolution)
     endif
 
-    time_range = time_double(input_time_range)
     files = rbsp_load_spice(time_range, probe=probe, errmsg=errmsg)
     if errmsg ne '' then return, retval
 
@@ -43,6 +44,8 @@ function rbsp_read_orbit, input_time_range, probe=probe, $
     endif
 
     add_setting, var, smart=1, {$
+        requested_time_range: time_range, $
+        mission_probe: 'rbsp'+probe, $
         display_type: 'vector', $
         unit: 'Re', $
         short_name: 'R', $

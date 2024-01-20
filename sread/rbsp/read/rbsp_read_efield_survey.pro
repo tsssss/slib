@@ -1,18 +1,18 @@
 ;+
-; Read RBSP EFW E field in mGSE in survey resolution (32).
+; Read RBSP EFW E field in mGSE in survey resolution (32 S/s).
 ; Load L2 E UVW and convert to mGSE.
 ; Do not use L2 E despun b/c cotran does a slightly more accurate job to convert UVW to mGSE.
 ;-
 
 function rbsp_read_efield_survey, input_time_range, probe=probe, $
     get_name=get_name, update=update, suffix=suffix, $
-    keep_e56=keep_e56, edot0_e56=edot0_e56, coord=coord, _extra=ex
+    keep_e56=keep_e56, b0_var=b0_var, coord=coord, _extra=ex
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
     retval = ''
 
-    default_coord = 'mgse'
+    default_coord = 'rbsp_mgse'
     if n_elements(suffix) eq 0 then suffix = '_survey'
     vec_default_var = prefix+'e_'+default_coord+suffix
     if n_elements(coord) eq 0 then coord = default_coord
@@ -41,9 +41,9 @@ function rbsp_read_efield_survey, input_time_range, probe=probe, $
 ;    read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
 ;    if errmsg ne '' then return, retval
 
-    orig_coord = 'uvw'
-    vec_orig_var = prefix+'e_'+orig_coord
+    orig_coord = 'rbsp_uvw'
     rbsp_efw_phasef_read_e_uvw, time_range, probe=probe
+    vec_orig_var = rename_var(prefix+'e_uvw',output=prefix+'e_'+orig_coord)
 
     get_data, vec_orig_var, times, vec_uvw
     index = where(abs(vec_uvw) ge 1e30, count)
@@ -59,27 +59,32 @@ function rbsp_read_efield_survey, input_time_range, probe=probe, $
         coord_labels: ['u','v','w'], $
         colors: constant('rgb') }
         
-    msg = orig_coord+'2'+default_coord
-    vec_default = cotran(vec_uvw, times, msg, probe=probe, _extra=ex)
+    vec_default = cotran_pro(vec_uvw, times, coord_msg=[orig_coord,default_coord], probe=probe, _extra=ex)
+    ; remove background E field.
+    rbsp_read_e_model, time_range, probe=probe
+    emod_var = prefix+'emod_mgse'
+    emod_mgse = get_var_data(emod_var, at=times)
+    vec_default -= emod_mgse
     ; treat e56.
     e_spinaxis = vec_default[*,0]
     if ~keyword_set(keep_e56) then vec_default[*,0] = 0
-    if keyword_set(edot0_e56) then begin
-        b_var = rbsp_read_bfield(time_range, probe=probe, coord=coord, errmsg=errmsg)
-        if errmsg ne '' then return, retval
-        interp_time, b_var, times
-        b_vec = get_var_data(b_var)
+    if n_elements(b0_var) then begin
+        b_vec = get_var_data(b0_var, at=times, limits=lim)
+        b_coord = lim.coord
+        if b_coord ne defaul_coord then begin
+            b_vec = cotran_pro(b_vec, times, b_coord+'2'+defaul_coord, probe=probe)
+        endif
         vec_default[*,0] = total(vec_default[*,1:2]*b_vec[*,1:2],2)/b_vec[*,0]
     endif
     store_data, vec_default_var, times, vec_default
     add_setting, vec_coord_var, smart=1, id='efield', dictionary($
+        'requested_time_range', time_range, $
         'coord', default_coord, $
         'e_spin_axis', e_spinaxis )
 
     ; convert to wanted coord.
     if coord ne default_coord then begin
-        msg = default_coord+'2'+coord
-        e_coord = cotran(vec_default, times, msg, probe=probe)
+        e_coord = cotran_pro(vec_default, times, coord_msg=[default_coord,coord], probe=probe)
         store_data, vec_coord_var, times, e_coord
         add_setting, vec_coord_var, id='efield', dictionary('coord', coord)
     endif

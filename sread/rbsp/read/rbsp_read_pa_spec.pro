@@ -4,7 +4,7 @@
 
 function rbsp_read_pa_spec, input_time_range, probe=probe, errmsg=errmsg, $
     species=species, get_name=get_name, $
-    energy_range=energy_range
+    energy_range=energy_range, update=update
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
@@ -20,8 +20,11 @@ function rbsp_read_pa_spec, input_time_range, probe=probe, errmsg=errmsg, $
 
     spec_var = prefix+species+'_pa_spec'
     if keyword_set(get_name) then return, spec_var
-
+    if keyword_set(update) then del_data, spec_var
     time_range = time_double(input_time_range)
+    if ~check_if_update(spec_var, time_range) then return, spec_var
+    
+    
     files = rbsp_load_hope(time_range, id='l3%pa', probe=probe, errmsg=errmsg)
     if errmsg ne '' then return, retval
 
@@ -85,6 +88,7 @@ function rbsp_read_pa_spec, input_time_range, probe=probe, errmsg=errmsg, $
     zrange = (species eq 'e')? [1e5,1e10]: [1e5,1e8]
     species_name = species_infos[species].short_name
     add_setting, spec_var, /smart, {$
+        requested_time_range: time_range, $
         display_type: 'spec', $
         unit: '#/cm!U2!N-s-sr-keV', $
         zrange: zrange, $
@@ -93,6 +97,9 @@ function rbsp_read_pa_spec, input_time_range, probe=probe, errmsg=errmsg, $
         ylog: 0, $
         zlog: 1, $
         yrange: [0,180], $
+        ytickv: [0,90,180], $
+        yticks: 2, $
+        yminor: 3, $
         short_name: ''}
 
     if nenergy_input eq 1 then begin
