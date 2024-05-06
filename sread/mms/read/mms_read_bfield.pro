@@ -17,8 +17,14 @@ function mms_read_bfield, input_time_range, id=datatype, probe=probe, $
 
 
     ; Prepare var name.
-    default_coord = 'gsm'
-    if n_elements(coord) eq 0 then coord = default_coord
+    supported_coords = ['gse','gsm','dmpa','mms_bcs']
+    if n_elements(coord) eq 0 then coord = 'gsm'
+    index = where_pro(supported_coords, '==', coord, count=count)
+    if count eq 0 then begin
+        default_coord = 'gsm'
+    endif else begin
+        default_coord = supported_coords[index]
+    endelse
     vec_coord_var = prefix+'b_'+coord
     if keyword_set(get_name) then return, vec_coord_var
     if keyword_set(update) then del_data, vec_coord_var
@@ -27,13 +33,16 @@ function mms_read_bfield, input_time_range, id=datatype, probe=probe, $
     vec_default_var = prefix+'b_'+default_coord
 
     ; Load files.
-    files = mms_load_fgm(time_range, probe=probe, id='l2%survey', errmsg=errmsg)
+    files = mms_ld_fgm(time_range, probe=probe, id='l2%survey', errmsg=errmsg)
     if errmsg ne '' then return, retval
 
 
 ;---Read data.
     var_list = list()
-    in_vars = [prefix+'fgm_b_'+default_coord+'_srvy_l2']
+    file_coord = default_coord
+    idx = strpos(file_coord,'mms_')
+    if idx[0] ne -1 then file_coord = strmid(default_coord,idx+4)
+    in_vars = [prefix+'fgm_b_'+file_coord+'_srvy_l2']
     out_vars = [vec_default_var]
     var_list.add, dictionary($
         'in_vars', in_vars, $
@@ -44,13 +53,19 @@ function mms_read_bfield, input_time_range, id=datatype, probe=probe, $
     if errmsg ne '' then return, ''
     add_setting, out_vars[0], id='bfield', dictionary($
         'requested_time_range', time_range, $
+        'probe', probe, $
+        'mission', 'mms', $
+        'mission_probe', 'mms'+probe, $
         'coord', default_coord )
 
 ;---Calibrate the data.
+    get_data, vec_default_var, times, vec_default
+    store_data, vec_default_var, times, vec_default[*,0:2]
+    
     ; Convert to wanted coord.
     if coord ne default_coord then begin
-        get_data, vec_default_var, times, vec_gsm, limits=lim
-        vec_coord = cotran_pro(vec_gsm, times, 'gsm2'+coord, probe=probe)
+        get_data, vec_default_var, times, vec_default, limits=lim
+        vec_coord = cotran_pro(vec_default, times, coord_msg=[default_coord,coord], probe=probe)
         store_data, vec_coord_var, times, vec_coord, limits=lim
     endif
 

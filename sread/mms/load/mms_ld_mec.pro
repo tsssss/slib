@@ -1,11 +1,11 @@
 ;+
-; Read MMS FGM data.
+; Read MMS MEC data.
 ;-
 
-function mms_load_fgm, input_time_range, id=datatype, probe=probe, $
+function mms_ld_mec, input_time_range, id=datatype, probe=probe, $
     print_datatype=print_datatype, errmsg=errmsg, $
     local_files=files, file_times=file_times, version=version, $
-    local_root=local_root
+    local_root=local_root, model=model
 
     compile_opt idl2
     on_error, 0
@@ -25,13 +25,15 @@ function mms_load_fgm, input_time_range, id=datatype, probe=probe, $
         time_range = input_time_range
     endelse
 
+    if n_elements(model) eq 0 then model = 'epht89q'
+
 ;---Init settings.
     type_dispatch = hash()
     ; L2 survey.
-    base_name = 'mms'+probe+'_fgm_srvy_l2_%Y%m%d_'+version+'.cdf'
-    local_path = [local_root,'mms'+probe,'fgm','srvy','l2','%Y','%m']
-    remote_path = [remote_root,'mms'+probe,'fgm','srvy','l2','%Y','%m']
-    valid_range = mms_valid_range('fgm%l2%survey', probe=probe)
+    base_name = 'mms'+probe+'_mec_srvy_l2_'+model+'_%Y%m%d_'+version+'.cdf'
+    local_path = [local_root,'mms'+probe,'mec','srvy','l2',model,'%Y','%m']
+    remote_path = [remote_root,'mms'+probe,'mec','srvy','l2',model,'%Y','%m']
+    valid_range = mms_valid_range('mec%l2%survey', probe=probe)
     type_dispatch['l2%survey'] = dictionary($
         'pattern', dictionary($
             'local_file', join_path([local_path,base_name]), $
@@ -72,5 +74,5 @@ end
 
 time_range = time_double(['2016-10-13','2016-10-14'])
 probe = '1'
-files = mms_load_fgm(time_range, probe=probe, id='l2%survey')
+files = mms_ld_mec(time_range, probe=probe, id='l2%survey')
 end

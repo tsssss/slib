@@ -18,7 +18,7 @@ function mms_read_orbit, input_time_range, probe=probe, $
     if keyword_set(get_name) then return, var
 
     time_range = time_double(input_time_range)
-    files = mms_load_mec(time_range, probe=probe, errmsg=errmsg, id='l2%survey')
+    files = mms_ld_mec(time_range, probe=probe, errmsg=errmsg, id='l2%survey')
     if errmsg ne '' then return, retval
 
 
@@ -39,11 +39,14 @@ function mms_read_orbit, input_time_range, probe=probe, $
 
     if coord ne 'gsm' then begin
         get_data, orig_var, times, r_gsm, limits=lim
-        r_coord = cotran(r_gsm, times, 'gsm2'+coord)
+        r_coord = cotran_pro(r_gsm, times, coord_msg=['gsm',coord])
         store_data, var, times, r_coord, limits=lim
     endif
 
     add_setting, var, smart=1, {$
+        probe: probe, $
+        mission: 'mms', $
+        mission_probe: 'mms'+probe, $
         display_type: 'vector', $
         unit: 'Re', $
         short_name: 'R', $
