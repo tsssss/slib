@@ -39,8 +39,8 @@ pro themis_asf_calc_mlon_image_per_site, asf_var, errmsg=errmsg, no_crop=no_crop
 ;---Get the MLon image and its pixel positions.
     if crop then begin
         prefix = 'thg_'+site+'_mlon_image_'
-        crop_xrange = get_var_data(prefix+'crop_xrange')
-        crop_yrange = get_var_data(prefix+'crop_yrange')
+        crop_xrange = (image_size[0]-1)<get_var_data(prefix+'crop_xrange')>0
+        crop_yrange = (image_size[0]-1)<get_var_data(prefix+'crop_yrange')>0
         pixel_mlon = pixel_mlon[crop_xrange[0]:crop_xrange[1],crop_yrange[0]:crop_yrange[1]]
         pixel_mlat = pixel_mlat[crop_xrange[0]:crop_xrange[1],crop_yrange[0]:crop_yrange[1]]
         pixel_xpos = pixel_xpos[crop_xrange[0]:crop_xrange[1],crop_yrange[0]:crop_yrange[1]]

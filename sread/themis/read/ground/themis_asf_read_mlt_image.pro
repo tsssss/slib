@@ -28,6 +28,11 @@ function themis_asf_read_mlt_image, input_time_range, sites=sites, $
 end
 
 
+time_range = time_double(['2013-03-17/08:30','2013-03-17/09:30'])
+sites = ['chbg']
+var = themis_asf_read_mlt_image(time_range, sites=sites, merge_method='merge_elev', min_elev=2.5)
+stop
+
 time_range = time_double(['2013-03-17/07:00','2013-03-17/08:00'])
 sites = ['mcgr','fykn','gako','fsim', $
     'fsmi','tpas','gill','snkq','pina','kapu']

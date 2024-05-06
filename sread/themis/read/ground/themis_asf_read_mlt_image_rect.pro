@@ -88,6 +88,16 @@ function themis_asf_read_mlt_image_rect, input_time_range, $
 end
 
 
+mlat_range = [55,70]
+mlt_range = [-2,0.5]
+sites = ['atha']
+time_range = ['2013-05-01/07:25','2013-05-01/07:55']
+var = themis_asf_read_mlt_image_rect(time_range, $
+    sites=sites, $
+    mlat_range=mlat_range, mlt_range=mlt_range)
+    
+stop
+
 time_range = time_double(['2015-01-05/00:00','2015-01-05/02:00'])
 sites = ['nrsq']
 min_elevs = float([2.5])
@@ -96,11 +106,5 @@ calibration_method = 'moon'
 mlt_image_var = themis_asf_read_mlt_image_rect(time_range, sites=sites, min_elev=min_elevs, merge_method=merge_method, calibration_method=calibration_method)
 stop
 
-mlat_range = [55,70]
-mlt_range = [-2,0.5]
-sites = ['atha']
-time_range = ['2013-05-01/07:25','2013-05-01/07:55']
-var = themis_asf_read_mlt_image_rect(time_range, $
-    sites=sites, $
-    mlat_range=mlat_range, mlt_range=mlt_range)
+
 end
