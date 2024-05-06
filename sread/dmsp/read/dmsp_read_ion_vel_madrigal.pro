@@ -10,7 +10,7 @@ function dmsp_read_ion_vel_madrigal, input_time_range, probe=probe, errmsg=errms
     retval = ''
 
     if n_elements(suffix) eq 0 then suffix = '_madrigal'
-    if n_elements(coord) eq 0 then coord = 'xyz'
+    if n_elements(coord) eq 0 then coord = 'dmsp_xyz'
     v_coord_var = prefix+'v_'+coord
     if keyword_set(get_name) then return, v_coord_var
 
@@ -32,16 +32,16 @@ function dmsp_read_ion_vel_madrigal, input_time_range, probe=probe, errmsg=errms
     times = times[time_index]
     ntime = n_elements(times)
     v_forw = fltarr(ntime)
-    v_perp = (all.hor_ion_v)[time_index]
-    v_down = (all.vert_ion_v)[time_index]
+    v_perp = (all.hor_ion_v)[time_index]*1e-3
+    v_down = (all.vert_ion_v)[time_index]*1e-3
 
     store_data, v_coord_var, times, [[v_forw],[v_perp],[v_down]]
     add_setting, v_coord_var, smart=1, dictionary($
         'requested_time_range', time_range, $
         'display_type', 'vector', $
-        'unit', 'm/s', $
+        'unit', 'km/s', $
         'short_name', 'V', $
-        'coord', 'XYZ' )
+        'coord', coord )
 
     return, v_coord_var
 

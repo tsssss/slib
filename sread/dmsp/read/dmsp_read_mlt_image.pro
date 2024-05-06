@@ -1,17 +1,18 @@
 ;+
 ; Read MLT image.
+; id=. ['','1216','1356','lbhs','lbhl','energy'].
 ;-
 
 function dmsp_read_mlt_image, input_time_range, probe=probe, id=datatype, $
-    errmsg=errmsg, get_name=get_name, update=update
+    errmsg=errmsg, get_name=get_name, update=update, _extra=ex
 
     prefix = 'dmsp'+probe+'_'
     errmsg = ''
     retval = !null
     
 
-    if n_elements(datatype) eq 0 then datatype = 'lbhs'
-    mlt_image_var = prefix+'mlt_image_'+datatype
+    if n_elements(datatype) eq 0 then datatype = 'energy'
+    mlt_image_var = prefix+'mlt_image'
     if keyword_set(get_name) then return, mlt_image_var
 
     pad_time = 1*3600d

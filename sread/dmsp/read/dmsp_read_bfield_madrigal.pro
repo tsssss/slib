@@ -3,15 +3,16 @@
 ;-
 
 function dmsp_read_bfield_madrigal, input_time_range, probe=probe, errmsg=errmsg, $
-    get_name=get_name, suffix=suffix, coord=coord, _extra=ex
+    get_name=get_name, suffix=suffix, coord=coord, read_b0=read_b0, _extra=ex
 
     prefix = 'dmsp'+probe+'_'
     errmsg = ''
     retval = ''
 
     if n_elements(suffix) eq 0 then suffix = '_madrigal'
-    if n_elements(coord) eq 0 then coord = 'xyz'
+    if n_elements(coord) eq 0 then coord = 'dmsp_xyz'
     b_coord_var = prefix+'db_'+coord
+    if keyword_set(read_b0) then b_coord_var = prefix+'b_'+coord
     if keyword_set(get_name) then return, b_coord_var
 
     time_range = time_double(input_time_range)
@@ -27,10 +28,14 @@ function dmsp_read_bfield_madrigal, input_time_range, probe=probe, errmsg=errmsg
     db_forward = all.diff_b_for
     db_perp = all.diff_b_perp
     db_down = all.diff_bd
+    short_name = 'dB'
     
-;    db_forward = all.b_forward
-;    db_perp = all.b_perp
-;    db_down = all.bd
+    if keyword_set(read_b0) then begin
+        db_forward = all.b_forward
+        db_perp = all.b_perp
+        db_down = all.bd
+        short_name = 'B'
+    endif
     
     times = all.ut1_unix
     time_index = where_pro(times, '[]', time_range, count=count)
@@ -49,8 +54,8 @@ function dmsp_read_bfield_madrigal, input_time_range, probe=probe, errmsg=errmsg
         'requested_time_range', time_range, $
         'display_type', 'vector', $
         'unit', 'nT', $
-        'short_name', 'dB', $
-        'coord', 'XYZ' )
+        'short_name', short_name, $
+        'coord', coord )
 
     return, b_coord_var
 

@@ -10,7 +10,7 @@ function dmsp_read_bfield_noaa, input_time_range, probe=probe, errmsg=errmsg, $
     retval = ''
 
     if n_elements(suffix) eq 0 then suffix = '_noaa'
-    if n_elements(coord) eq 0 then coord = 'xyz'
+    if n_elements(coord) eq 0 then coord = 'dmsp_xyz'
     b_coord_var = prefix+'db_'+coord
     if keyword_set(get_name) then return, b_coord_var
 
@@ -40,7 +40,7 @@ function dmsp_read_bfield_noaa, input_time_range, probe=probe, errmsg=errmsg, $
         'display_type', 'vector', $
         'unit', 'nT', $
         'short_name', 'dB', $
-        'coord', 'XYZ' )
+        'coord', coord )
 
     return, b_coord_var
 
