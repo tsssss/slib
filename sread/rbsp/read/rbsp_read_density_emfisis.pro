@@ -1,4 +1,5 @@
-function rbsp_read_density_emfisis, input_time_range, probe=probe, errmsg=errmsg, get_name=get_name, suffix=suffix
+function rbsp_read_density_emfisis, input_time_range, probe=probe, errmsg=errmsg, $
+    get_name=get_name, update=update, suffix=suffix
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
@@ -8,6 +9,7 @@ function rbsp_read_density_emfisis, input_time_range, probe=probe, errmsg=errmsg
     var = prefix+'density'+suffix
     if keyword_set(get_name) then return, var
     time_range = time_double(input_time_range)
+    if keyword_set(update) then del_data, var
     if ~check_if_update(var, time_range) then return, var
     
     files = rbsp_load_emfisis(time_range, probe=probe, id='l4%density', errmsg=errmsg)

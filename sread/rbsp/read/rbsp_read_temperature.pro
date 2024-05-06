@@ -1,6 +1,6 @@
 
 function rbsp_read_temperature, input_time_range, probe=probe, $
-    errmsg=errmsg, get_name=get_name, species=species
+    errmsg=errmsg, get_name=get_name, species=species, update=update, suffix=suffix
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
@@ -13,18 +13,21 @@ function rbsp_read_temperature, input_time_range, probe=probe, $
         return, retval
     endif
     species_name = rbsp_hope_species_name(species)
-    var = prefix+species+'_temp'
+    if n_elements(suffix) eq 0 then suffix = ''
+    var = prefix+species+'_temp'+suffix
     if keyword_set(get_name) then return, var
 
+    if keyword_set(update) then del_data, var
     time_range = time_double(input_time_range)
+    if ~check_if_update(var, time_range) then return, var
     files = rbsp_load_hope(time_range, probe=probe, id='l3%mom', errmsg=errmsg)
     if errmsg ne '' then return, retval
 
 
     var_list = list()
     
-    suffix = (species eq 'e')? '_200': '_30'
-    in_vars = ['Tpar','Tperp']+'_'+species+suffix
+    species_suffix = (species eq 'e')? '_200': '_30'
+    in_vars = ['Tpar','Tperp']+'_'+species+species_suffix
     out_vars = prefix+species+'_t'+['para','perp']
     time_var = (species eq 'e')? 'Epoch_Ele': 'Epoch_Ion'
     var_list.add, dictionary($

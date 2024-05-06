@@ -4,11 +4,13 @@
 
 function rbsp_read_pa_spec, input_time_range, probe=probe, errmsg=errmsg, $
     species=species, get_name=get_name, $
-    energy_range=energy_range, update=update
+    energy_range=energy_range, update=update, suffix=suffix
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
     retval = ''
+    if n_elements(suffix) eq 0 then suffix = ''
+
 
     if n_elements(species) eq 0 then species = 'e'
     all_species = ['e','p','o','he']
@@ -18,7 +20,7 @@ function rbsp_read_pa_spec, input_time_range, probe=probe, errmsg=errmsg, $
         return, retval
     endif
 
-    spec_var = prefix+species+'_pa_spec'
+    spec_var = prefix+species+'_pa_spec'+suffix
     if keyword_set(get_name) then return, spec_var
     if keyword_set(update) then del_data, spec_var
     time_range = time_double(input_time_range)
@@ -30,9 +32,9 @@ function rbsp_read_pa_spec, input_time_range, probe=probe, errmsg=errmsg, $
 
     var_list = list()
 
-    suffix = (species eq 'e')? '_Ele': '_Ion'
-    time_var = 'Epoch'+suffix
-    energy_var = 'HOPE_ENERGY'+suffix
+    species_suffix = (species eq 'e')? '_Ele': '_Ion'
+    time_var = 'Epoch'+species_suffix
+    energy_var = 'HOPE_ENERGY'+species_suffix
     flux_var = strupcase('f'+species+'du')
     var_list.add, dictionary($
         'in_vars', [energy_var,flux_var], $

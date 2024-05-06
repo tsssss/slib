@@ -6,11 +6,12 @@
 
 function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
     species=species, get_name=get_name, update=update, $
-    pitch_angle_range=pitch_angle_range
+    pitch_angle_range=pitch_angle_range, suffix=suffix
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
     retval = ''
+    if n_elements(suffix) eq 0 then suffix = ''
 
     if n_elements(species) eq 0 then species = 'e'
     all_species = rbsp_hope_species()
@@ -20,7 +21,7 @@ function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
         return, retval
     endif
 
-    spec_var = prefix+species+'_en_spec'
+    spec_var = prefix+species+'_en_spec'+suffix
     if keyword_set(get_name) then return, spec_var
     if keyword_set(update) then del_data, spec_var
     time_range = time_double(input_time_range)
@@ -31,9 +32,9 @@ function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
 
     var_list = list()
 
-    suffix = (species eq 'e')? '_Ele': '_Ion'
-    time_var = 'Epoch'+suffix
-    energy_var = 'HOPE_ENERGY'+suffix
+    species_suffix = (species eq 'e')? '_Ele': '_Ion'
+    time_var = 'Epoch'+species_suffix
+    energy_var = 'HOPE_ENERGY'+species_suffix
     flux_var = strupcase('f'+species+'du')
     var_list.add, dictionary($
         'in_vars', [energy_var,flux_var], $
@@ -55,7 +56,7 @@ function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
     supported_species = species_infos.keys()
 
     fillval = !values.f_nan
-    get_data, flux_var, times, fluxs
+    get_data, flux_var, times, fluxs, limits=lim
     index = where(abs(fluxs) ge 1e30, count)
     if count ne 0 then fluxs[index] = fillval
 

@@ -1,15 +1,15 @@
 ;+
-; Read E field spec.
+; Read B field spec.
 ;-
 
-function rbsp_read_efield_spec, input_time_range, probe=probe, errmsg=errmsg, $
+function rbsp_read_bfield_spec, input_time_range, probe=probe, errmsg=errmsg, $
     get_name=get_name, update=update, suffix=suffix
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
     retval = ''
 
-    id = 'e'
+    id = 'b'
     if n_elements(suffix) eq 0 then suffix = ''
     out_var = prefix+id+'_spec'+suffix
     if keyword_set(get_name) then return, out_var
@@ -20,13 +20,12 @@ function rbsp_read_efield_spec, input_time_range, probe=probe, errmsg=errmsg, $
 
 ;---Read spec in different freq ranges.
     spec_vars = list()
-    spec_vars.add, rbsp_read_wave_spec_mhz(time_range, probe=probe)
     spec_vars.add, rbsp_read_wave_spec_khz(time_range, probe=probe, id=id)
     spec_vars.add, rbsp_read_wave_spec_hz(time_range, probe=probe, id=id)
-    freq_ranges = [[1e4,5e4],[10,1e4],[0.1,10]]
+    freq_ranges = [[10,1e4],[0.1,10]]
 
 ;---Combine them.
-    yrange = [0.1,5e4]
+    yrange = [0.1,1e4]
     dfreq = 1.15
     freqs = smkgmtrc(yrange[0],yrange[1],dfreq, 'dx')
     nfreq = n_elements(freqs)
@@ -36,7 +35,6 @@ function rbsp_read_efield_spec, input_time_range, probe=probe, errmsg=errmsg, $
     ntime = n_elements(common_times)
     specs = fltarr(ntime,nfreq)
     foreach var, spec_vars, var_id do begin
-        if var eq '' then continue
         data = get_var_data(var, vals, at=common_times, limits=lim)
         freq_range = freq_ranges[*,var_id]
         index = where_pro(freqs, '[)', freq_range, count=count)
@@ -65,54 +63,20 @@ function rbsp_read_efield_spec, input_time_range, probe=probe, errmsg=errmsg, $
         'yminor', yminor, $
         'zlog', 1, $
         'zrange', zrange, $
-        'short_name', 'E' )
+        'short_name', 'B' )
 ;    spec_var_combo = var+'_combo'
 ;    store_data, spec_var_combo, data=[spec_var,fc_vars]
     return, out_var
 
 end
 
-time_range = time_double(['2013-06-07/04:30','2013-06-07/05:30'])
-foreach probe, ['a','b'] do begin
-    prefix = 'rbsp'+probe+'_'
-    e_spec_var = rbsp_read_efield_spec(time_range, probe=probe)
-    
-    fc_vars = list()
-    foreach species, ['e','o','he','p'] do fc_vars.add, rbsp_read_gyro_freq(time_range, probe=probe, species=species)
-    var = prefix+'fce_half'
-    fce = get_var_data(prefix+'fce', times=times)
-    ;        store_data, var, times, fce*0.5
-    ;        fc_vars.add, var
-    options, prefix+'fce', labels='f!Dc,e'
-    options, prefix+'fcp', labels='f!Dc,H'
-    options, prefix+'fco', labels='f!Dc,O'
-    options, prefix+'fche', labels='f!Dc,He'
 
-    var = prefix+'flh'
-    fcp = get_var_data(prefix+'fcp', times=times)
-    store_data, var, times, fcp*43, limits={labels:'f!DLH!N'}
-    fc_vars.add, var
-    fc_vars = fc_vars.toarray()
-    fc_colors = get_color(n_elements(fc_vars))
-    foreach var, fc_vars, ii do options, var, 'colors', fc_colors[ii]
-
-    e_spec_combo = e_spec_var+'_combo'
-    store_data, e_spec_combo, data=[e_spec_var,fc_vars]
-    options, e_spec_combo, 'yrange', get_setting(e_spec_var,'yrange')
-    options, e_spec_combo, 'labflag', -2
-
-endforeach
-
-
-
-stop
-
-time_range = time_double(['2015-03-17','2015-03-18'])
-
+time_range = time_double(['2015-03-17/06:00','2015-03-17/18:00'])
+update = 1
 foreach probe, ['a','b'] do begin
     prefix = 'rbsp'+probe+'_'
     
-    spec_var = rbsp_read_efield_spec(time_range, probe=probe, update=update)
+    spec_var = rbsp_read_bfield_spec(time_range, probe=probe, update=update)
     
     fc_vars = list()
     foreach species, ['e','o','he','p'] do fc_vars.add, rbsp_read_gyro_freq(time_range, probe=probe, species=species)

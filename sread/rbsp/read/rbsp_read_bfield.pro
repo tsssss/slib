@@ -146,6 +146,7 @@ function rbsp_read_bfield, input_time_range, probe=probe, id=id, update=update, 
     endif
 
     add_setting, vec_coord_var, smart=1, {$
+        mission_probe: 'rbsp'+probe, $
         requested_time_range: time_range, $
         display_type: 'vector', $
         unit: 'nT', $

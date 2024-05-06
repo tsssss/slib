@@ -8,7 +8,7 @@
 ;-
 
 function rbsp_read_en_spec_combo, input_time_range, probe=probe, $
-    errmsg=errmsg, species=species, get_name=get_name
+    errmsg=errmsg, species=species, get_name=get_name, suffix=suffix, update=update
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
@@ -35,10 +35,12 @@ function rbsp_read_en_spec_combo, input_time_range, probe=probe, $
     time_range = time_double(input_time_range)
 
     foreach key, settings.keys() do begin
+        if keyword_set(update) then del_data, vinfo[key]
         if ~check_if_update(vinfo[key], time_range) then continue
         info = settings[key]
         pitch_angle_range = info[0]
-        var = rbsp_read_en_spec(time_range, probe=probe, errmsg=errmsg, species=species, pitch_angle_range=pitch_angle_range)
+        var = rbsp_read_en_spec(time_range, probe=probe, errmsg=errmsg, $
+            species=species, pitch_angle_range=pitch_angle_range, suffix=suffix)
         if errmsg ne '' then return, retval
         tmp = rename_var(var, output=vinfo[key])
     endforeach

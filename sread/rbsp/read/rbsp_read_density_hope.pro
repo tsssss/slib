@@ -1,5 +1,5 @@
 function rbsp_read_density_hope, input_time_range, probe=probe, $
-errmsg=errmsg, get_name=get_name, species=species
+errmsg=errmsg, get_name=get_name, species=species, suffix=suffix, update=update
 
     prefix = 'rbsp'+probe+'_'
     errmsg = ''
@@ -12,10 +12,13 @@ errmsg=errmsg, get_name=get_name, species=species
         return, retval
     endif
     species_name = rbsp_hope_species_name(species)
-    var = prefix+species+'_density'
+    if n_elements(suffix) eq 0 then suffix = ''
+    var = prefix+species+'_density'+suffix
     if keyword_set(get_name) then return, var
 
+    if keyword_set(update) then del_data, var
     time_range = time_double(input_time_range)
+    if ~check_if_update(var, time_range) then return, var
     files = rbsp_load_hope(time_range, probe=probe, id='l3%mom', errmsg=errmsg)
     if errmsg ne '' then return, retval
 

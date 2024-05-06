@@ -2,6 +2,7 @@
 ; Read E and B wave spectrogram.
 ;
 ; Return rbspx_[e,b]_spec_khz.
+; id=. 'e' or 'b'
 ;-
 
 function rbsp_read_wave_spec_khz, input_time_range, probe=probe, $
