@@ -12,7 +12,7 @@
 function prepare_files, request=request, errmsg=errmsg, $
     local_files=local_files, nonexist_files=nonexist_files, $
     file_times=file_times, time=time, cadence=cadence, version=version, $
-    _extra=extra
+    get_all_match=get_all_match, _extra=extra
 
     errmsg = ''
     retval = !null
@@ -255,22 +255,23 @@ function prepare_files, request=request, errmsg=errmsg, $
 
         ; Expect an index file, and it exists.
         lprmsg, '    Look up the index file: '+file.local_index_file+' ...'
-        the_file = lookup_index_file(file.local_file, file.local_index_file)
-        if the_file eq '' then begin
+        the_file = lookup_index_file(file.local_file, file.local_index_file, get_all_match=get_all_match)
+        
+        if the_file[0] eq '' then begin
             ; Generate if the local index file is expected, and we stay local.
             if n_elements(file.remote_index_file) eq 0 then begin
                 gen_index_file, file.local_index_file, extension=extension, /delete_empty_folder
-                the_file = lookup_index_file(file.local_file, file.local_index_file)
+                the_file = lookup_index_file(file.local_file, file.local_index_file, get_all_match=get_all_match)
             endif
         endif
-        if the_file eq '' then begin
+        if the_file[0] eq '' then begin
             file.base_name = ''  ; use this as a signature to tell results of looking up index.
         endif else begin
             file.local_file = the_file
             file.base_name = fgetbase(the_file)
         endelse
 
-        if file.base_name eq '' then begin
+        if file.base_name[0] eq '' then begin
             lprmsg, '    Data file is not found ...'
         endif else begin
             lprmsg, '    Data file is found: '+file.local_file+' ...'
@@ -278,7 +279,8 @@ function prepare_files, request=request, errmsg=errmsg, $
 
         if n_elements(file.remote_file) eq 0 then continue
         file_base = fgetbase(file.local_file)
-        file.remote_file = join_path([fgetpath(file.remote_file),file_base])
+        remote_path = (fgetpath(file.remote_file))[0]
+        file.remote_file = remote_path+'/'+file_base
         lprmsg, '    Remote data file should be: '+file.remote_file+' ...'
     endforeach
     request['files'] = files
@@ -288,65 +290,65 @@ function prepare_files, request=request, errmsg=errmsg, $
     foreach file, files do begin
         lprmsg, 'Prepare the data file: '+file.local_file+' ...'
         ; File is not found in the index file, do not download.
-        if file.base_name eq '' then begin
+        if file.base_name[0] eq '' then begin
             lprmsg, '    File is not found ...'
             continue
         endif
-
-        if n_elements(file.remote_file) eq 0 then begin
-            lprmsg, '    No remote info, stay local ...'
-            ; Nothing can be done, will collect non-existing files for other operations, like call a generating routine.
-        endif else begin
-            lprmsg, '    Remote info is available: '+file.remote_file+' ...'
-            sync_flag = 0
-
-            if n_elements(sync_time) ne 0 then begin
-                lprmsg, '    Check sync_time: update if file_time is later than '+time_string(sync_time)+' ...'
-                ftime = file.file_time
-                if n_elements(ftime) ne 0 then if ftime ge sync_time then begin
-                    lprmsg, '    The data file is new, need to update ...'
+        
+        ftime = file.file_time
+        foreach local_file, file.local_file, fid do begin
+            remote_file = file.remote_file[fid]
+            
+            if n_elements(remote_file) eq 0 then begin
+                lprmsg, '    No remote info, stay local ...'
+                ; Nothing can be done, will collect non-existing files for other operations, like call a generating routine.
+            endif else begin
+                lprmsg, '    Remote info is available: '+remote_file+' ...'
+                sync_flag = 0
+    
+                if n_elements(sync_time) ne 0 then begin
+                    lprmsg, '    Check sync_time: update if file_time is later than '+time_string(sync_time)+' ...'
+                    if n_elements(ftime) ne 0 then if ftime ge sync_time then begin
+                        lprmsg, '    The data file is new, need to update ...'
+                        sync_flag = 1
+                    endif else lprmsg, '    The data file is old, no need to update ...'
+                endif
+                if file_test(local_file) eq 0 then begin
+                    lprmsg, '    File does not exist, try to update ...'
                     sync_flag = 1
-                endif else lprmsg, '    The data file is old, no need to update ...'
-            endif
-            if file_test(file.local_file) eq 0 then begin
-                lprmsg, '    File does not exist, try to update ...'
-                sync_flag = 1
-            endif
-
-            if sync_flag then begin
-                lprmsg, '    Sync the file ...'
-                if n_elements(has_connection_to_remote) eq 0 then begin
-                    has_connection_to_remote = net_check_connection(file.remote_file)
-                    msg = has_connection_to_remote? 'Have ': 'Does not have '
-                    msg = '    '+msg+'connection to the remote server ...'
-                    lprmsg, msg
                 endif
-                if has_connection_to_remote then begin
-                    download_flag = 0
-                    if file_test(file.local_file) eq 1 then begin
-                        finfo = file_info(file.local_file)
-                        rinfo = get_remote_info(file.remote_file)
-                        if finfo.size ne rinfo.size then download_flag = 1
-                        if finfo.mtime ne rinfo.mtime then download_flag = 1
-                        msg = '    Local file is identical to remote, done ...'
+    
+                if sync_flag then begin
+                    lprmsg, '    Sync the file ...'
+                    if n_elements(has_connection_to_remote) eq 0 then begin
+                        has_connection_to_remote = net_check_connection(remote_file)
+                        msg = has_connection_to_remote? 'Have ': 'Does not have '
+                        msg = '    '+msg+'connection to the remote server ...'
                         lprmsg, msg
-                    endif else download_flag = 1
-                    if download_flag then $
-                        download_file, file.local_file, file.remote_file, errmsg=errmsg
-;                    if errmsg ne '' then begin
-;                        lprmsg, '    Remote file is not found, cleaning up ...'
-;                        file_delete, file.local_file, /allow_nonexistent
-;                    endif
-                endif
-            endif else lprmsg, '    File is good to go ...'
-
-        endelse
-        if file_test(file.local_file) eq 0 then begin
-            lprmsg, '    Failed to find the file ...'
-            continue
-        endif
-        if n_elements(mtime) eq 0 then continue
-        ftouch, file.local_file, mtime=mtime
+                    endif
+                    if has_connection_to_remote then begin
+                        download_flag = 0
+                        if file_test(local_file) eq 1 then begin
+                            finfo = file_info(local_file)
+                            rinfo = get_remote_info(remote_file)
+                            if finfo.size ne rinfo.size then download_flag = 1
+                            if finfo.mtime ne rinfo.mtime then download_flag = 1
+                            msg = '    Local file is identical to remote, done ...'
+                            lprmsg, msg
+                        endif else download_flag = 1
+                        if download_flag then begin
+                            download_file, local_file, remote_file, errmsg=errmsg
+                        endif
+                    endif
+                endif else lprmsg, '    File is good to go ...'
+    
+            endelse
+            if file_test(local_file) eq 0 then begin
+                lprmsg, '    Failed to find the file ...'
+                continue
+            endif
+            if n_elements(mtime) ne 0 then ftouch, local_file, mtime=mtime
+        endforeach
     endforeach
 
 
@@ -354,12 +356,14 @@ function prepare_files, request=request, errmsg=errmsg, $
     nonexist_files = list()
     ne_files = list()
     foreach file, files do begin
-        if file_test(file.local_file) eq 0 then begin
-            nonexist_files.add, file.local_file, /extract
-            ne_files.add, file
-        endif else begin
-            local_files.add, file.local_file, /extract
-        endelse
+        foreach local_file, file.local_file do begin
+            if file_test(local_file) eq 0 then begin
+                nonexist_files.add, local_file, extract=1
+                ne_files.add, file
+            endif else begin
+                local_files.add, local_file, extract=1
+            endelse
+        endforeach
     endforeach
     local_files = local_files.toarray()
     nonexist_files = nonexist_files.toarray()
