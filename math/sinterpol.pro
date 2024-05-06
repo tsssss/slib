@@ -9,6 +9,7 @@
 ; Keywords:
 ;   _extra = extra, in, struct, opt. Keywords for interpol, see idl help.
 ;     /LSQuadratic, /NaN, /Quatradic, /Spline.
+;   interp_range=. 
 ; Return: [*]. If data is array of [n0], then return [n1];
 ;     if data is array of [m, n0], then return, [m, n1].
 ;     if data is array of [n0, m], then return, [n1, m].
@@ -20,7 +21,7 @@
 ;   2012-09-17, Sheng Tian, auto deal with dims.
 ;-
 
-function sinterpol, data, oldabs, newabs, _extra = extra
+function sinterpol, data, oldabs, newabs, interp_range=interp_range, _extra = extra
   compile_opt idl2 & on_error, 0
   
   oldyy = data
@@ -52,6 +53,12 @@ function sinterpol, data, oldabs, newabs, _extra = extra
   for ii=0, ncomp-1 do begin
     new_data[*,ii] = interpol(old_data[*,ii], oldxx, newxx, /nan, _extra=extra)
   endfor
+  ; do not extrapolate.
+  if n_elements(interp_range) eq 0 then interp_range = minmax(oldxx)
+  index = where_pro(newxx, ')(', interp_range, count=count)
+  if count ne 0 then begin
+        new_data[index,*] = !values.f_nan
+  endif
   new_data = reform(new_data, new_dims)
   return, new_data
   
