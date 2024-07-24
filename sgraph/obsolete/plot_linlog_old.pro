@@ -6,7 +6,7 @@ pro plot_linlog, var, ypans=ypans, positive=positive, negative=negative, $
     xstyle=xstyle, xlog=xlog, xrange=xrange, xticks=xticks, xtickv=xtickv, xminor=xminor, xticklen=xticklen, xtickformat=xtickformat, xtickname=xtickn, xtitle=xtitle, $
     ystyle=ystyle, ylog=ylog, yrange=yrange, yticks=yticks, ytickv=ytickv, yminor=yminor, yticklen=yticklen, ytickformat=ytickformat, ytickname=ytickn, ytitle=ytitle, $
     log_ystyle=log_ystyle, log_yticks=log_yticks, log_yrange=log_yrange, log_ytickv=log_ytickv, log_yminor=log_yminor, log_ytickformat=log_ytickformat, log_ytickname=log_ytickn, $
-    position=tpos
+    position=tpos, _extra=ex
 
 ;---Default settings.
     if n_elements(var) eq 0 then begin

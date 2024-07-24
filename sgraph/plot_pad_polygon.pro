@@ -38,14 +38,14 @@ function plot_pad_polygon, pad_var, plot_times=plot_times, $
     position=tpos, is_velocity=is_velocity, axis_title=axis_title, $
     circles=circles, no_axis=no_axis, $
     xrange=xrange, xticks=xticks, xtickv=xtickv, xminor=xminor, $
-    color_table=color_table, cbpos=cbpos, no_colorbar=no_colorbar, ncolor=ncolor, $
+    color_table=color_table, cbpos=cbpos, no_colorbar=no_colorbar, ncolor=ncolor, color_range=color_range, $
     title=title, ztitle=ztitle, $
     zrange=zrange, zticks=zticks, ztickv=ztickv, zminor=zminor, zticklen=zticklen, $
-    test=test, _extra=ex
+    test=test, scale_method=scale_method, file_extension=file_extension, _extra=ex
 
 
     errmsg = ''
-    retval = !null
+    retval = list()
 
 
 ;---Figure out the dimensions.
@@ -114,9 +114,10 @@ function plot_pad_polygon, pad_var, plot_times=plot_times, $
     if n_elements(zminor) eq 0 then zminor = 9
 
     ; color settings.
-    ncolor = 15
-    color_top = 250
-    color_bottom = 10
+    if n_elements(ncolor) eq 0 then ncolor = 15
+    if n_elements(color_range) ne 2 then color_range = [10,250]
+    color_top = color_range[1]
+    color_bottom = color_range[0]
     if n_elements(color_table) eq 0 then color_table = 40
     index_colors = floor(smkarthm(color_bottom,color_top,ncolor,'n'))
     colors = index_colors
@@ -132,8 +133,7 @@ function plot_pad_polygon, pad_var, plot_times=plot_times, $
         errmsg = 'Invalid unit: '+unit+' ...'
         return, retval
     endif
-    axis_title = (unit eq 'velocity')? 'V (km/s)': 'E (eV)'
-
+    if n_elements(axis_title) eq 0 then axis_title = (unit eq 'velocity')? 'V (km/s)': 'E (eV)'
 
 
     ; Plot related settings.
@@ -189,22 +189,22 @@ function plot_pad_polygon, pad_var, plot_times=plot_times, $
     foreach time, plot_times, time_id do begin
         print, mission+', '+probe+', '+species_str+', '+time_string(time)
 
-        time_id = (where(times eq time, count))[0]
-        if count eq 0 then tmp = min(times-time, time_id, abs=1)
-        fluxs = reform(pad_fluxs[time_id,*,*])
+        the_tid = (where(times eq time, count))[0]
+        if count eq 0 then tmp = min(times-time, the_tid, abs=1)
+        fluxs = reform(pad_fluxs[the_tid,*,*])
 
         ; Energy bins.
         if uniform_en_bin then begin
             energys = en_centers
         endif else begin
-            energys = en_centers[time_id,*]
+            energys = en_centers[the_tid,*]
         endelse
 
         ; Pitch angle bins.
         if uniform_pa_bin then begin
             angles = pa_centers
         endif else begin
-            angles = pa_centers[time_id,*]
+            angles = pa_centers[the_tid,*]
         endelse
         tmp = (angles[1:-1]+angles[0:-2])*0.5
         angle_boundarys = [tmp[0]*2-tmp[1],tmp,tmp[-1]*2-tmp[-2]]
@@ -274,16 +274,20 @@ function plot_pad_polygon, pad_var, plot_times=plot_times, $
         ; scaled axis is linear on x and y.
         scaled_xrange = [-1,1]*scale_dis(xrange[1], scale_method)
         scaled_circles = scale_dis(circles, scale_method)
-stop
+
 
     ;---Start to plot.
         prefix = mission+probe+'_'
+        if n_elements(file_extension) eq 0 then file_extension = 'pdf'
         if gen_figure then begin
-            base = prefix+'pad_'+species_str+'_'+time_string(time,tformat='YYYY_MMDD_hhmm_ss')+file_suffix+'_v01.pdf'
-            ofn = join_path([plot_dir,base])
-            if keyword_set(test) then ofn = 0
-            if keyword_set(test) then magn = 2 else magn = 1
-            sgopen, ofn, size=fig_size, inch=1, magn=magn
+            base = prefix+'pad_'+species_str+'_'+time_string(time,tformat='YYYY_MMDD_hhmm_ss')+file_suffix+'_v01.'+file_extension
+            plot_file = join_path([plot_dir,base])
+            if keyword_set(test) then plot_file = 0
+            magn = 1
+            if keyword_set(test) then magn = 2 else if file_extension eq 'png' then magn = 2
+            sgopen, plot_file, size=fig_size, inch=1, magn=magn
+            retval.add, plot_file
+            if ~keyword_set(test) then print, plot_file
         endif
 
         ; Title.
@@ -389,10 +393,11 @@ stop
                 ty = tcdis*sin(tcang)
 
                 ; Can extrude a little.
-                index = where($
-                    tx gt scaled_xrange[0] or tx lt scaled_xrange[1] or $
-                    ty gt scaled_xrange[0] or ty lt scaled_xrange[1] , count)
-                if count eq 0 then continue
+;                index = where($
+;                    tx gt scaled_xrange[0] or tx lt scaled_xrange[1] or $
+;                    ty gt scaled_xrange[0] or ty lt scaled_xrange[1] , count)
+;                if count lt 5 then continue
+                if min(tcdis) ge max(scaled_xrange) then continue
                 polyfill, tx,ty, data=1, color=tc
                 ; symmetric.
                 polyfill, tx,-ty, data=1, color=tc
@@ -416,10 +421,11 @@ stop
         xyouts, tx,ty, title, normal=1, color=black, alignment=0.5, charsize=label_size
         
         ; Add lines at every 45 deg.
+        linestyle=1
         tts = smkarthm(45,360,45,'dx')*constant('rad')
         dis = [0,xrange[1]]*2
         foreach tmp, tts do begin
-            oplot, dis*cos(tmp), dis*sin(tmp), color=black, linestyle=2
+            oplot, dis*cos(tmp), dis*sin(tmp), color=black, linestyle=linestyle
         endforeach
         
         ; Add circles.
@@ -428,7 +434,7 @@ stop
         tys = sin(tmp)
         ncircle = n_elements(scaled_circles)
         for ii=0, ncircle-1 do begin
-            plots, txs*scaled_circles[ii], tys*scaled_circles[ii], linestyle=2, color=black
+            plots, txs*scaled_circles[ii], tys*scaled_circles[ii], linestyle=linestyle, color=black
         endfor
         
         ; Add minor ticks.
@@ -502,7 +508,7 @@ stop
 
     endforeach
 
-    
+    if n_elements(retval) gt 0 then retval = retval.toarray()
     return, retval
 
 end
