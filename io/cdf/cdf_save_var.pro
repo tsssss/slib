@@ -69,9 +69,10 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
             vals = transpose(temporary(data))
       endelse
     endelse
-    
+    ; convert scalar to one-element array, to avoid bug in creating variable.
+    if (size(vals,dimensions=1))[0] eq 0 then vals = [vals]
     nrec = n_elements(vals)
-    data_dims = size(vals,/dimensions)
+    data_dims = size(vals,dimensions=1)
     data_ndim = n_elements(data_dims)
 
     ; Strings are special.

@@ -297,7 +297,8 @@ function prepare_files, request=request, errmsg=errmsg, $
         
         ftime = file.file_time
         foreach local_file, file.local_file, fid do begin
-            remote_file = file.remote_file[fid]
+            remote_files = file.remote_file
+            if n_elements(remote_files) eq 0 then remote_file = !null else remote_file = file.remote_file[fid]
             
             if n_elements(remote_file) eq 0 then begin
                 lprmsg, '    No remote info, stay local ...'
