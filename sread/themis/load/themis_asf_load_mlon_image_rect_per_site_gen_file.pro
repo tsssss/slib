@@ -38,7 +38,8 @@ pro themis_asf_load_mlon_image_rect_per_site_gen_file, time, site=site, filename
         themis_asi_cal_brightness_smooth, asf_var, newname=asf_cal_var, _extra=ex
     endif else begin
         themis_asi_cal_brightness, asf_var, newname=asf_cal_var, calibration_method=calibration_method
-    endelsethemis_calc_asf_mlon_image_rect_per_site, asf_cal_var, errmsg=errmsg
+    endelse
+    themis_calc_asf_mlon_image_rect_per_site, asf_cal_var, errmsg=errmsg
     if errmsg ne '' then return
     
 ;    ; Calibrate brightness after mapping runs much faster.

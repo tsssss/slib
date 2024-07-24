@@ -2,6 +2,7 @@
 ; Read the energy-time spectrogram, for a given pitch angle.
 ; time_range.
 ; probe=.
+; species=.
 ;-
 
 function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
@@ -95,7 +96,26 @@ function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
     endfor
     ;data = reform(total(the_fluxs,3,nan=1)/dims[2])
 
-    store_data, spec_var, times, data, energys
+    
+    ; fix electron data gaps.
+    if species eq 'e' then begin
+        ntime = n_elements(times)
+        nen = n_elements(data[0,*])
+        en_centers = fltarr(nen)
+        for eid=0,nen-1 do begin
+            en_centers[eid] = median(energys[*,eid])
+        endfor
+        for tid=0,ntime-1 do data[tid,*] = sinterpol(reform(data[tid,*]),reform(energys[tid,*]),en_centers)
+        for eid=0,nen-1 do begin
+            index = where(finite(data[*,eid]) and data[*,eid] ne 0,count)
+            if count lt ntime then begin
+                data[*,eid] = interpol(data[index,eid],times[index],times)
+            endif
+        endfor
+    endif else en_centers = energys
+    
+    store_data, spec_var, times, data, en_centers
+
 
     zrange = (species eq 'e')? [1e4,1e10]: [1e4,1e8]
     species_name = species_infos[species].short_name

@@ -5,6 +5,7 @@
 ;-
 
 function rbsp_read_wave_spec_hz, input_time_range, probe=probe, $
+    use_e12=use_e12, use_e34=use_e34, $
     errmsg=errmsg, get_name=get_name, id=id, update=update, suffix=suffix
 
     prefix = 'rbsp'+probe+'_'
@@ -21,7 +22,17 @@ function rbsp_read_wave_spec_hz, input_time_range, probe=probe, $
     if ~check_if_update(out_var, time_range) then return, out_var
 
     if id eq 'e' then begin
-        field_var = rbsp_read_efield(time_range, probe=probe, resolution='survey', errmsg=errmsg)
+        if keyword_set(use_e12) or keyword_set(use_e34) then begin
+            rbsp_efw_phasef_read_e_uvw, time_range, probe=probe
+            e_var = prefix+'e_uvw'
+            vecs = get_var_data(e_var, times=times)
+            if keyword_set(use_e12) then index = 0 else index = 1
+            comps = constant('uvw')
+            field_var = prefix+'e'+comps[index]
+            store_data, field_var, times, vecs[*,index]
+        endif else begin
+            field_var = rbsp_read_efield(time_range, probe=probe, resolution='survey', errmsg=errmsg)
+        endelse
     endif else begin
         field_var = rbsp_read_bfield(time_range, probe=probe, resolution='hires', errmsg=errmsg)
         r_var = rbsp_read_orbit(time_range, probe=probe)

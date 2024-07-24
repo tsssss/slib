@@ -44,9 +44,6 @@ function test_themis_asf_calc_background, input_data, moon_angles, min_data=min_
 
         sample_indexs = sort_uniq(sample_indexs)
         sample_values = the_data[sample_indexs]
-        sample_indexs0 = sample_indexs
-        sample_values0 = sample_values
-
 
         ; sample_index are sparse at low values, need to add some more (but not too close).
         nsample_index = n_elements(sample_indexs)
@@ -105,11 +102,11 @@ function test_themis_asf_calc_background, input_data, moon_angles, min_data=min_
     weight = (tanh((bg1-2.5e3)/5e3)+1)*0.5
     bg1 *= weight
     
-;    plot, the_data, yrange=[1,65536], xstyle=1
-;    oplot, bg1, color=sgcolor('red')
-;    plots, middle_indexs, middle_values, psym=1, color=sgcolor('red')
-;    oplot, bg1*weight, color=sgcolor('blue')
-;    stop
+    plot, the_data, yrange=[1,65536], xstyle=1
+    oplot, bg1, color=sgcolor('red')
+    plots, middle_indexs, middle_values, psym=1, color=sgcolor('red'), symsize=0.5
+    oplot, bg1*weight, color=sgcolor('blue')
+    stop
     return, bg1+min_data
     
 
@@ -119,6 +116,11 @@ end
 
 
 test_list = list()
+test_list.add, dictionary($
+    'site', 'whit', $
+    'pixel2d', [80,50], $
+    'label', 'moon', $
+    'time_range', ['2015-01-04/06:00','2015-01-04/16:00'] )
 test_list.add, dictionary($
     'site', 'inuv', $
     'pixel2d', [56,160], $

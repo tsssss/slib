@@ -11,7 +11,9 @@ pro rbsp_read_burst_efield, time, probe=probe, prefix=pre0, datarate=dt, spin_ax
     ; 'edot0': Calculate E spin-axis using E dot B = 0.
     if n_elements(sa_mode) eq 0 then sa_mode = 'e0'
 
-    rbsp_read_efw, time, id='l1%vb1', probe=probe, errmsg=errmsg
+    ;rbsp_read_efw, time, id='l1%vb1', probe=probe, errmsg=errmsg
+    files = rbsp_load_efw(time, id='l1%vb1-split', probe=probe, errmsg=errmsg)
+    cdf2tplot, files, prefix=pre1+'efw_'
     vvar = pre1+'efw_vb1'
 
     ; Adopted from rbsp_load_efw_waveform, rbsp_efw_cal_waveform.
