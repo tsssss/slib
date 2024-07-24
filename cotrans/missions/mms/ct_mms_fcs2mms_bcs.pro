@@ -3,7 +3,7 @@
 ; c.f. mms_feeps_pitch_angles.pro.
 ;-
 
-function mms_fcs2mms_bcs, vec_fcs, times, probe=probe, errmsg=errmsg
+function ct_mms_fcs2mms_bcs, vec_fcs, times, probe=probe, errmsg=errmsg
     errmsg = ''
     retval = !null
     
@@ -19,7 +19,7 @@ function mms_fcs2mms_bcs, vec_fcs, times, probe=probe, errmsg=errmsg
 end
 
 m_fcs2bcs0 = mms_get_m_bcs2fcs()
-print, mms_fcs2mms_bcs((fltarr(1)+1) # [1,0,0])-m_fcs2bcs0[*,0]
-print, mms_fcs2mms_bcs((fltarr(1)+1) # [0,1,0])-m_fcs2bcs0[*,1]
-print, mms_fcs2mms_bcs((fltarr(1)+1) # [0,0,1])-m_fcs2bcs0[*,2]
+print, ct_mms_fcs2mms_bcs((fltarr(1)+1) # [1,0,0])-m_fcs2bcs0[*,0]
+print, ct_mms_fcs2mms_bcs((fltarr(1)+1) # [0,1,0])-m_fcs2bcs0[*,1]
+print, ct_mms_fcs2mms_bcs((fltarr(1)+1) # [0,0,1])-m_fcs2bcs0[*,2]
 end

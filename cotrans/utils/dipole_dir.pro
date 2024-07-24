@@ -122,7 +122,7 @@ dipole_dir, time, v1,v2,v3
 print, v1,v2,v3
 print, gmst(time)
 rgsm = [v1,v2,v3]
-rsm = gsm2sm(rgsm, time)
+rsm = ct_gsm2sm(rgsm, time)
 print, rsm
 
 ; test against a previous version.

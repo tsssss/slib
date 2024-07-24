@@ -21,7 +21,7 @@ function aacgm_mlon2mlt, mlon0, time, radian=radian, errmsg=errmsg
     r_geo[*,0] = dis*cos(dec)*cos(slon)
     r_geo[*,1] = dis*cos(dec)*sin(slon)
     r_geo[*,2] = dis*sin(dec)
-    r_aacgm = geo2aacgm(r_geo, time)
+    r_aacgm = ct_geo2aacgm(r_geo, time)
     sun_mlon = r_get_lon(r_aacgm)*rad2hour
 
     

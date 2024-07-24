@@ -1,11 +1,11 @@
 ;+
-; Convert a vector from GSM to SM.
+; Convert a vector from SM to GSM.
 ;
-; vec0. An array in [3] or [n,3]. In GSM, in any unit.
+; vec0. An array in [3] or [n,3]. In SM, in any unit.
 ; times. An array of UT sec, in [n].
 ;-
 
-function gsm2sm, vec0, time, _extra=ex
+function ct_sm2gsm, vec0, time, _extra=ex
     compile_opt idl2 & on_error, 2
 
     vec1 = double(vec0)
@@ -14,7 +14,7 @@ function gsm2sm, vec0, time, _extra=ex
     vy0 = vec1[n1:n2-1]
     vz0 = vec1[n2:n3-1]
 
-    ; get t4.
+    ; get transpose(t4).
     dipole_dir, time, qgx, qgy, qgz     ; qg in geo.
     gmst = gmst(time, /radian)          ; geo to gei.
     sing = sin(gmst)
@@ -31,9 +31,9 @@ function gsm2sm, vec0, time, _extra=ex
     cosm = cos(m)
 
     ; vectorized, so should be faster than matrix ##.
-    vx1 = cosm*vx0 - sinm*vz0
-    vy1 = vy0
-    vz1 = sinm*vx0 + cosm*vz0
+    vx1 =  cosm*vx0 + sinm*vz0
+    vy1 =  vy0
+    vz1 = -sinm*vx0 + cosm*vz0
 
     vec1[0:n1-1] = temporary(vx1)
     vec1[n1:n2-1] = temporary(vy1)

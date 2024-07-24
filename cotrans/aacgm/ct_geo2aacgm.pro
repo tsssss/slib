@@ -135,5 +135,5 @@ r_geos = [$
     [sin(glat*rad)*(1+alt/re)]]
 times = time_double(string(year,format='(I04)')+string(month,format='(I02)')+string(day,format='(I02)'),tformat='YYYYMMDD')
 r_aacgm = geo2aacgm(r_geos, times)
-r_geo = aacgm2geo(r_aacgm, times)
+r_geo = ct_aacgm2geo(r_aacgm, times)
 end

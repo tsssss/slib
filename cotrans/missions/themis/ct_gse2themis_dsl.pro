@@ -6,7 +6,7 @@
 ; Adpoted from dsl2gse in spedas.
 ;-
 
-function themis_dsl2gse, vec_dsl, times, probe=probe, errmsg=errmsg
+function ct_gse2themis_dsl, vec_gse, times, probe=probe, errmsg=errmsg
 
     errmsg = ''
     retval = !null
@@ -42,21 +42,19 @@ function themis_dsl2gse, vec_dsl, times, probe=probe, errmsg=errmsg
         store_data, q_var, uts, q_gse2dsl
         xyz = constant('xyz')
         add_setting, q_var, smart=1, dictionary($
-            'in_coord', 'GEI', $
+            'in_coord', 'THEMIS_DSL', $
             'in_coord_labels', xyz, $
             'out_coord', 'GSE', $
             'out_coord_labels', 'xyz', $
             'requested_time_range', time_range )
     endif
     
-
     
     ; Interpolate to the wanted times.
     q_gse2dsl = qslerp(get_var_data(q_var, times=uts), uts, times)
-    q_dsl2gse = qinv(q_gse2dsl)
-    m_dsl2gse = qtom(q_dsl2gse)
-    vec_gse = rotate_vector(vec_dsl, m_dsl2gse)
+    m_gse2dsl = qtom(q_gse2dsl)
+    vec_dsl = rotate_vector(vec_gse, m_gse2dsl)
 
-    return, vec_gse
+    return, vec_dsl
 
 end

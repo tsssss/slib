@@ -7,7 +7,7 @@
 ; Adpoted from ssl2dsl in spedas.
 ;-
 
-function themis_dsl2themis_ssl, vec_dsl, times, probe=probe, errmsg=errmsg
+function ct_themis_dsl2themis_ssl, vec_dsl, times, probe=probe, errmsg=errmsg
 
     errmsg = ''
     retval = !null

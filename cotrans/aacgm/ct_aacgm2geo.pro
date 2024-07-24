@@ -3,7 +3,7 @@
 ; Note: only glat and glon are obtained. dis is just 1.
 ;-
 
-function aacgm2geo, r_aacgm, times
+function ct_aacgm2geo, r_aacgm, times
 
 
     aacgm_coef_var = aacgm_read_coef()

@@ -5,7 +5,7 @@
 ; SSL (Spin-sun Sensor L-vectorZ coord)
 ;-
 
-function themis_ssl2themis_spg, vec_ssl, times, probe=probe, errmsg=errmsg
+function ct_themis_ssl2themis_spg, vec_ssl, times, probe=probe, errmsg=errmsg
 
     errmsg = ''
     retval = !null

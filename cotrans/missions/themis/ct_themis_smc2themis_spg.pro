@@ -5,7 +5,7 @@
 ; SPG (Spinning Probe Geometrical coord)
 ;-
 
-function themis_smc2themis_spg, vec_smc, times, probe=probe, errmsg=errmsg
+function ct_themis_smc2themis_spg, vec_smc, times, probe=probe, errmsg=errmsg
 
     errmsg = ''
     retval = !null

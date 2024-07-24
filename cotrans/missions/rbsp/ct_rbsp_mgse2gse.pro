@@ -11,7 +11,7 @@
 ; adopted from mgse2gse.
 ;-
 
-function rbsp_mgse2gse, vec0, time, wsc=wsc_gse, probe=probe, use_orig_quaternion=use_orig_quaternion, _extra=ex
+function ct_rbsp_mgse2gse, vec0, time, wsc=wsc_gse, probe=probe, use_orig_quaternion=use_orig_quaternion, _extra=ex
 
     compile_opt idl2 & on_error, 2
 

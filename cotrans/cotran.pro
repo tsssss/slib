@@ -17,7 +17,7 @@ function cotran, vec0, time, msg, errmsg=errmsg, print_coord=print_coord, _extra
     retval = !null
 
     ; Call existing functions.
-    native_functions = [$
+    native_function0 = [$
     ;---mission specific
         ; THEMIS.
         'themis_smc2themis_spg', 'themis_spg2themis_smc', $
@@ -36,8 +36,9 @@ function cotran, vec0, time, msg, errmsg=errmsg, print_coord=print_coord, _extra
         'gsm2sm','sm2gsm', $
         'mgse2gse','gse2mgse', $    ; These are rbsp specific, needs to be updated.
         'uvw2gse','gse2uvw']
+    native_functions = 'ct_'+native_function0
         
-    supported_coord = strsplit(native_functions,'2',/extract)
+    supported_coord = strsplit(native_function0,'2',/extract)
     supported_coord = supported_coord.toarray()
     supported_coord = supported_coord[*]
     supported_coord = suniq(supported_coord)
@@ -49,25 +50,26 @@ function cotran, vec0, time, msg, errmsg=errmsg, print_coord=print_coord, _extra
         return, retval
     endif
     
-    index = where(native_functions eq msg, count)
+    routine = 'ct_'+msg
+    index = where(native_functions eq routine, count)
     if count ne 0 then begin
         pos = strpos(msg, 'mgse')
         pos2 = strpos(msg, 'uvw')
         if pos[0] eq -1 and pos2[0] eq -1 then begin
-            return, call_function(msg, vec0, time)
+            return, call_function(routine, vec0, time)
         endif else begin
-            return, call_function(msg, vec0, time, _extra=ex)
+            return, call_function(routine, vec0, time, _extra=ex)
         endelse
     endif
 
     ; Use existing functions to coerce.
     coords = strsplit(msg,'2',/extract)
     case coords[0] of
-        'sm': vec1 = gsm2gse(sm2gsm(vec0,time),time)
-        'gsm': vec1 = gsm2gse(vec0,time)
-        'gei': vec1 = gei2gse(vec0,time)
-        'geo': vec1 = gei2gse(geo2gei(vec0,time),time)
-        'mag': vec1 = gei2gse(geo2gei(mag2geo(vec0,time),time),time)
+        'sm': vec1 = ct_gsm2gse(ct_sm2gsm(vec0,time),time)
+        'gsm': vec1 = ct_gsm2gse(vec0,time)
+        'gei': vec1 = ct_gei2gse(vec0,time)
+        'geo': vec1 = ct_gei2gse(ct_geo2gei(vec0,time),time)
+        'mag': vec1 = ct_gei2gse(ct_geo2gei(ct_mag2geo(vec0,time),time),time)
         'mgse': vec1 = mgse2gse(vec0,time,_extra=ex)
         'uvw': vec1 = uvw2gse(vec0,time,_extra=ex)
         'gse': vec1 = vec0
@@ -78,11 +80,11 @@ function cotran, vec0, time, msg, errmsg=errmsg, print_coord=print_coord, _extra
     endcase
 
     case coords[1] of
-        'sm': return, gsm2sm(gse2gsm(vec1,time),time)
-        'gsm': return, gse2gsm(vec1,time)
-        'gei': return, gse2gei(vec1,time)
-        'geo': return, gei2geo(gse2gei(vec1,time),time)
-        'mag': return, geo2mag(gei2geo(gse2gei(vec1,time),time),time)
+        'sm': return, ct_gsm2sm(ct_gse2gsm(vec1,time),time)
+        'gsm': return, ct_gse2gsm(vec1,time)
+        'gei': return, ct_gse2gei(vec1,time)
+        'geo': return, ct_gei2geo(ct_gse2gei(vec1,time),time)
+        'mag': return, ct_geo2mag(ct_gei2geo(ct_gse2gei(vec1,time),time),time)
         'mgse': return, gse2mgse(vec1,time,_extra=ex)
         'uvw': return, gse2uvw(vec1,time,_extra=ex)
         'gse': return, vec1

@@ -21,7 +21,7 @@ function cotran_pro_find_path, path, stop_coord, supported_funcs, $
     if current_coord eq stop_coord then return, path
 
     ; Return if it's directly available.
-    index = where(supported_funcs eq path[-1]+'2'+stop_coord, count)
+    index = where(supported_funcs eq 'ct_'+path[-1]+'2'+stop_coord, count)
     if count ne 0 then return, [path,stop_coord]
     
 
@@ -116,7 +116,7 @@ function cotran_pro, input_vec, times, msg, coord_msg=coord_msg, errmsg=errmsg, 
     endif
 
     routines = strarr(npath-1)
-    for ii=0,npath-2 do routines[ii] = strjoin(paths[ii:ii+1],'2')
+    for ii=0,npath-2 do routines[ii] = 'ct_'+strjoin(paths[ii:ii+1],'2')
     output_vec = float(input_vec)
     foreach routine, routines do begin
         output_vec = call_function(routine, output_vec, times, probe=probe, errmsg=errmsg)
