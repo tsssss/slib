@@ -9,9 +9,10 @@
 ; compress=. A number sets the compress level, 0-9?
 ; cdf_type=. A string specifies the cdf_type.
 ; save_as_one=. A boolean to save value as a whole, i.e., nrec=1. Used to save metadata.
+; copy_data=. A boolean, set to copy data, otherwise data is destroyed after running this routine.
 ;-
 pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
-    compress=compress, cdf_type=cdf_type, $
+    compress=compress, cdf_type=cdf_type, copy_data=copy_data, $
     save_as_one=save_as_one, errmsg=errmsg
 
     errmsg = ''
@@ -58,15 +59,21 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
     extra = create_struct(var_type,1)
 
     ; Get the data size.
-    if keyword_set(save_as_one) then begin
-        vals = temporary(data)
+    if keyword_set(copy_data) then begin
+        vals = data
     endif else begin
-        ndim = size(data,n_dimension=1)
+        vals = temporary(data)
+    endelse
+    
+    if keyword_set(save_as_one) then begin
+        ;vals = vals
+    endif else begin
+        ndim = size(vals,n_dimension=1)
         if ndim gt 1 then begin
             permu = shift(findgen(ndim),-1)
-            vals = transpose(temporary(data),permu)
+            vals = transpose(vals,permu)
         endif else begin
-            vals = transpose(temporary(data))
+            vals = transpose(vals)
       endelse
     endelse
     ; convert scalar to one-element array, to avoid bug in creating variable.
