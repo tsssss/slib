@@ -29,6 +29,7 @@ function where_pro, data, relation, range, count=count, _extra=ex
         'lt': res = where(data lt val[0], count, _extra=ex)
         '<': res = where(data lt val[0], count, _extra=ex)
         'eq': res = where(data eq val[0], count, _extra=ex)
+        'ne': res = where(data ne val[0], count, _extra=ex)
         '==': res = where(data eq val[0], count, _extra=ex)
         '[)': res = where(data ge val[0] and data lt val[1], count, _extra=ex)
         '(]': res = where(data gt val[0] and data le val[1], count, _extra=ex)
