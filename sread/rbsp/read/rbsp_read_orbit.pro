@@ -58,5 +58,5 @@ end
 
 time_range = ['2013-06-07','2013-06-08']
 probe = 'a'
-var = rbsp_read_orbit(time_range, probe=probe)
+var = rbsp_read_orbit(time_range, probe=probe, coord='sm', resolution='1sec')
 end

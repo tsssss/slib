@@ -23,6 +23,10 @@ function rbsp_read_bfield_spec, input_time_range, probe=probe, errmsg=errmsg, $
     spec_vars.add, rbsp_read_wave_spec_khz(time_range, probe=probe, id=id)
     spec_vars.add, rbsp_read_wave_spec_hz(time_range, probe=probe, id=id)
     freq_ranges = [[10,1e4],[0.1,10]]
+    spec_vars = spec_vars.toarray()
+    index = where_pro(spec_vars, 'ne', '', count=count)
+    spec_vars = spec_vars[index]
+    freq_ranges = freq_ranges[*,index]
 
 ;---Combine them.
     yrange = [0.1,1e4]

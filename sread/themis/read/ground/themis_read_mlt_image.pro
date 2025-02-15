@@ -6,7 +6,7 @@
 ;-
 
 function themis_read_mlt_image, input_time_range, sites=sites, $
-    min_elevs=min_elevs, resolutions=resolutiosn, $
+    min_elevs=min_elevs, resolutions=resolutions, $
     merge_method=merge_method, update=update, $
     get_name=get_name, calibration_method=calibration_method, _extra=extra
 
@@ -18,11 +18,11 @@ function themis_read_mlt_image, input_time_range, sites=sites, $
     time_range = time_double(input_time_range)
     if ~check_if_update(mlt_image_var, time_range) then return, mlt_image_var
     if time_range[-1] lt time_range[0] then message, 'Inconsistent ...'
-    if total(time_range*[-1,1]) ge 12*3600 then message, 'Time range too long ...'
+    if total(time_range*[-1,1]) ge 12*3600d then message, 'Time range too long ...'
 
 ;---Get mlon image.
     mlon_image_var = themis_read_mlon_image(input_time_range, sites=sites, $
-        min_elevs=min_elevs, resolutions=resolutiosn, $
+        min_elevs=min_elevs, resolutions=resolutions, $
         merge_method=merge_method, errmsg=errmsg, $
         calibration_method=calibration_method)
     if errmsg ne '' then return, retval

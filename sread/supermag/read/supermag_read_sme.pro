@@ -73,13 +73,23 @@ pro supermag_read_sme, input_time_range, errmsg=errmsg
     out_vars = prefix+in_vars
     var_list.add, dictionary($
         'in_vars', in_vars, $
-        'out_vars', out_vars )
+        'out_vars', out_vars, $
+        'time_var_name', 'time', $
+        'time_var_type', 'unix' )
     read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
 
 
 ;---Further processing.
     sme_var = prefix+'sme'
     get_data, sme_var, times, sme
+    fillval = -1e5
+    maxval = 1e5
+    index = where(sme le fillval or sme ge maxval, count)
+    if count ne 0 then begin
+        sme[index] = !values.f_nan
+        store_data, sme_var, times, sme
+    endif
+  
     omni_read_index, time_range
     ae = get_var_data('ae', at=times)
     store_data, sme_var, times, [[sme],[ae]]

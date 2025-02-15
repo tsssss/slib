@@ -7,12 +7,12 @@ function rbsp_read_temperature, input_time_range, probe=probe, $
     retval = ''
 
     if n_elements(species) eq 0 then species = 'e'
-    index = where(species eq rbsp_hope_species(), count)
+    index = where(species eq rbsp_get_hope_species(), count)
     if count eq 0 then begin
         errmsg = 'Invalid species: '+species+' ...'
         return, retval
     endif
-    species_name = rbsp_hope_species_name(species)
+    species_name = rbsp_get_hope_species_name(species)
     if n_elements(suffix) eq 0 then suffix = ''
     var = prefix+species+'_temp'+suffix
     if keyword_set(get_name) then return, var

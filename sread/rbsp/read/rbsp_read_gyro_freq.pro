@@ -22,7 +22,7 @@ function rbsp_read_gyro_freq, input_time_range, probe=probe, errmsg=errmsg, $
     retval = ''
 
     if n_elements(species) eq 0 then species = 'e'
-    all_species = rbsp_hope_species()
+    all_species = rbsp_get_hope_species()
     index = where(all_species eq species, count)
     if count eq 0 then begin
         errmsg = 'Invalid species: '+species+' ...'

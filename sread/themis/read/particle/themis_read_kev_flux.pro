@@ -2,7 +2,7 @@
 ; Read high energy electron and ion fluxes.
 ;-
 function themis_read_kev_flux, input_time_range, probe=probe, $
-    errmsg=errmsg, get_name=get_name, spec=spec, energy_range=energy_range
+    errmsg=errmsg, get_name=get_name, spec=spec, energy_range=energy_range, pitch_angle_range=pitch_angle_range
 
     e_var = themis_read_kev_electron(input_time_range, probe=probe, get_name=1)
     p_var = themis_read_kev_proton(input_time_range, probe=probe, get_name=1)
@@ -12,9 +12,9 @@ function themis_read_kev_flux, input_time_range, probe=probe, $
 
     errmsg = ''
     retval = ''
-    e_var = themis_read_kev_electron(input_time_range, probe=probe, errmsg=errmsg)
+    e_var = themis_read_kev_electron(input_time_range, probe=probe, errmsg=errmsg, energy_range=energy_range, pitch_angle_range=pitch_angle_range)
     if errmsg ne '' then return, retval
-    p_var = themis_read_kev_proton(input_time_range, probe=probe, errmsg=errmsg)
+    p_var = themis_read_kev_proton(input_time_range, probe=probe, errmsg=errmsg, energy_range=energy_range, pitch_angle_range=pitch_angle_range)
     if errmsg ne '' then return, retval
 
 

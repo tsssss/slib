@@ -65,13 +65,13 @@ function rbsp_plot_pa2d, input_time_range, probe=probe, $
     if n_elements(input_species) eq 0 then input_species = 'p'
     species = strlowcase(strmid(input_species,0,1))
     if species eq 'h' then species = strmid(input_species,0,2)
-    supported_species = rbsp_hope_species()
+    supported_species = rbsp_get_hope_species()
     index = where(supported_species eq species, count)
     if count eq 0 then begin
       errmsg = 'Invalid species: '+input_species+' ...'
       return, retval
     endif
-    species_str = rbsp_hope_species_name(species)
+    species_str = rbsp_get_hope_species_name(species)
     
     ; mass.
     case species of

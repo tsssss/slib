@@ -1,7 +1,7 @@
 ;+
 ; Return the name/labeling for a given species.
 ;-
-function rbsp_hope_species_name, species
+function rbsp_get_hope_species_name, species
     info = dictionary($
         'o', 'O+', $
         'p', 'H+', $

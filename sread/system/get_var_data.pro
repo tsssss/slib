@@ -28,11 +28,15 @@ function get_var_data, var, val, in=time_range, at=time, raw=raw, times=times, l
     if size(lim,type=1) ne 8 then settings = !null else settings = dictionary(lim)
     
     if keyword_set(time) ne 0 then begin
+        ; check if var is quaternion.
+        display_type = get_var_setting(var, 'display_type', exist)
+        if not exist then display_type = 'generic'
+        is_quaternion = display_type eq 'quaternion'
         if n_elements(time) eq 1 then begin
             index = where(times eq time[0], count)
-            if count eq 0 then dat = sinterpol(dat, times, time, /nan, _extra=ex) else dat = dat[index,*,*,*,*,*,*,*]
+            if count eq 0 then dat = sinterpol(dat, times, time, nan=1, is_quaternion=is_quaternion, extra=ex) else dat = dat[index,*,*,*,*,*,*,*]
         endif else begin
-            dat = sinterpol(dat, times, time, /nan, _extra=ex)
+            dat = sinterpol(dat, times, time, nan=1, is_quaternion=is_quaternion, _extra=ex)
         endelse
     endif
     

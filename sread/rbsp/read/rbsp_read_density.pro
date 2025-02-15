@@ -1,5 +1,5 @@
 ;+
-; Read HOPE density.
+; Read density.
 ; input_time_range,
 ; probe=.
 ; id=. 'emfisis','hope','efw'. Default is 'hope'

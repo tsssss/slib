@@ -56,7 +56,6 @@ function themis_read_ion_vel, input_time_range, probe=probe, id=datatype, $
     if coord ne 'gsm' then begin
         get_data, var, times, vec
         vec = cotran_pro(vec, times, 'gsm2'+coord, probe=probe)
-        var = prefix+'u_'+coord
         store_data, vec_coord_var, times, vec
     endif
     add_setting, vec_coord_var, smart=1, dictionary($

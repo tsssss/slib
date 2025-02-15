@@ -1,8 +1,8 @@
 ;+
-; Read SME (AE-like) 1D.
+; Read Symh (Dst-like) 1D.
 ;-
 
-function supermag_read_ae, input_time_range, errmsg=errmsg, get_name=get_name
+function supermag_read_symh, input_time_range, errmsg=errmsg, get_name=get_name
 
     compile_opt idl2
     supermag_api
@@ -12,17 +12,17 @@ function supermag_read_ae, input_time_range, errmsg=errmsg, get_name=get_name
     if errmsg ne '' then return, ''
 
     prefix = 'sm_'
-    sme_var = prefix+'ae'
-    if keyword_set(get_name) then return, sme_var
+    var_info = prefix+'symh'
+    if keyword_set(get_name) then return, var_info
 
-    in_vars = ['sme']
+    in_vars = ['smr']
     time_var = 'time'
     vatt_info = dictionary($
-        'sme', dictionary($
+        'smr', dictionary($
             'VAR_TYPE', 'data', $
             'DEPEND_0', time_var, $
             'UNITS', 'nT', $
-            'VAR_NOTES', 'SME index' ) )
+            'VAR_NOTES', 'SMR index' ) )
 
 
     secofday = constant('secofday')
@@ -32,8 +32,8 @@ function supermag_read_ae, input_time_range, errmsg=errmsg, get_name=get_name
             common_times = cdf_read_var(time_var, filename=file)
             day_time_range = common_times[0]+[0,secofday]
             ntime = n_elements(common_times)
-            if var eq 'sme' then begin
-                tmp = supermaggetindicesarray(day_time_range, times, sme=val)
+            if var eq 'smr' then begin
+                tmp = supermaggetindicesarray(day_time_range, times, smr=val)
                 if ntime ne n_elements(times) then message, 'Inconsistency ...'
                 cdf_save_var, var, value=val, filename=file
                 cdf_save_setting, vatt_info[var], varname=var, filename=file
@@ -43,28 +43,27 @@ function supermag_read_ae, input_time_range, errmsg=errmsg, get_name=get_name
 
 
     var_list = list()
-    out_vars = prefix+in_vars
+    out_vars = var_info
     var_list.add, dictionary($
         'in_vars', in_vars, $
-        'out_vars', out_vars )
+        'out_vars', out_vars, $
+        'time_var_name', 'time', $
+        'time_var_type', 'unix' )
     read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
 
 
 ;---Further processing.
-    sme_var = rename_var(prefix+'sme', output=sme_var)
-    get_data, sme_var, times, sme
-    add_setting, sme_var, smart=1, dictionary($
+    add_setting, var_info, smart=1, dictionary($
         'display_type', 'scalar', $
         'unit', 'nT', $
-        'short_name', 'AE' )
+        'short_name', 'SMR' )
     
-    return, sme_var
-
+    return, var_info
 
 end
 
 
-time_range = ['2019-01-01','2019-01-02']
-time_range = ['2019-01-01','2019-01-02']
-var = supermag_read_ae(time_range)
+tr = ['2015-03-17','2015-03-19']
+var = supermag_read_symh(tr)
+dst_var = omni_read_symh(tr)
 end
