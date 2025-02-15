@@ -28,10 +28,10 @@ function project_load, project_info, root_dir=root_dir
     
     ; GoogleDrive appears as different names in different OS.
     if ~file_test(project.root_dir,/directory) then begin
-        project.root_dir = join_path([googledir(),'works',project.name])
+        project.root_dir = join_path([googledir(),'works',project.id_with_year])
         project.data_dir = join_path([project.root_dir,'data'])
         project.plot_dir = join_path([project.root_dir,'plot'])
-        project.code_dir = join_path([homedir(),'Project','idl','spacephys','topics',project.name])
+        project.code_dir = join_path([project_idl_dir(),project.name])
         project.file = join_path([project.data_dir,project.name+'_project_info.tplot'])
     endif
     if ~file_test(project.file) then call_procedure, project.name+'_init_project', project
@@ -39,4 +39,7 @@ function project_load, project_info, root_dir=root_dir
 
     return, project
 
+end
+
+project_info = project_load('arc')
 end
