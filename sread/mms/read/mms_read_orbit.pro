@@ -35,6 +35,9 @@ function mms_read_orbit, input_time_range, probe=probe, $
     ; Convert to Re and remove |B|.
     get_data, orig_var, times, r_coord
     r_coord = r_coord[*,0:2]*(1d/constant('re'))
+    ; Remove invalid data.
+    index = where(snorm(r_coord) ge 1e4, count)
+    if count ne 0 then r_coord[index,*] = !values.f_nan
     store_data, orig_var, times, r_coord
 
     if coord ne 'gsm' then begin

@@ -42,7 +42,7 @@ function mms_ld_hpca, input_time_range, id=datatype, probe=probe, $
     foreach type_str, types do begin
         keys = [level_str,mode_str,type_str]
         the_key = strjoin(keys,'%')
-        base_name = mission_str+probe+'_'+instr_str+'_'+mode_str+'_'+level_str+'_'+type_str+'_%Y%m%d%H[0-9]{4}_'+version+'.cdf'
+        base_name = mission_str+probe+'_'+instr_str+'_'+mode_str+'_'+level_str+'_'+type_str+'_%Y%m%d[0-9]{6}_'+version+'.cdf'
         local_path = [local_root,mission_str+probe,instr_str,mode_str,level_str,type_str,'%Y','%m']
         remote_path = [remote_root,mission_str+probe,instr_str,mode_str,level_str,type_str,'%Y','%m']
         type_dispatch[the_key] = dictionary($
