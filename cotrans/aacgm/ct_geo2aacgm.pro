@@ -3,7 +3,7 @@
 ; Note: only mlat and mlon are obtained. dis is just 1.
 ;-
 
-function geo2aacgm, r_geo, times, glat=glat, glon=glon, dis=dis
+function ct_geo2aacgm, r_geo, times, glat=glat, glon=glon, dis=dis
 
     aacgm_coef_var = aacgm_read_coef()
     coef_v2 = (get_var_data(aacgm_coef_var, times=coef_times))['geo2aacgm']
@@ -96,7 +96,7 @@ glat_vars = dmsp_read_glat_vars_madrigal(time_range, probe=probe)
 mlat_vars2 = dmsp_read_mlat_vars_madrigal(time_range, probe=probe)
 ;r_var = dmsp_read_orbit(time_range, probe=probe, coord='geo')
 ;r_geo = get_var_data(r_var, times=times)
-;r_aacgm = geo2aacgm(r_geo, times)
+;r_aacgm = ct_geo2aacgm(r_geo, times)
 stop
 
 
@@ -134,6 +134,6 @@ r_geos = [$
     [cos(glat*rad)*sin(glon*rad)*(1+alt/re)], $
     [sin(glat*rad)*(1+alt/re)]]
 times = time_double(string(year,format='(I04)')+string(month,format='(I02)')+string(day,format='(I02)'),tformat='YYYYMMDD')
-r_aacgm = geo2aacgm(r_geos, times)
+r_aacgm = ct_geo2aacgm(r_geos, times)
 r_geo = ct_aacgm2geo(r_aacgm, times)
 end

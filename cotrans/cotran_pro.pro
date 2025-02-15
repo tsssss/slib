@@ -21,7 +21,7 @@ function cotran_pro_find_path, path, stop_coord, supported_funcs, $
     if current_coord eq stop_coord then return, path
 
     ; Return if it's directly available.
-    index = where(supported_funcs eq 'ct_'+path[-1]+'2'+stop_coord, count)
+    index = where(supported_funcs eq path[-1]+'2'+stop_coord, count)
     if count ne 0 then return, [path,stop_coord]
     
 
@@ -31,10 +31,13 @@ function cotran_pro_find_path, path, stop_coord, supported_funcs, $
     
     new_path_list = list()
     foreach the_func, useful_funcs do begin
-        next_coord = (strsplit(the_func,'2',extract=1))[1]
-        if parsed_coords.where(next_coord) ne !null then continue
-        parsed_coords.add, next_coord
-        the_path = cotran_pro_find_path([path,next_coord], stop_coord, supported_funcs, parsed_coords)
+        my_coords = strsplit(the_func,'2',extract=1)
+        my_current_coord = my_coords[0]
+        if my_current_coord ne current_coord then continue  ; this is to fix a bug: gsm2gse should be excluded for sm to gse.
+        my_next_coord = my_coords[1]
+        if parsed_coords.where(my_next_coord) ne !null then continue
+        parsed_coords.add, my_next_coord
+        the_path = cotran_pro_find_path([path,my_next_coord], stop_coord, supported_funcs, parsed_coords)
         if n_elements(the_path) ne 0 then return, the_path
     endforeach
 
@@ -74,6 +77,8 @@ function cotran_pro, input_vec, times, msg, coord_msg=coord_msg, errmsg=errmsg, 
         ; RBSP.
         'rbsp_uvw2gse', 'gse2rbsp_uvw', $
         'rbsp_mgse2gse', 'gse2rbsp_mgse', $
+        ; Polar.
+        'polar_spc2gsm', 'gsm2polar_spec', $
     ;---General
         'gei2geo','geo2gei', $
         'gei2gse','gse2gei', $
@@ -119,7 +124,8 @@ function cotran_pro, input_vec, times, msg, coord_msg=coord_msg, errmsg=errmsg, 
     for ii=0,npath-2 do routines[ii] = 'ct_'+strjoin(paths[ii:ii+1],'2')
     output_vec = float(input_vec)
     foreach routine, routines do begin
-        output_vec = call_function(routine, output_vec, times, probe=probe, errmsg=errmsg)
+        output_vec = call_function(routine, output_vec, times, $
+            probe=probe, errmsg=errmsg)
         if errmsg ne '' then return, retval
     endforeach
     return, output_vec
