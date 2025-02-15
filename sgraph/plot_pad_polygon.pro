@@ -39,8 +39,11 @@ function plot_pad_polygon, pad_var, plot_times=plot_times, $
     circles=circles, no_axis=no_axis, $
     xrange=xrange, xticks=xticks, xtickv=xtickv, xminor=xminor, $
     color_table=color_table, cbpos=cbpos, no_colorbar=no_colorbar, ncolor=ncolor, color_range=color_range, $
-    title=title, ztitle=ztitle, $
+    title=input_title, ztitle=ztitle, $
     zrange=zrange, zticks=zticks, ztickv=ztickv, zminor=zminor, zticklen=zticklen, $
+    xtitle=xtitle, xtickformat=xtickformat, $
+    ytitle=ytitle, ytickformat=ytickformat, $
+    constants=constants, $
     test=test, scale_method=scale_method, file_extension=file_extension, _extra=ex
 
 
@@ -54,6 +57,8 @@ function plot_pad_polygon, pad_var, plot_times=plot_times, $
         return, retval
     endif
     pad_fluxs = get_var_data(pad_var, times=times, settings=settings)
+    index = where(pad_fluxs eq 0, count)
+    if count ne 0 then pad_fluxs[index] = !values.f_nan
     pad_dims = size(pad_fluxs, dimensions=1)
     npad_dim = n_elements(pad_dims)
     if npad_dim lt 2 then begin
@@ -118,7 +123,7 @@ function plot_pad_polygon, pad_var, plot_times=plot_times, $
     if n_elements(color_range) ne 2 then color_range = [10,250]
     color_top = color_range[1]
     color_bottom = color_range[0]
-    if n_elements(color_table) eq 0 then color_table = 40
+    if n_elements(color_table) eq 0 then color_table = 49
     index_colors = floor(smkarthm(color_bottom,color_top,ncolor,'n'))
     colors = index_colors
     for ii=0,ncolor-1 do colors[ii] = sgcolor(index_colors[ii],ct=color_table)
@@ -436,6 +441,11 @@ function plot_pad_polygon, pad_var, plot_times=plot_times, $
         for ii=0, ncircle-1 do begin
             plots, txs*scaled_circles[ii], tys*scaled_circles[ii], linestyle=linestyle, color=black
         endfor
+        
+        ; Add constants.
+        foreach xx, scale_dis(constants, scale_method) do begin
+            plots, txs*xx, tys*xx, linestyle=0, color=black
+        endforeach
         
         ; Add minor ticks.
         minor_tick_ratio = 0.6

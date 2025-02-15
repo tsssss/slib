@@ -155,7 +155,7 @@ function plot_linlog, var, ypans=ypans, time_range=time_range, $
     endif
     tplot, my_var, position=tpos, noerase=my_noerase, novtitle=my_novtitle, trange=time_range, $
         var_label=my_var_labels, vlab_margin=vlab_margin
-    del_data, my_var
+    if my_var ne var then del_data, my_var
     
 
     if n_elements(log_tick_setting) eq 0 then log_tick_setting = !null
@@ -185,7 +185,7 @@ function plot_linlog, var, ypans=ypans, time_range=time_range, $
             foreach key, positive_tick_setting.keys() do options, my_var, key, positive_tick_setting[key]
         endif
         tplot, my_var, position=tpos, noerase=my_noerase, novtitle=my_novtitle, trange=time_range
-        del_data, my_var
+        if my_var ne var then del_data, my_var
     endif
 
 
@@ -214,7 +214,7 @@ function plot_linlog, var, ypans=ypans, time_range=time_range, $
         endif
         tplot, my_var, position=tpos, noerase=my_noerase, novtitle=my_novtitle, trange=time_range, $
             var_label=my_var_labels, vlab_margin=vlab_margin
-        del_data, my_var
+        if my_var ne var then del_data, my_var
     endif
 
 
