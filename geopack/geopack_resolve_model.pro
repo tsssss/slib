@@ -13,6 +13,7 @@ function geopack_resolve_model, input_model
         'storm', 0 )
 
     the_model = strmid(model,0,3)
+    if ~idl_validname(the_model) then return, info.tostruct()
     if info.haskey(the_model) then begin
         info[the_model] = 1
     endif

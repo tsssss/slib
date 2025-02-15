@@ -7,6 +7,7 @@
 ;   oldabs, in, [n0], req. Old abscissa.
 ;   newabs, in, [n1], req. New abscissa.
 ; Keywords:
+;   is_quaternion=.
 ;   _extra = extra, in, struct, opt. Keywords for interpol, see idl help.
 ;     /LSQuadratic, /NaN, /Quatradic, /Spline.
 ;   interp_range=. 
@@ -21,8 +22,12 @@
 ;   2012-09-17, Sheng Tian, auto deal with dims.
 ;-
 
-function sinterpol, data, oldabs, newabs, interp_range=interp_range, _extra = extra
-  compile_opt idl2 & on_error, 0
+function sinterpol, data, oldabs, newabs, interp_range=interp_range, is_quaternion=is_quaternion, _extra = extra
+  compile_opt idl2
+  on_error, 0
+  
+  errmsg = ''
+  retval = !null
   
   oldyy = data
   oldxx = oldabs
@@ -33,8 +38,22 @@ function sinterpol, data, oldabs, newabs, interp_range=interp_range, _extra = ex
   
 
   if old_ndim eq 0 then begin
-    message, 'data is scalar, return ...', /continue
+    message, 'data is scalar, return ...', continue=1
     return, data
+  endif
+  
+  ; quaternion.
+  if keyword_set(is_quaternion) then begin
+      old_dims = size(data,/dimensions)
+      nold_dim = n_elements(old_dims)
+      ncomp = product(old_dims[1:nold_dim-1])
+      if ncomp ne 4 then begin
+        errmsg = 'Invalid dimension ...'
+        return, retval
+      endif
+      old_dim1 = [old_dims[0],ncomp]
+      old_data = reform(data, old_dim1)
+      return, qslerp(old_data, oldabs, newabs)
   endif
   
   ; scalar array.

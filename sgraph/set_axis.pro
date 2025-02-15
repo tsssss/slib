@@ -9,7 +9,7 @@
 ; ylog=.
 ;-
 pro set_axis, var, position=tpos, $
-    xrange=xrange, xlog=xlog, yrange=yrange, ylog=ylog
+    xrange=xrange, xlog=xlog, yrange=yrange, ylog=ylog, iso=iso
 
     if n_elements(tpos) ne 4 then return
 
@@ -40,6 +40,6 @@ pro set_axis, var, position=tpos, $
     plot, xrange, yrange, $
         xstyle=5, xrange=xrange, xlog=xlog, $
         ystyle=5, yrange=yrange, ylog=ylog, $
-        position=tpos, nodata=1, noerase=1
+        position=tpos, nodata=1, noerase=1, iso=iso
     
 end

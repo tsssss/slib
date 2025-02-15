@@ -25,7 +25,7 @@ test = 1
 
     species = strlowcase(strmid(input_species,0,1))
     if species eq 'h' then species = strmid(input_species,0,2)
-    supported_species = rbsp_hope_species()
+    supported_species = rbsp_get_hope_species()
     index = where(supported_species eq species, count)
     if count eq 0 then begin
         errmsg = 'Invalid species: '+input_species+' ...'
@@ -58,7 +58,7 @@ test = 1
     endcase
     mass0 = mass0*(1.67e-27/1.6e-19)   ; E in eV, mass in kg.
 
-    species_str = rbsp_hope_species_name(species)
+    species_str = rbsp_get_hope_species_name(species)
 
 ;---Read data.
     time_range = time_double(input_time_range)

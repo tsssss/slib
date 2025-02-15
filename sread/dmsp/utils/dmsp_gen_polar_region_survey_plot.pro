@@ -47,6 +47,7 @@ input_time_range = ['2013-06-06','2013-06-10']
 input_time_range = ['2016-05-08','2016-12-31']
 
 input_time_range = ['2010-04-06','2010-04-07']
+input_time_range = ['2016-08-03','2016-08-05']
 ;input_time_range = ['2015-03-04','2015-05-31']
 ; '2015-03-03 has problem.
 secofday = constant('secofday')
