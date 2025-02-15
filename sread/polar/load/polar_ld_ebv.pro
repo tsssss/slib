@@ -12,7 +12,7 @@
 ; file_times=. An array of N times. Set to fine tuning the times of the files.
 ;-
 
-function polar_load_ebv, input_time_range, id=datatype, $
+function polar_ld_ebv, input_time_range, id=datatype, $
     print_datatype=print_datatype, errmsg=errmsg, $
     local_files=files, file_times=file_times, version=version, $
     local_root=local_root
@@ -75,5 +75,5 @@ function polar_load_ebv, input_time_range, id=datatype, $
 end
 
 time_range = time_double(['1997-09-25','1997-09-27'])
-files = polar_load_ebv(time_range)
+files = polar_ld_ebv(time_range)
 end

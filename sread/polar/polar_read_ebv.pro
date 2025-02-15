@@ -13,14 +13,14 @@ pro polar_read_ebv, time, id=datatype, $
 ;---Check inputs.
     sync_threshold = 0
     if n_elements(probe) eq 0 then probe = 'x'
-    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'sdata'])
+    if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'sdata','polar'])
     if n_elements(version) eq 0 then version = 'v01'
 
 ;---Init settings.
     type_dispatch = hash()
     valid_range = ['1996-02-28','2008-04-28']
     base_name = 'po_ebv_%Y_%m%d_'+version+'.cdf'
-    local_path = [local_root,'polar_ebv','%Y']
+    local_path = [local_root,'polar_ebv_cdf','%Y']
     ; Survey E field.
     type_dispatch['e_spc'] = dictionary($
         'pattern', dictionary($
