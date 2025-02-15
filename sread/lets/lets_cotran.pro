@@ -7,6 +7,10 @@ function lets_cotran, coord_msgs, input=in_var, output=out_var, q_var=q_var, $
     errmsg = ''
     retval = !null
 
+
+    out_coord = coord_msgs[1]
+    in_coord = coord_msgs[0]
+    if n_elements(out_var) eq 0 then out_var = streplace(in_var, in_coord, out_coord)
     var_info = out_var
     ; Check if update in memory.
     if keyword_set(update) then tmp = delete_var_from_memory(var_info)
@@ -18,14 +22,14 @@ function lets_cotran, coord_msgs, input=in_var, output=out_var, q_var=q_var, $
     if is_success then return, var_info
 
 
-    out_coord = coord_msgs[1]
-    if out_coord eq 'fac' then begin
+    mission = get_var_setting(in_var,'mission')
+    fac_coord = mission+'_fac'
+    if out_coord eq fac_coord then begin
         if n_elements(q_var) eq 0 then begin
             errmsg = 'No quaternion ...'
             return, retval
         endif
-        in_coord = coord_msgs[0]
-        q_in_coord = get_setting(q_var, 'in_coord')
+        q_in_coord = get_var_setting(q_var, 'in_coord')
         if in_coord ne q_in_coord then begin
             the_in_var = streplace(in_var, in_coord, q_in_coord)
             the_in_var = lets_cotran([in_coord,q_in_coord], input=in_var, output=the_in_var)
@@ -45,7 +49,7 @@ function lets_cotran, coord_msgs, input=in_var, output=out_var, q_var=q_var, $
             display_type: 'vector', $
             short_name: get_setting(in_var,'short_name'), $
             unit: get_setting(in_var,'unit'), $
-            coord: 'fac', $
+            coord: fac_coord, $
             coord_labels: get_setting(q_var,'out_coord_labels')}
     endif else begin
         in_vec = get_var_data(in_var, times=times, settings=settings)

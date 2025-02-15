@@ -29,17 +29,19 @@ function lets_read_this, time_range, probe=mission_probe, sites=sites, $
         probe = probe_info['probe']
         
         var_info = call_function(routine, time_range, probe=probe, $
-            update=update, get_name=1, suffix=suffix, errmsg=errmsg, $
+            get_name=1, errmsg=errmsg, $
             _extra=ex)
     endif else if n_elements(sites) ne 0 then begin
         var_info = call_function(routine, time_range, sites=sites, $
-            update=update, get_name=1, suffix=suffix, errmsg=errmsg, $
+            get_name=1, errmsg=errmsg, $
             _extra=ex)
     endif else begin
         var_info = call_function(routine, time_range, $
-            update=update, get_name=1, suffix=suffix, errmsg=errmsg, $
+            get_name=1, errmsg=errmsg, $
             _extra=ex)
     endelse
+    if n_elements(suffix) eq 0 then suffix = ''
+    var_info = add_suffix(var_info,suffix)
 
     
     
@@ -56,17 +58,17 @@ function lets_read_this, time_range, probe=mission_probe, sites=sites, $
     ; Read var from routine.
     if n_elements(mission_probe) ne 0 then begin
         var_info = call_function(routine, time_range, probe=probe, $
-            update=update, get_name=0, suffix=suffix, errmsg=errmsg, $
+            get_name=0, errmsg=errmsg, $
             _extra=ex)
-        is_success = save_setting_to_memory(var_info, dictionary('mission_probe',probe_info['mission_probe']))
+        is_success = save_setting_to_memory(var_info, dictionary('mission_probe',mission_probe,'mission',mission,'probe',probe))
     endif else if n_elements(sites) ne 0 then begin
         var_info = call_function(routine, time_range, sites=sites, $
-            update=update, get_name=0, suffix=suffix, errmsg=errmsg, $
+            get_name=0, errmsg=errmsg, $
             _extra=ex)
         is_success = save_setting_to_memory(var_info, dictionary('sites',sites))
     endif else begin
         var_info = call_function(routine, time_range, $
-            update=update, get_name=0, suffix=suffix, errmsg=errmsg, $
+            get_name=0,  errmsg=errmsg, $
             _extra=ex)
     endelse
     is_success = save_setting_to_memory(var_info, dictionary('requested_time_range',time_double(time_range)))
