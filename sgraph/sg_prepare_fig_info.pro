@@ -6,13 +6,14 @@
 ; xrange=. Input
 ; panel_labels=. Input
 ; pansize=.
+; ypans=.
 ; margins=.
 ; plot_file=.
 ;-
 
 function sg_prepare_fig_info, vars, label_vars=label_vars, $
     xrange=xrange, panel_labels=panel_labels, $
-    margins=margins, pansize=pansize, plot_file=plot_file, $
+    margins=margins, pansize=pansize, ypans=ypans, plot_file=plot_file, $
     errmsg=errmsg
 
     retval = !null
@@ -59,10 +60,12 @@ function sg_prepare_fig_info, vars, label_vars=label_vars, $
     if n_elements(label_vars) eq 0 then label_vars = 'time'
     nvar_label = n_elements(label_vars)
     if n_elements(margins) ne 4 then margins = [12,3.5+nvar_label,10,2]
-    ypans = dblarr(nplot_var)
-    foreach plot_var, plot_vars, vid do begin
-        ypans[vid] = (panel_info[plot_var])['ypan']
-    endforeach
+    if n_elements(ypans) ne nplot_var then begin
+        ypans = dblarr(nplot_var)
+        foreach plot_var, plot_vars, vid do begin
+            ypans[vid] = (panel_info[plot_var])['ypan']
+        endforeach
+    endif
     if n_elements(pansize) eq 0 then pansize = [10,0.8]
     if n_elements(plot_file) eq 0 then plot_file = 0
     plot_poss = panel_pos(plot_file, nypan=nplot_var, fig_size=fig_size, ypans=ypans, pansize=pansize, margins=margins)

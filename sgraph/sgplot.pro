@@ -3,10 +3,11 @@
 ; xrange=.
 ; filename=.
 ; pansize=.
+; ypans=.
 ; panel_labels=.
 ;-
 function sgplot, vars, xrange=xrange, filename=plot_file, pansize=pansize, $
-    errmsg=errmsg, panel_labels=panel_labels
+    errmsg=errmsg, panel_labels=panel_labels, ypans=ypans
 
     errmsg = errmsg
     retval = !null
@@ -45,7 +46,7 @@ function sgplot, vars, xrange=xrange, filename=plot_file, pansize=pansize, $
     endif
     
     fig_info = sg_prepare_fig_info(plot_vars, xrange=xrange, $
-        plot_file=plot_file, pansize=pansize, panel_labels=panel_labels)
+        plot_file=plot_file, pansize=pansize, ypans=ypans, panel_labels=panel_labels)
     sgopen, fig_info['file'], size=fig_info['size']
     foreach plot_var, fig_info.panel_info.keys() do begin
         my_info = (fig_info['panel_info'])[plot_var]
