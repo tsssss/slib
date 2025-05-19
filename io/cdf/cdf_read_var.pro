@@ -1,6 +1,7 @@
 ;+
 ; Read and return one variable from one file.
 ; range=. A record range, e.g., [0,100].
+; filename=.
 ;-
 function cdf_read_var, var, range=range, filename=cdf0, errmsg=errmsg
 
