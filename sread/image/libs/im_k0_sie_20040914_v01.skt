@@ -1,0 +1,507 @@
+! Skeleton table for the "/home/sheng/Downloads/im_k0_sie_20040914_v01" CDF.
+! Generated: Sat Jul 13 10:14:02 2013
+! CDF version: 2.6.7
+
+#header
+
+CDF NAME:      /home/sheng/Downloads/im_k0_sie_20040914_v01
+DATA ENCODING: NETWORK_ENCODING
+DATA DECODING: HOST_DECODING
+MAJORITY:      ROW_MAJOR
+FORMAT:        SINGLE_FILE
+
+!    R.Vars    Z.Vars    G.Atts    V.Atts
+!    ------    ------    ------    ------
+     24        0         22        16
+
+
+#GLOBALattributes
+
+   0 Project:  IMAGE
+   1 Discipline:  Space Physics>Magnetospheric Science
+   2 Source_name:  IMAGE>Magnetopause to Aurora
+   3 Data_type:  K0>Key parameter
+   4 Logical_source_description: 
+Image Spectrographic Imaging Camera Key parameter
+   5 PI_name:  S. Mende
+   6 PI_affiliation:  UC/Berkeley/SSL
+   7 Instrument_type:  Imager
+   8 TEXT_supplement_1:  SKT version 24-July-2000 
+Mende et al: Far Ultraviolet Imaging from the IMAGE Spacecraft,Space Sciences Review 1999  
+   9 Data_version:  1
+  10 Descriptor:  Aurora at 1356 A
+  11 Logical_file_id:  im_k0_sie_20040914_v01
+  12 Logical_source:  im_k0_sie
+  13 Mission_group:  Magnetospheric Investigations
+  14 TEXT:  electrons
+  15 Generation_date: no value
+  16 Acknowledgement: no value
+  17 ADID_ref: no value
+  18 Rules_of_use: no value
+  19 Generated_by:  fuvcdfg
+  20 MODS: no value
+  21 Time_resolution: no value
+
+
+#Variables
+
+   0 INSTRUMENT_ID
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_UCHAR     6         1           NOVARY       128, 128       0, 0
+
+     FIELDNAM                          Label
+     UNITS                              
+     CATDESC                           Name of FUV subinstrument
+     DISPLAY_TYPE                        
+     FORMAT                            a6
+     VAR_TYPE                          metadata
+
+   1 Z128
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_INT2      1         1           NOVARY       128, 128       1, 0
+
+     FIELDNAM                          ImAxis
+     UNITS                             digital words
+     VALIDMIN                                 0
+     VALIDMAX                             16384
+     DESCRIP                           array for DEPEND1
+     CATDESC                            
+     DISPLAY_TYPE                       
+     FORMAT                            i4
+     VAR_TYPE                          metadata
+
+   2 SI_PIXELS
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_INT2      1         526         VARY         128, 128       1, 1
+
+     FIELDNAM                          Pixel Value
+     UNITS                             digital words
+     VALIDMIN                                 0
+     VALIDMAX                              8192
+     DESCRIP                           raw pixel values (12 bits)
+     CATDESC                           Raw image of LBH aurora
+     DISPLAY_TYPE                      image
+     FILLVAL                             -32768
+     LABLAXIS                            
+     FORMAT                              
+     VAR_TYPE                          data
+     DICT_KEY                          photon_flux
+     DEPEND_0                          EPOCH
+     DEPEND_1                          Z128
+     DEPEND_2                          Z128
+
+   3 EPOCH
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_EPOCH     1         526         VARY         128, 128       0, 0
+
+     FIELDNAM                          EPOCH     
+     UNITS                             date/time
+     VALIDMIN                             6.3082368e+13
+     VALIDMAX                             6.3429523e+13
+     DESCRIP                           UT Snapshot Time (center of interval)
+     CATDESC                           Time
+     DISPLAY_TYPE                      time_series
+     FILLVAL                             -1.0000000e+31
+     LABLAXIS                          Epoch
+     FORMAT                              
+     VAR_TYPE                          support_data
+     DICT_KEY                          time>Epoch
+
+   4 SPIN
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_INT4      1         526         VARY         128, 128       0, 0
+
+     FIELDNAM                          Spin_Number
+     UNITS                              
+     VALIDMIN                                     0
+     VALIDMAX                                 65535
+     DESCRIP                           FUV-generated Spin Number
+     CATDESC                           time_equivalent
+     DISPLAY_TYPE                      time_series
+     FILLVAL                            -2147483648
+     LABLAXIS                          Spin Number
+     FORMAT                            I4
+     VAR_TYPE                          support_data
+     DEPEND_0                          EPOCH
+
+   5 DATA_QUAL
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_INT2      1         526         VARY         128, 128       0, 0
+
+     FIELDNAM                          quality parameter
+     UNITS                              
+     VALIDMIN                                 0
+     VALIDMAX                                 8
+     DESCRIP                           1=Good Data, 2=Bad Data
+     CATDESC                           quality parameter
+     DISPLAY_TYPE                      time_series
+     FILLVAL                                 -32768
+     LABLAXIS                          quality parameter
+     FORMAT                            I2
+     VAR_TYPE                          support_data
+     DEPEND_0                          EPOCH
+
+   6 RADIUS
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_FLOAT     1         526         VARY         128, 128       0, 0
+
+     FIELDNAM                          Radius
+     UNITS                             Earth radii
+     VALIDMIN                                1.00000
+     VALIDMAX                                9.00000
+     DESCRIP                           Distance from COE at start of Spin
+     CATDESC                           Geocentric Distance
+     DISPLAY_TYPE                      time_series
+     FILLVAL                            -1.00000e+31
+     LABLAXIS                          Geocentric Distance / Re
+     FORMAT                            F4.2
+     VAR_TYPE                          support_data
+     DICT_KEY                          position>radial_distance
+     DEPEND_0                          EPOCH
+
+   7 HV
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_FLOAT     1         526         VARY         128, 128       0, 0
+
+     FIELDNAM                          HV_PHOS
+     UNITS                             volts
+     VALIDMIN                                0.00000
+     VALIDMAX                                4200.00
+     DESCRIP                           HV setting
+     CATDESC                           voltage
+     DISPLAY_TYPE                      time_series
+     FILLVAL                            -1.00000e+31
+     LABLAXIS                          Voltage
+     FORMAT                            F5.0
+     VAR_TYPE                          support_data
+     DEPEND_0                          EPOCH
+
+   8 FOVSCALE
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_INT2      1         526         VARY         128, 128       0, 0
+
+     FIELDNAM                          FOVSCALE
+     UNITS                              
+     VALIDMIN                                 1
+     VALIDMAX                                 4
+     DESCRIP                           FOV Scale Factor
+     CATDESC                           expansion factor for FOV
+     DISPLAY_TYPE                      time_series
+     FILLVAL                             -32768
+     LABLAXIS                          FOV_scale
+     FORMAT                            I1
+     VAR_TYPE                          support_data
+     DEPEND_0                          EPOCH
+
+   9 SPINPHASE
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_FLOAT     1         526         VARY         128, 128       0, 0
+
+     FIELDNAM                          SPINPHASE
+     UNITS                             Degrees
+     VALIDMIN                               -180.000
+     VALIDMAX                                180.000
+     DESCRIP                           Spin Phase Angle 
+     CATDESC                           angle
+     DISPLAY_TYPE                      time_series
+     FILLVAL                            -1.00000e+31
+     LABLAXIS                          Spin Phase
+     FORMAT                            F6.1
+     VAR_TYPE                          support_data
+     DEPEND_0                          EPOCH
+
+  10 SV_X
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_DOUBLE    1         526         VARY         128, 128       0, 0
+
+     FIELDNAM                          GCI_X
+     UNITS                              
+     VALIDMIN                                -1.0000000
+     VALIDMAX                                 1.0000000
+     DESCRIP                           GCI X coordinate of spin axis
+     VAR_NOTES                         direction of true spin axis at WIC Snapshot Time
+     CATDESC                           oriention direction cosine
+     DISPLAY_TYPE                      time_series
+     FILLVAL                             -1.0000000e+31
+     LABLAXIS                          SV_X
+     FORMAT                            F7.4
+     VAR_TYPE                          support_data
+     DEPEND_0                          EPOCH
+
+  11 SV_Y
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_DOUBLE    1         526         VARY         128, 128       0, 0
+
+     FIELDNAM                          GCI_Y
+     UNITS                              
+     VALIDMIN                                -1.0000000
+     VALIDMAX                                 1.0000000
+     DESCRIP                           GCI Y coordinate of spin axis
+     VAR_NOTES                         direction of true spin axis at WIC Snapshot Time
+     CATDESC                           oriention direction cosine
+     DISPLAY_TYPE                      time_series
+     FILLVAL                             -1.0000000e+31
+     LABLAXIS                          SV_Y
+     FORMAT                            F7.4
+     VAR_TYPE                          support_data
+     DEPEND_0                          EPOCH
+
+  12 SV_Z
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_DOUBLE    1         526         VARY         128, 128       0, 0
+
+     FIELDNAM                          GCI_Z
+     UNITS                              
+     VALIDMIN                                -1.0000000
+     VALIDMAX                                 1.0000000
+     DESCRIP                           GCI Z coordinate of spin axis
+     VAR_NOTES                         direction of true spin axis at WIC Snapshot Time
+     CATDESC                           oriention direction cosine
+     DISPLAY_TYPE                      time_series
+     FILLVAL                             -1.0000000e+31
+     LABLAXIS                          SV_Z
+     FORMAT                            F7.4
+     VAR_TYPE                          support_data
+     DEPEND_0                          EPOCH
+
+  13 ORB_X
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_DOUBLE    1         526         VARY         128, 128       0, 0
+
+     FIELDNAM                          ORB_X
+     UNITS                             Earth Radii
+     VALIDMIN                                -9.0000000
+     VALIDMAX                                 9.0000000
+     DESCRIP                           GCI X coordinate of Orbiter Position
+     VAR_NOTES                         Spacecraft Position at Snapshot Time
+     CATDESC                           geocentric position
+     DISPLAY_TYPE                      time_series
+     FILLVAL                             -1.0000000e+31
+     LABLAXIS                          ORB_X
+     FORMAT                            F5.2
+     VAR_TYPE                          support_data
+     DEPEND_0                          EPOCH
+
+  14 ORB_Y
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_DOUBLE    1         526         VARY         128, 128       0, 0
+
+     FIELDNAM                          ORB_Y
+     UNITS                             Earth Radii
+     VALIDMIN                                -9.0000000
+     VALIDMAX                                 9.0000000
+     DESCRIP                           GCI Y coordinate of Orbiter Position
+     VAR_NOTES                         Spacecraft Position at Snapshot Time
+     CATDESC                           geocentric position
+     DISPLAY_TYPE                      time_series
+     FILLVAL                             -1.0000000e+31
+     LABLAXIS                          ORB_Y
+     FORMAT                            F5.2
+     VAR_TYPE                          support_data
+     DEPEND_0                          EPOCH
+
+  15 ORB_Z
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_DOUBLE    1         526         VARY         128, 128       0, 0
+
+     FIELDNAM                          ORB_Z
+     UNITS                             Earth Radii
+     VALIDMIN                                -9.0000000
+     VALIDMAX                                 9.0000000
+     DESCRIP                           GCI Z coordinate of Orbiter Position
+     VAR_NOTES                         Spacecraft Position at Snapshot Time
+     CATDESC                           geocentric position
+     DISPLAY_TYPE                      time_series
+     FILLVAL                             -1.0000000e+31
+     LABLAXIS                          ORB_Z
+     FORMAT                            F5.2
+     VAR_TYPE                          support_data
+     DEPEND_0                          EPOCH
+
+  16 HFOV
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_DOUBLE    1         1           NOVARY       128, 128       0, 0
+
+     FIELDNAM                          HFOV
+     UNITS                             degrees
+     VALIDMIN                                 1.0000000
+     VALIDMAX                                 90.000000
+     DESCRIP                           Horizontal Field of View
+     VAR_NOTES                          
+     CATDESC                           angle
+     DISPLAY_TYPE                        
+     FILLVAL                             -1.0000000e+31
+     LABLAXIS                            
+     FORMAT                            F6.2
+     VAR_TYPE                          support_data
+
+  17 VFOV
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_DOUBLE    1         1           NOVARY       128, 128       0, 0
+
+     FIELDNAM                          VFOV
+     UNITS                             degrees
+     VALIDMIN                                 1.0000000
+     VALIDMAX                                 90.000000
+     DESCRIP                           Vertical Field of View
+     VAR_NOTES                          
+     CATDESC                           angle
+     DISPLAY_TYPE                        
+     FILLVAL                             -1.0000000e+31
+     LABLAXIS                            
+     FORMAT                            F6.2
+     VAR_TYPE                          support_data
+
+  18 INST_AZIMUTH
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_DOUBLE    1         1           NOVARY       128, 128       0, 0
+
+     FIELDNAM                          INST_AZIMUTH
+     UNITS                             degrees
+     VALIDMIN                                 0.0000000
+     VALIDMAX                                 360.00000
+     DESCRIP                           Angular Offset between SI12 center and Spacecraft +X
+     VAR_NOTES                         (Phi) flight software uses 315, analysis uses 45 
+     CATDESC                           angle
+     DISPLAY_TYPE                        
+     FILLVAL                             -1.0000000e+31
+     LABLAXIS                            
+     FORMAT                            F7.3
+     VAR_TYPE                          support_data
+
+  19 INST_CO_ELEVATION
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_DOUBLE    1         1           NOVARY       128, 128       0, 0
+
+     FIELDNAM                          INST_CO_ELEVATION
+     UNITS                             degrees
+     VALIDMIN                                -90.000000
+     VALIDMAX                                 90.000000
+     DESCRIP                           Tilt of Instrument Vertical from Spacecraft +Z
+     VAR_NOTES                         (Theta) 
+     CATDESC                           angle
+     DISPLAY_TYPE                        
+     FILLVAL                             -1.0000000e+31
+     LABLAXIS                            
+     FORMAT                            F7.3
+     VAR_TYPE                          support_data
+
+  20 INST_ROLL
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_DOUBLE    1         1           NOVARY       128, 128       0, 0
+
+     FIELDNAM                          INST_ROLL
+     UNITS                             degrees
+     VALIDMIN                                -180.00000
+     VALIDMAX                                 180.00000
+     DESCRIP                           3rd Euler angle Instrument-Spacecraft
+     VAR_NOTES                         (Omega) 
+     CATDESC                           angle
+     DISPLAY_TYPE                        
+     FILLVAL                             -1.0000000e+31
+     LABLAXIS                            
+     FORMAT                            F7.3
+     VAR_TYPE                          support_data
+
+  21 SCSV_X
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_DOUBLE    1         526         VARY         128, 128       0, 0
+
+     FIELDNAM                          SCSV_X
+     UNITS                              
+     VALIDMIN                                -1.0000000
+     VALIDMAX                                 1.0000000
+     DESCRIP                           X-coordinate of Spin Axis in Spacecraft System
+     VAR_NOTES                          
+     CATDESC                           orientation direction cosine
+     DISPLAY_TYPE                      time_series
+     FILLVAL                             -1.0000000e+31
+     LABLAXIS                          SCSV_X
+     FORMAT                            F7.4
+     VAR_TYPE                          support_data
+     DEPEND_0                          EPOCH
+
+  22 SCSV_Y
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_DOUBLE    1         526         VARY         128, 128       0, 0
+
+     FIELDNAM                          SCSV_Y
+     UNITS                              
+     VALIDMIN                                -1.0000000
+     VALIDMAX                                 1.0000000
+     DESCRIP                           Y-coordinate of Spin Axis in Spacecraft System
+     VAR_NOTES                          
+     CATDESC                           orientation direction cosine
+     DISPLAY_TYPE                      time_series
+     FILLVAL                             -1.0000000e+31
+     LABLAXIS                          SCSV_Y
+     FORMAT                            F7.4
+     VAR_TYPE                          support_data
+     DEPEND_0                          EPOCH
+
+  23 SCSV_Z
+
+!    CDF Type      # Elem    Max Rec     Rec Vary     Dimensions     Dim Vary
+!    --------      ------    -------     --------     ----------     --------
+     CDF_DOUBLE    1         526         VARY         128, 128       0, 0
+
+     FIELDNAM                          SCSV_Z
+     UNITS                              
+     VALIDMIN                                -1.0000000
+     VALIDMAX                                 1.0000000
+     DESCRIP                           Z-coordinate of Spin Axis in Spacecraft System
+     VAR_NOTES                          
+     CATDESC                           orientation direction cosine
+     DISPLAY_TYPE                      time_series
+     FILLVAL                             -1.0000000e+31
+     LABLAXIS                          SCSV_Z
+     FORMAT                            F7.4
+     VAR_TYPE                          support_data
+     DEPEND_0                          EPOCH
+

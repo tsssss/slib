@@ -91,7 +91,7 @@ function themis_read_j_ver_mlon_image_uniform, input_time_range, mlat_range=mlat
 
     ; Positive for upward current.
     store_data, mlon_image_var, times, j_new*1e-3, limits={$
-        unit: '(kA)', $
+        unit: 'kA', $
         image_size: mlonimg_size, $
         mlon_range: mlon_range, $
         mlat_range: mlat_range, $

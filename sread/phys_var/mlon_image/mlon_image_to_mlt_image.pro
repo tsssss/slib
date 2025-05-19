@@ -9,10 +9,11 @@ function mlon_image_to_mlt_image, mlon_image_var, output=mlt_image_var, errmsg=e
 
     errmsg = ''
     retval = ''
-    if n_elements(mlt_image_var) eq 0 then begin
-        errmsg = 'No input mlt_image_var ...'
+    if n_elements(mlon_image_var) eq 0 then begin
+        errmsg = 'No input mlon_image_var ...'
         return, retval
     endif
+    if n_elements(mlt_image_var) eq 0 then mlt_image_var = streplace(mlon_image_var, 'mlon', 'mlt')
     get_data, mlon_image_var, times, mlon_images, limits=lim
     ntime = n_elements(times)
     if ntime eq 1 and times[0] eq 0 then return, retval

@@ -5,7 +5,7 @@
 ; id=. Can be 'j_hor','j_ver','j_west','j_north','j_hor_mag'.
 ;-
 
-function themis_read_weygand_j, input_time_range, id=datatype, get_name=get_name, errmsg=errmsg
+function themis_read_weygand_j, input_time_range, id=datatype, get_name=get_name, errmsg=errmsg, update=update
 
     errmsg = ''
     time_range = time_double(input_time_range)
@@ -16,6 +16,8 @@ function themis_read_weygand_j, input_time_range, id=datatype, get_name=get_name
     if n_elements(datatype) eq 0 then datatype = 'j_ver'
     j_vars = prefix+datatype
     if keyword_set(get_name) then return, j_vars
+    if keyword_set(update) then del_data, j_vars
+    if ~check_if_update(j_vars, time_range) then return, j_vars
     
     if n_elements(types) eq 0 then types = ['hor','ver']
     foreach type, types, type_id do begin

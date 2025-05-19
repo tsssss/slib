@@ -158,6 +158,8 @@ function themis_load_weygand_j, input_time_range, id=datatype, probe=probe, $
 
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'themis'])
     if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/aaa_special-purpose-datasets/spherical-elementary-and-equivalent-ionospheric-currents-weygand'
+    ;if n_elements(remote_root) eq 0 then remote_root = 'https://vmo.igpp.ucla.edu/data1/SECS/'
+    ;https://vmo.igpp.ucla.edu/data1/SECS/EICS/
     if n_elements(version) eq 0 then version = 'v[0-9]{2}'
 
     if size(input_time_range[0],type=1) eq 7 then begin
@@ -170,6 +172,7 @@ function themis_load_weygand_j, input_time_range, id=datatype, probe=probe, $
     probe = 'g'
     thx = 'th'+probe
     valid_range = ['2007-01-19']    ; the start date applies to tha-the.
+    valid_range = ['1990-01-01']    ; there are earlier data.
     base_name = 'thg_weygand_'+'%Y_%m%d.cdf'
     local_path = [local_root,thx,'weygand','%Y']
 

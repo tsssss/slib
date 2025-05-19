@@ -35,9 +35,9 @@ function themis_read_j_ver_mlon_image, input_time_range, errmsg=errmsg, get_name
     corner_glats = corner_glat_bins ## (fltarr(nglon_bin+1)+1)    
     geo2mag2d, times, glon=corner_glons, glat=corner_glats, $
         mlon=corner_mlons, mlat=corner_mlats, use_apex=1
-    
+
+    mlat_range = [50d,90]    
     if n_elements(half_size) eq 0 then begin
-        mlat_range = [50d,90]
         half_size = floor(total(mlat_range*[-1,1])/glat_bin_size)
     endif
 
@@ -196,12 +196,13 @@ function themis_read_j_ver_mlon_image, input_time_range, errmsg=errmsg, get_name
     store_data, mlon_image_var, times, new_images*1e-3
     add_setting, mlon_image_var, smart=1, dictionary($
         'display_type', 'image', $
-        'unit', '(kA)', $
+        'unit', 'kA', $
         'image_size', new_image_size, $ ; image size of the mlon image.
         'pixel_mlon', pixel_mlon, $
         'pixel_mlat', pixel_mlat, $
         'pixel_xpos', mlon_image_info.pixel_xpos, $
         'pixel_ypos', mlon_image_info.pixel_ypos, $
+        'mlat_range', mlat_range, $
         'crop_xrange', crop_xrange, $
         'crop_yrange', crop_yrange )
 

@@ -1,0 +1,115 @@
+PRO xform_plot,mlt_img,xpos,ypos,xsize,ysize,inst,record,rfresh
+;
+@fuv_cmnblk
+;------------------------------------------------------------------------------------
+; This the latest version of GIFWALK program.  Applying the FUV modification to it
+;
+;Modified
+;
+; Hassan Dougani	10041999			Applying the latest FUV modifications
+; Hassan Dougani	10281999			Modify structures for multiple Instrument capability
+;
+;------------------------------------------------------------------------------------
+;
+;
+;    ; parameters
+;txt_clr = black
+;   lin_clr = txt_clr
+    lbl_clr = txt_clr
+    lin_sty = 0
+
+    lat_lim = 90. - latmin
+    img_xsize = float(nxpix)
+    img_ysize = float(nypix)
+;
+    x_img_org = (xpos + ( (xsize - nxpix)2 ))xwin
+;    if(makegif)then x_img_org=1.0
+    y_img_org = (ypos + ( (ysize - nypix) ))ywin
+    if (rfresh eq 0) then begin
+     mlt_img = CONGRID(mlt_img,nxpix,nypix)
+     mlt_img = smooth(mlt_img, 3)
+     mlt_rdy=1
+    endif else mlt_img=imageinfo(inst).mlt_img
+;
+;    case inst of
+;    0 max_value= 13000.
+;    1 max_value=80.
+;    2 max_value=80.
+;    endcase
+    if (ps_flag eq 1) then $
+      TV,calculate_scaling(mlt_img,inst)0,x_img_org,y_img_org,NORMAL,$
+      	XSIZE=float(xsize)xwin,YSIZE=float(ysize)ywin $
+    else $
+      TV,calculate_scaling(mlt_img,inst)0,x_img_org,y_img_org,NORMAL
+;      TV,bytscl(mlt_img0,max=max_value),x_img_org,y_img_org,NORMAL
+;hfrey
+;print,'mag_img',max(mlt_img),mean(mlt_img) 
+    Imageinfo(inst).mlt_img=mlt_img
+    ; plot latitude lines
+    npts = 500
+    a = FINDGEN(npts)(!PI2.005FLOAT(npts))
+    cx = 10.cos(a)
+    cy = 10.sin(a)
+    !P.THICK=1
+
+    pos = [x_img_org, y_img_org,x_img_org+(img_xsize)xwin, y_img_org+(img_ysize)ywin]
+
+    PLOT,cx,cy,NOERASE,NODATA,COLOR=grd_color,linestyle=lin_sty, $
+       position=pos, NORMAL, $
+       xstyle=1+4,ystyle=1+4, $
+       xrange=[-lat_lim,lat_lim], $
+       yrange=[-lat_lim,lat_lim], $
+       charsize=1.2, BACKGROUND = bkgrnd
+    ncirc = FLOOR(.1lat_lim)
+    FOR i=0,ncirc-1 DO BEGIN
+      scl = i+1.
+      IF (i EQ ncirc-1) THEN $
+        oplot,sclcx,sclcy,COLOR=grd_color,linestyle=lin_sty $
+      ELSE oplot,sclcx,sclcy,COLOR=grd_color,linestyle=lin_sty
+    ENDFOR
+
+    ; plot longitude lines
+    lx1 = -lat_lim + 2.lat_limFINDGEN(npts)(npts-1.)
+    ly1 = 0.lx1
+    ly2 = -lat_lim + 2.lat_limFINDGEN(npts)(npts-1.)
+    lx2 = 0.ly2
+    lx3 = SQRT(0.5)lx1
+    ly3 = lx3
+    lx4 = lx3
+    ly4 = -ly3
+    oplot,lx1,ly1,COLOR=grd_color,linestyle=lin_sty
+    oplot,lx2,ly2,COLOR=grd_color,linestyle=lin_sty
+    oplot,lx3,ly3,COLOR=grd_color,linestyle=lin_sty
+    oplot,lx4,ly4,COLOR=grd_color,linestyle=lin_sty
+
+    xh = [1,lat_lim-3,1,-lat_lim+1]
+    yh = [-lat_lim+1,1,lat_lim-3,1]
+    s2 = SQRT(50.)
+    xl = (s2(1.+FINDGEN(4))+2)
+    yl = (s2(1.+FINDGEN(4))-1)
+    XYOUTS,xh(0),yh(0),'0',COLOR=txt_clr,CHARSIZE=1.0,DATA
+    XYOUTS,xh(1),yh(1),'6',COLOR=txt_clr,CHARSIZE=1.0,DATA
+    XYOUTS,xh(2),yh(2),'12',COLOR=txt_clr,CHARSIZE=1.0,DATA
+    XYOUTS,xh(3),yh(3),'18',COLOR=txt_clr,CHARSIZE=1.0,DATA
+  case sphere of
+  1 begin
+    XYOUTS,xl(0),yl(0),'80',COLOR=txt_clr,CHARSIZE=xsize256.,DATA
+    XYOUTS,xl(1),yl(1),'70',COLOR=txt_clr,CHARSIZE=xsize256.,DATA
+    XYOUTS,xl(2),yl(2),'60',COLOR=txt_clr,CHARSIZE=xsize256.,DATA
+    XYOUTS,xl(3),yl(3),'50',COLOR=txt_clr,CHARSIZE=xsize256.,DATA
+    endcase
+  -1 begin
+    XYOUTS,xl(0),yl(0),'-80',COLOR=txt_clr,CHARSIZE=xsize256.,DATA
+    XYOUTS,xl(1),yl(1),'-70',COLOR=txt_clr,CHARSIZE=xsize256.,DATA
+    XYOUTS,xl(2),yl(2),'-60',COLOR=txt_clr,CHARSIZE=xsize256.,DATA
+    XYOUTS,xl(3),yl(3),'-50',COLOR=txt_clr,CHARSIZE=xsize256.,DATA
+    endcase
+    endcase
+
+  	; mark positions
+   posi_check=where(position_long ne 0. and position_lati ne 0.,count)
+   if (count gt 0) then begin
+   plots,pos[0]+position_xrxwin,pos[1]+position_yrywin,psym=4,normal,COLOR=txt_clr
+   endif
+
+END
