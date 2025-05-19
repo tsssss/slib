@@ -16,10 +16,7 @@ function time_to_range, times, time_step=time_step, pad_times=input_pad_times
         errmsg = handle_error('No input times ...')
         return, retval
     endif
-    if n_elements(time_step) eq 0 then begin
-        errmsg = handle_error('No input time_step ...')
-        return, retval
-    endif
+    if n_elements(time_step) eq 0 then time_step = 1
 
 
     time_ranges = list()

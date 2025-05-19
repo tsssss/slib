@@ -3,7 +3,7 @@
 ; 
 ; files. A string or a string array [n] of files.
 ; var0. A string for the variable to read.
-; rec_info. An array of [n,2], optional. Default value is [n,2] of -1's.
+; rec_info=. An array of [n,2], optional. Default value is [n,2] of -1's.
 ;   Any range with negative value is treated as [-1,-1], meaning to read all.
 ;   A range with two equal numbers means to read one record.   
 ; no_merge. A boolean. Set it to return an array of pointer in [n]. Each

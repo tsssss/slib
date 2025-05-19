@@ -7,7 +7,7 @@
 ; data_gap_window=. A number n sec, time diff larger than this will be NaN'ed.
 ;-
 
-pro interp_time, var, times, to=new_var, data_gap_window=data_gap_window, _extra=ex
+pro interp_time, var, times, to=new_var, data_gap_window=data_gap_window, simple=simple, _extra=ex
 
     get_data, var, old_times, old_data, val
     if keyword_set(new_var) then get_data, new_var, times
@@ -19,6 +19,11 @@ pro interp_time, var, times, to=new_var, data_gap_window=data_gap_window, _extra
     bad_index = []
     index = where_pro(times,')(',minmax(old_times), count=count)
     if count ne 0 then bad_index = [bad_index,index]
+    
+    if keyword_set(simple) then begin
+        store_data, var, times, dat
+        return
+    endif
     
     ; Treat NaN.
     ndim = size(old_data,/n_dimensions)

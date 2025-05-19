@@ -6,7 +6,7 @@ function get_var_value, var, in=time_range, limits=lim
     if n_elements(var) ne 1 then message, 'Invalid input var ...'   ; want to stop instead of return.
     if tnames(var) eq '' then return, retval
 
-    get_data, var, times, vals, limits=lim
+    get_data, var, times, data, vals, limits=lim
 
     ndim = size(vals, n_dimension=1)
     if ndim eq 2 then begin
