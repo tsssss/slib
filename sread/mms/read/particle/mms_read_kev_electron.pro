@@ -3,7 +3,7 @@
 ;-
 
 function mms_read_kev_electron, time_range, probe=probe, $
-    errmsg=errmsg, get_name=get_name, $
+    errmsg=errmsg, get_name=get_name, update=update, $
     pitch_angle_range=pitch_angle_range, energy_range=energy_range, spec=spec, $
     _extra=ex
 
@@ -13,6 +13,7 @@ function mms_read_kev_electron, time_range, probe=probe, $
 
     out_var = prefix+'kev_e_flux'
     if keyword_set(get_name) then return, out_var
+    if keyword_set(update) then del_data, out_var
     pad_var = mms_read_pad_ele_kev(time_range, probe=probe, errmsg=errmsg, _extra=ex)
     if errmsg ne '' then return, retval
 
@@ -79,6 +80,14 @@ function mms_read_kev_electron, time_range, probe=probe, $
 
 end
 
+
+time_range = ['2016-03-05','2016-03-06']
+probe = '4'
+vars = mms_read_kev_electron(time_range, probe=probe, spec=1)
+; vars = read('mms', 'kev_electron', time_range, probe=probe, spec=1)
+; -> mms_read_kev_electron(time_range, **kwarg)
+tplot, vars
+stop
 
 time_range = ['2015-09-01','2015-09-02']
 probes = ['1','2','3','4']

@@ -2,7 +2,7 @@
 ; This is a quick and dirty function to read FEEPS electron flux in raw unit.
 ;-
 
-function mms_read_kev_electron_raw, time_range, probe=probe, $
+function mms_read_kev_electron_cdaweb, time_range, probe=probe, $
     errmsg=errmsg, get_name=get_name, suffix=suffix
 
     prefix = 'mms'+probe+'_'
@@ -108,7 +108,7 @@ function mms_read_kev_electron_raw, time_range, probe=probe, $
         level=level_str, data_units=unit_type, suffix=suffix
     
     old_var = prefix2+unit_type+'_omni_spin'+suffix
-    options, old_var, no_interp=1
+    options, old_var, no_interp=1, unit='#/cm!U2!N-sr-s-keV'
     return, rename_var(old_var, output=out_var)
 
 
@@ -117,6 +117,7 @@ end
 
 tr = ['2015-09-01','2015-09-02']
 probe = '4'
-var1 = mms_read_kev_electron_raw(tr, probe=probe, suffix='_test')
+tr = ['2015-08-18','2015-08-19']
+var1 = mms_read_kev_electron_cdaweb(tr, probe=probe, suffix='_test')
 ;var2 = mms_read_kev_electron(tr, probe=probe, energy_range=[40,600]*1e3, spec=1)
 end

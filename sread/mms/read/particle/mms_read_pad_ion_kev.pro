@@ -39,7 +39,7 @@ function mms_read_pad_ion_kev, input_time_range, id=datatype, probe=probe, speci
     if ~check_if_update(var_info, time_range) then return, var_info
 
     ; Load files.
-    files = mms_ld_feeps_pad_ion(time_range, probe=probe, errmsg=errmsg)
+    files = mms_ld_feeps_pad_ion(time_range, probe=probe, errmsg=errmsg, version=version)
     if errmsg ne '' then return, retval
 
 

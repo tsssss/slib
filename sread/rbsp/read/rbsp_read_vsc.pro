@@ -6,15 +6,17 @@
 ;-
 
 function rbsp_read_vsc, input_time_range, probe=probe, $
-    errmsg=errmsg, id=datatype, get_name=get_name
+    errmsg=errmsg, id=datatype, get_name=get_name, usffix=suffix, update=update
 
     errmsg = ''
     retval = ''
     on_error, 2     ; return if any error occurred.
 
     prefix = 'rbsp'+probe+'_'
-    out_var = prefix+'vsc'
+    if n_elements(suffix) eq 0 then suffix = '_'+datatype
+    out_var = prefix+'vsc'+suffix    
     if keyword_set(get_name) then return, out_var
+    if keyword_set(update) then del_data, out_var
     time_range = time_double(input_time_range)
     if ~check_if_update(out_var, time_range) then return, out_var
 

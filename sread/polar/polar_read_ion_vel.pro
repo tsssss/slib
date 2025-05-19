@@ -2,10 +2,13 @@
 ; Read ion velocity in GSM in km.
 ;-
 
-pro polar_read_ion_vel, time, probe=probe, errmsg=errmsg
+function polar_read_ion_vel, time, probe=probe, errmsg=errmsg
 
+    retval = !null
+    errmsg = ''
+    
     polar_read_cdaweb_hydra, time, id='ion_vel', errmsg=errmsg
-    if errmsg ne '' then return
+    if errmsg ne '' then return, retval
 
     var = 'po_u_gsm'
     get_data, var, times, data
@@ -22,6 +25,7 @@ pro polar_read_ion_vel, time, probe=probe, errmsg=errmsg
         coord: 'GSM', $
         coord_labels: ['x','y','z'], $
         colors: sgcolor(['red','green','blue'])}
+    return, var
 
 end
 

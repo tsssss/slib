@@ -88,6 +88,7 @@ function mms_ld_fpi_pad_ion_gen_file, input_time_range, probe=probe, filename=cd
     data_time_range = time_range+[-1,1]*60  ; to ensure data coverage at the beginning and end of the day.
     b_var = lets_read_this(func='mms_read_bfield', data_time_range, probe=mission_probe, coord=coord)
     r_var = lets_read_this(func='mms_read_orbit', data_time_range, probe=mission_probe, coord=coord)
+    options, [b_var,r_var], mission='mms'
     q_fac = lets_define_fac(b_var=b_var, r_var=r_var, time_var=flux_var)
     m_xxx2fac = qtom(get_var_data(q_fac))
     

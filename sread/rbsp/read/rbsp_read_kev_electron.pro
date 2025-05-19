@@ -14,6 +14,7 @@ function rbsp_read_kev_electron, input_time_range, probe=probe, $
 
     out_var = prefix+'kev_e_flux'
     if keyword_set(get_name) then return, out_var
+    if ~check_if_update(out_var, input_time_range) then return, out_var
 
     time_range = time_double(input_time_range)
     files = rbsp_load_mageis(time_range, probe=probe, errmsg=errmsg, id='l3')
@@ -36,7 +37,12 @@ function rbsp_read_kev_electron, input_time_range, probe=probe, $
     energy_bins = energy_bins[energy_index]
 
     get_data, 'FEDU', common_times, fluxs
-    fluxs = reform(fluxs[*,energy_index,*])>1
+    index = where(fluxs le 0, count)
+    if count ne 0 then begin
+        fluxs[index] = !values.f_nan
+        store_data, 'FPDU', common_times, fluxs
+    endif
+    fluxs = reform(fluxs[*,energy_index,*])
 
 ;---Apply energy range.
     nenergy_range = n_elements(energy_range)
@@ -141,6 +147,7 @@ function rbsp_read_kev_electron, input_time_range, probe=probe, $
 
 
     if keyword_set(spec) then begin
+        options, out_var, 'display_type', 'spec'
         options, out_var, 'spec', 1
         options, out_var, 'no_interp', 1
         options, out_var, 'zlog', 1
@@ -151,7 +158,8 @@ function rbsp_read_kev_electron, input_time_range, probe=probe, $
             ylim, out_var, min(energy_bins), max(energy_bins)
         endif
     endif
-
+    options, out_var, requested_time_range=time_range
+    
 ;    dt = 10.848
 ;    uniform_time, out_var, dt
     return, out_var

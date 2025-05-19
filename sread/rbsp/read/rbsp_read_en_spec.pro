@@ -86,12 +86,13 @@ function rbsp_read_en_spec, input_time_range, probe=probe, errmsg=errmsg, $
     ; A more complicated version b/c flux contain a lot 0 and nan.
     dims = size(the_fluxs,dimensions=1)
     data = fltarr(dims[0:1])
+    the_count = n_elements(the_fluxs[0,0,*])
     for ii=0,dims[0]-1 do begin
         for jj=0,dims[1]-1 do begin
             the_data = the_fluxs[ii,jj,*]
             index = where(the_data ne 0, count)
             if count eq 0 then continue
-            data[ii,jj] = total(the_data)/count
+            data[ii,jj] = total(the_data)/the_count
         endfor
     endfor
     ;data = reform(total(the_fluxs,3,nan=1)/dims[2])

@@ -14,7 +14,7 @@ load_data = 1
 
 if load_data then begin
 ;---The original process.
-    var = mms_read_kev_electron_raw(tr, probe=probe)
+    var = mms_read_kev_electron_cdaweb(tr, probe=probe)
     out_var = var+'_target'
     var1 = rename_var(var, output=out_var)
     ; Rename vars.

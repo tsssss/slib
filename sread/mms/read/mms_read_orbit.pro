@@ -3,66 +3,36 @@
 ;
 ; input_time_range. Unix time or string for time range.
 ; probe=. A string for probe. '1','2','3','4'.
+; ids=. ['sdata','cdaweb'].
 ;-
 
-function mms_read_orbit, input_time_range, probe=probe, $
+function mms_read_orbit, input_time_range, probe=probe, ids=ids, $
     errmsg=errmsg, coord=coord, get_name=get_name, resolution=resolution, _extra=ex
 
+    if n_elements(ids) eq 0 then ids = ['sdata']
 
     prefix = 'mms'+probe+'_'
-    errmsg = ''
-    retval = ''
-
+    if n_elements(suffix) eq 0 then suffix = '_'+strjoin(ids, '_')
     if n_elements(coord) eq 0 then coord = 'gsm'
-    var = prefix+'r_'+coord
-    if keyword_set(get_name) then return, var
+    var_info = prefix+'r_'+coord+suffix
+    if keyword_set(get_name) then return, var_info
 
     time_range = time_double(input_time_range)
-    files = mms_ld_mec(time_range, probe=probe, errmsg=errmsg, id='l2%survey')
-    if errmsg ne '' then return, retval
+    if keyword_set(update) then tmp = delete_var_from_memory(var_info)
+    if ~check_if_update_memory(var_info, time_range) then return, var_info
 
-
-    var_list = list()
-    orig_var = prefix+'r_gsm'
-    var_list.add, dictionary($
-        'in_vars', [prefix+'mec_r_gsm'], $
-        'out_vars', [orig_var], $
-        'time_var_name', 'Epoch', $
-        'time_var_type', 'tt2000')
-    read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
-    if errmsg ne '' then return, retval
+    my_name = get_filename()
+    routine = get_file_stem(my_name)
+    foreach id, ids do routine += '_'+id
+    return, call_function(routine, time_range, probe=probe, coord=coord, $
+        errmsg=errmsg, resolution=resolution, var_info=var_info, _extra=_extra)
     
-    ; Convert to Re and remove |B|.
-    get_data, orig_var, times, r_coord
-    r_coord = r_coord[*,0:2]*(1d/constant('re'))
-    ; Remove invalid data.
-    index = where(snorm(r_coord) ge 1e4, count)
-    if count ne 0 then r_coord[index,*] = !values.f_nan
-    store_data, orig_var, times, r_coord
-
-    if coord ne 'gsm' then begin
-        get_data, orig_var, times, r_gsm, limits=lim
-        r_coord = cotran_pro(r_gsm, times, coord_msg=['gsm',coord])
-        store_data, var, times, r_coord, limits=lim
-    endif
-
-    add_setting, var, smart=1, {$
-        probe: probe, $
-        mission: 'mms', $
-        mission_probe: 'mms'+probe, $
-        display_type: 'vector', $
-        unit: 'Re', $
-        short_name: 'R', $
-        coord: strupcase(coord), $
-        coord_labels: constant('xyz')}
-
-    return, var
-
 end
 
+time_range = ['2015-01-03','2017-01-04']
+foreach probe, mms_probes() do begin
+    ids = 'sdata'
+    var = mms_read_orbit(time_range, probe=probe, ids=ids)
+endforeach
 
-
-time_range = time_double(['2016-10-13','2016-10-14'])
-probe = '1'
-var = mms_read_orbit(time_range, probe=probe)
 end

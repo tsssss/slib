@@ -35,7 +35,7 @@ pro polar_read_mfe, time, id=datatype, probe=probe, $
     valid_range = ['1996-03-16','2006-05-31']
     base_name = 'po_k0_mfe_%Y%m%d_'+version+'.cdf'
     local_path = [local_root,'%Y']
-    remote_path = [remote_root,'%Y']
+    remote_path = [remote_root,'mfe_k0','%Y']
     type_dispatch['k0%bgsm'] = dictionary($
         'pattern', dictionary($
             'local_file', join_path([local_path,base_name]), $

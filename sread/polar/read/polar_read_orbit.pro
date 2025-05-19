@@ -2,12 +2,15 @@
 ; Read spacecraft position.
 ;-
 
-pro polar_read_orbit, time_range, errmsg=errmsg, coord=in_coord
+function polar_read_orbit, time_range, errmsg=errmsg, coord=in_coord
 
+    errmsg = errmsg
+    retval = !null
+    
     if n_elements(in_coord) eq 0 then coord = 'gsm' else coord = strlowcase(in_coord)
 
     files = polar_load_ssc(time_range, id='sheng', errmsg=errmsg)
-    if errmsg ne '' then return
+    if errmsg ne '' then return, retval
 
     prefix = 'po_'
     var_list = list()
@@ -20,7 +23,7 @@ pro polar_read_orbit, time_range, errmsg=errmsg, coord=in_coord
         'time_var_name', 'Epoch', $
         'time_var_type', 'epoch' )
     read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
-    if errmsg ne '' then return
+    if errmsg ne '' then return, retval
 
 
 ;---Touch on the formats etc.
@@ -65,6 +68,8 @@ pro polar_read_orbit, time_range, errmsg=errmsg, coord=in_coord
         'display_type', 'scalar', $
         'short_name', 'ILat', $
         'unit', 'deg')
+    
+    return, r_coord_var
 
 end
 

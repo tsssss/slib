@@ -39,7 +39,7 @@ function mms_read_pad_ele_kev, input_time_range, id=datatype, probe=probe, speci
     if ~check_if_update(var_info, time_range) then return, var_info
 
     ; Load files.
-    files = mms_ld_feeps_pad_ele(time_range, probe=probe, errmsg=errmsg)
+    files = mms_ld_feeps_pad_ele(time_range, probe=probe, errmsg=errmsg, version=version)
     if errmsg ne '' then return, retval
 
 
@@ -91,7 +91,7 @@ function mms_read_pad_ele_kev, input_time_range, id=datatype, probe=probe, speci
         read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
         
         ; spin averaged fluxs.
-        spin_sectors = get_var_data(spin_var)
+        spin_sectors = get_var_data(spin_var, at=times)
         ntime = n_elements(times)
         spin_index = where(spin_sectors[0:ntime-2] ge spin_sectors[1:ntime-1], count)+1
         nspin_sector = count-1
