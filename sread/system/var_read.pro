@@ -28,6 +28,17 @@ function parse_setting, flat_dict
 
 end
 
+function read_var_internal2, var, files
+
+    data = []
+    foreach file, files[index], fid do begin
+        data = [data,cdf_read_var(var, filename=file)]
+    endforeach
+
+    return, data
+
+end
+
 
 function read_var_internal, var, time_var, files, time_cache
 
@@ -112,10 +123,17 @@ function var_read, vars, files=files, time_range=input_time_range, var_info=out_
         foreach var, all_vars do begin
             vatt = (var_info[var])['setting']
             if ~vatt.haskey('var_type') then begin
+                ; No dependent var.
                 if ~vatt.haskey('depend_0') then continue
             endif else begin
+                ; Not data.
                 if vatt['var_type'] ne 'data' then continue
             endelse
+            
+            ; complex number.
+            pos = strpos(var,'#imaginary_part')
+            if pos[0] ne -1 then continue
+            
             vars.add, var
         endforeach
         vars = vars.toarray()
@@ -207,7 +225,7 @@ function var_read, vars, files=files, time_range=input_time_range, var_info=out_
         settings = read_nested_setting(settings, files, time_cache, var_cache)
 
         if not dep_vars.haskey('depend_0') then begin
-            data = read_data(files, var)
+            data = read_var_internal2(files, var)
             var = var_store(out_var, data, settings=settings)
         endif else begin
             time_var = dep_vars['depend_0']

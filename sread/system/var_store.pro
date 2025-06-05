@@ -8,10 +8,11 @@
 ; settings=.
 ;-
 
-function var_store, var, data, times, values, settings=settings
+function var_store, var0, data, times, values, settings=settings
 
     retval = !null
 
+    var = var0[0]
     if n_elements(data) eq 0 then return, retval
     if n_elements(times) eq 0 then begin
         store_data, var, data

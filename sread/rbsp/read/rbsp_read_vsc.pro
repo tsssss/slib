@@ -13,6 +13,7 @@ function rbsp_read_vsc, input_time_range, probe=probe, $
     on_error, 2     ; return if any error occurred.
 
     prefix = 'rbsp'+probe+'_'
+    if n_elements(datatype) eq 0 then datatype = 'median'
     if n_elements(suffix) eq 0 then suffix = '_'+datatype
     out_var = prefix+'vsc'+suffix    
     if keyword_set(get_name) then return, out_var
@@ -20,7 +21,6 @@ function rbsp_read_vsc, input_time_range, probe=probe, $
     time_range = time_double(input_time_range)
     if ~check_if_update(out_var, time_range) then return, out_var
 
-    if n_elements(datatype) eq 0 then datatype = 'median'
     rbsp_efw_phasef_read_vsvy, time_range, probe=probe
     var = prefix+'efw_vsvy'
     get_data, var, times, vsvy
@@ -40,7 +40,7 @@ function rbsp_read_vsc, input_time_range, probe=probe, $
         store_data, out_var, times, vsc
         add_setting, out_var, smart=1, dictionary($
             'display_type', 'scalar', $
-            'short_name', 'Vsc', $
+            'short_name', '-Vsc', $
             'unit', 'V', $
             'requested_time_range', time_range )
     endif else if datatype eq 'spin_plane' then begin
@@ -48,7 +48,7 @@ function rbsp_read_vsc, input_time_range, probe=probe, $
         store_data, out_var, times, vsc
         add_setting, out_var, smart=1, dictionary($
             'display_type', 'stack', $
-            'short_name', 'Vsc', $
+            'short_name', '-Vsc', $
             'unit', 'V', $
             'labels', 'V'+['1','2','3','4'], $
             'colors', sgcolor(['red','green','blue','purple']), $
@@ -58,7 +58,7 @@ function rbsp_read_vsc, input_time_range, probe=probe, $
         store_data, out_var, times, vsc
         add_setting, out_var, smart=1, dictionary($
             'display_type', 'stack', $
-            'short_name', 'Vsc', $
+            'short_name', '-Vsc', $
             'unit', 'V', $
             'labels', 'V'+['1','2','3','4','5','6'], $
             'colors', sgcolor(['red','green','blue','purple','yellow','cyan']), $

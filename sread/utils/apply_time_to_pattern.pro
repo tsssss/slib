@@ -20,6 +20,7 @@ function apply_time_to_pattern, pattern, times
     res = strarr(ntime)
     for ii=0, ntime-1 do res[ii] = stodate(times[ii], pattern)
 
+    if ntime eq 1 then res = res[0]
     return, res
 end
 

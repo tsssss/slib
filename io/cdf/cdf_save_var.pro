@@ -55,7 +55,14 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
     if has_var then cdf_del_var, the_var, filename=cdfid
 
     ; Get the cdf_type.
-    var_type = keyword_set(cdf_type)? cdf_type: cdf_type_from_idl_type(size(data[0],/type))
+    idl_type = size(data[0],/type)
+    is_complex = idl_type eq 6 or idl_type eq 9
+    if is_complex then begin
+        ; complex numbers need special care, cdf_epoch16 somehow doesn't work.
+        data_imag = imaginary(data)
+        data = real_part(data)
+    endif
+    var_type = keyword_set(cdf_type)? cdf_type: cdf_type_from_idl_type(size(data[0],type=1))
     extra = create_struct(var_type,1)
 
     ; Get the data size.
@@ -115,6 +122,11 @@ pro cdf_save_var, varname, value=data, filename=cdf0, settings=settings, $
         tmp = cdf_varcreate(cdfid, the_var, dimvary, dimensions=dimensions, zvariable=1, numelem=numelem, _extra=extra)
     endelse
     cdf_varput, cdfid, the_var, vals, zvariable=1
+    
+    if is_complex then begin
+        var_imag = the_var+'#imaginary_part'
+        cdf_save_var, var_imag, value=data_imag, filename=cdfid, save_as_one=save_as_one
+    endif
 
     has_setting = isa(settings, 'dictionary')
     if has_setting then cdf_save_setting, settings, filename=cdfid, varname=the_var

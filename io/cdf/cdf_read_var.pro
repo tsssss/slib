@@ -81,6 +81,12 @@ function cdf_read_var, var, range=range, filename=cdf0, errmsg=errmsg
 ;        if nrec ne 1 and size(vals,/n_dimensions) gt 1 then $
 ;            vals = transpose(vals,shift(indgen(n_elements(varinq.dim)+1),1))
     endelse
+    
+    var_imag = var+'#imaginary_part'
+    if cdf_has_var(var_imag, filename=cdfid) then begin
+        vals_imag = cdf_read_var(var_imag, range=range, filename=cdfid)
+        vals = complex(vals, vals_imag)
+    endif
 
     if input_is_file then cdf_close, cdfid
     return, vals

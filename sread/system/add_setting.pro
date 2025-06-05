@@ -58,6 +58,13 @@ pro add_setting, var, settings, smart=smart, id=id, errmsg=errmsg
                 'display_type', 'vector', $
                 'short_name', 'U', $
                 'unit', 'km/s' )
+        endif else if id eq 'quaternion' then begin
+            default_settings = dictionary($
+                'display_type', 'quaternion', $
+                'short_name', 'Q', $
+                'unit', '#', $
+                'colors', sgcolor(['red','green','blue','black']), $
+                'coord_labels', ['a','b','c','d'])
         endif
         
         
@@ -191,6 +198,30 @@ pro add_setting, var, settings, smart=smart, id=id, errmsg=errmsg
             colors = get_setting(var, 'colors', exist)
             if ~exist and n_elements(clabels) eq 3 then begin
                 options, var, 'colors', sgcolor(['red','green','blue'])
+            endif
+            end
+        'quaternion': begin
+            options, var, 'spec', 0
+            tname = get_setting(var, 'short_name')
+            coord = get_setting(var, 'coord')
+            clabels = get_setting(var, 'coord_labels')
+            if n_elements(clabels) ne 4 then clabels = letters(4)
+            if n_elements(coord) eq 0 then begin
+                options, var, 'labels', clabels
+            endif else begin
+                if n_elements(tname) eq 0 then tname = 'X'
+                options, var, 'labels', strupcase(coord)+' '+tname+'!D'+clabels+'!N'
+            endelse
+
+            ; use unit to init ytitle.
+            unit = get_setting(var, 'unit', exist)
+            if exist then options, var, 'ytitle', '('+unit+')'
+            options, var, 'ysubtitle', ''
+
+            ; assume rgb.
+            colors = get_setting(var, 'colors', exist)
+            if ~exist and n_elements(clabels) eq 4 then begin
+                options, var, 'colors', sgcolor(['red','green','blue','black'])
             endif
             end
         'scalar': begin

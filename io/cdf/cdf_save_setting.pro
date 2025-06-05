@@ -62,8 +62,10 @@ pro cdf_save_val_setting, key, val, cdfid=cdfid, varname=varname
         iszvar = varinq.is_zvar
         ; cdf_attput cannot write complex number directly.
         if type eq 6 or type eq 9 then begin
-            complex_val = dictionary('real',real_part(val),'imaginary',imaginary(val))
-            cdf_save_dict_setting, key, complex_val, cdfid=cdfid, varname=varname
+;            complex_val = dictionary('real',real_part(val),'imaginary',imaginary(val))
+;            cdf_save_dict_setting, key, complex_val, cdfid=cdfid, varname=varname
+            the_var = varname+'@'+key+'#value'
+            cdf_save_var, the_var, value=val, filename=cdfid, save_as_one=1, settings=dictionary('var_type','vatt_data')
         endif else begin
             nrec = n_elements(val)
             if nrec gt min_nrec and size(val,type=1) ne 7 then begin
