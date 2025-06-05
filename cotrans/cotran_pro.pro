@@ -69,6 +69,11 @@ function cotran_pro, input_vec, times, msg, coord_msg=coord_msg, errmsg=errmsg, 
     ; This needs to be updated.
     supported_funcs = [$
     ;---mission specific
+        ; MMS.
+        'mms_dbcs2mms_eci', 'mms_eci2mms_dbcs', $
+        'mms_dbcs2mms_bcs', 'mms_bcs2mms_dbcs', $
+        'mms_eci2gse', 'gse2mms_eci', $
+        'mms_fcs2mms_bcs', 'mms_bcs2mms_fcs', $
         ; THEMIS.
         'themis_smc2themis_spg', 'themis_spg2themis_smc', $
         'themis_spg2themis_ssl', 'themis_ssl2themis_spg', $

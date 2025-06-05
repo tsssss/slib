@@ -143,17 +143,22 @@ tr = time_double(['2016-08-04','2016-08-05'])
 probe = '2'
 
 tr = ['2016-10-14/20:00','2016-10-14/22:30']
-probe = '1'
 plot_time = time_double('2016-10-14/21:43:30')
-plot_time = time_double('2016-10-14/22:11:00')
+
+tr = ['2016-03-05','2016-03-06']
+probe = '1'
+plot_time = time_double('2016-03-05/02:11:00')
 
 
 ; keV electron.
 ;ele_var1 = mms_read_pad_ele_thermal(tr, probe=probe)
 ele_var2 = mms_read_pad_ele_kev(tr, probe=probe)
-ele_pa_var = mms_read_pa_spec_ele(tr, probe=probe, id='kev')
 ele_en_var = mms_read_en_spec_ele(tr, probe=probe, id='kev')
-tmp = plot_pad_polygon(ele_var2, plot_times=plot_time, test=1, zrange=[1e1,2e7], color_table=49)
+energy_range = [60,300]
+ele_pa_var = mms_read_pa_spec_ele(tr, probe=probe, id='kev', energy_range=energy_range)
+var1 = mms_read_pa_spec_ele_kev_cdaweb(tr, probe=probe, suffix='_test', energy_range=energy_range)
+stop
+;tmp = plot_pad_polygon(ele_var2, plot_times=plot_time, test=1, zrange=[1e1,2e7], color_table=49)
 stop
 
 ;dpa = total(pas*[-1,1])
