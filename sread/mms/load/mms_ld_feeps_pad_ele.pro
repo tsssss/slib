@@ -5,6 +5,7 @@
 
 function mms_ld_feeps_pad_ele_gen_file_v03, input_time_range, probe=probe, filename=cdf_file, errmsg=errmsg  
 
+test = 0
     errmsg = ''
     retval = !null
     update = 0
@@ -37,7 +38,7 @@ function mms_ld_feeps_pad_ele_gen_file_v03, input_time_range, probe=probe, filen
     nsensor = n_elements(sensor_vars)
     sensor_vars = sensor_vars.toarray()
 
-    vars = mms_read_feeps_flux_cdaweb(time_range, probe=probe, $
+    vars = mms_read_feeps_flux_cdaweb(time_range, probe=probe, species_str=species_str, $
         errmsg=errmsg, update=update)
     if errmsg ne '' then return, retval
     spin_var = prefix2+'spinsectnum'
@@ -124,7 +125,7 @@ function mms_ld_feeps_pad_ele_gen_file_v03, input_time_range, probe=probe, filen
     rad = constant('rad')
     deg = constant('deg')
 
-    ; Get unit vectors for all sensors.
+    ; Get unit vectors for all sensors in mms_fcs coord.
     top_sensor_r_fcs = transpose([$
         [ 0.347,-0.837, 0.423], $
         [ 0.347,-0.837,-0.423], $
@@ -153,8 +154,8 @@ function mms_ld_feeps_pad_ele_gen_file_v03, input_time_range, probe=probe, filen
 
 
     coord = 'gse'
+    b_var = mms_read_bfield(time_range, probe=probe, coord=coord)
     data_time_range = time_range+[-1,1]*30d
-    b_var = mms_read_bfield(data_time_range, probe=probe, coord=coord)
     r_var = mms_read_orbit(data_time_range, probe=probe, coord=coord)
     q_fac = lets_define_fac(b_var=b_var, r_var=r_var, time_var=flux_var, update=1)
     m_coord2fac = qtom(get_var_data(q_fac))
@@ -164,7 +165,8 @@ function mms_ld_feeps_pad_ele_gen_file_v03, input_time_range, probe=probe, filen
     tmp_r_var = prefix+'tmp_r_'+coord
     for sid=0,nsensor-1 do begin
         the_r_bcs = (fltarr(ntime)+1) # reform(r_coords[sid,*])
-        the_r_coord = cotran_pro(the_r_bcs, times, coord_msg=['mms_bcs',coord], probe=probe)
+        the_r_coord = cotran_pro(the_r_bcs, times, coord_msg=['mms_bcs',coord], probe=probe, errmsg=errmsg)
+        if errmsg ne '' then return, retval
         tmp = rotate_vector(the_r_coord, m_coord2fac)
         index = where(finite(snorm(tmp)),count)
         if count ne ntime then tmp = sinterpol(tmp[index,*],times[index],times, interp_range=time_range)
@@ -177,31 +179,125 @@ function mms_ld_feeps_pad_ele_gen_file_v03, input_time_range, probe=probe, filen
     index = where(fac_phis lt 0, count)
     if count ne 0 then fac_phis[index] += 360
 
-    ; interp flux to uniform fac phi and theta.
+    ; Uniform fac phi and theta bins.
     ntheta = 16d
     nphi = 2*ntheta
     ntheta = 11d        ; to be consistent with mms_feeps_pad.
+    ;ntheta = 12d
     nphi = 24
-    theta_bins = smkarthm(0,180,ntheta+1,'n')
+    theta_bin_range = [0,180d]
+    theta_bins = smkarthm(theta_bin_range[0],theta_bin_range[1],ntheta+1,'n')
     thetas = (theta_bins[0:ntheta-1]+theta_bins[1:ntheta])*0.5
     theta_bin_size = total(thetas[0:1]*[-1,1])
-    phi_bins = smkarthm(0,360,nphi+1,'n')
+    phi_bin_range = [0,360d]
+    phi_bins = smkarthm(phi_bin_range[0],phi_bin_range[1],nphi+1,'n')
     phis = (phi_bins[0:nphi-1]+phi_bins[1:nphi])*0.5
     phi_bin_size = total(phis[0:1]*[-1,1])
+
+    ; 2D meshed grids, in [nphi,ntheta]
+    tts = thetas*rad ## (fltarr(nphi)+1)
+    pps = (fltarr(ntheta)+1) ## phis*rad
+    tts = tts[*]
+    pps = pps[*]
+    fac_xxs = sin(tts)*cos(pps)
+    fac_yys = sin(tts)*sin(pps)
+    fac_zzs = cos(tts)
     
 
 ;---Obtain the 3D PAD.
     dAngResp = 21.4d    ; from mms_feeps_pad.
-    full_fluxs = fltarr(ntime,nphi,ntheta,nen_bin)
-    for phi_id=0,nphi-1 do begin
-        for theta_id=0,ntheta-1 do begin
-            the_phi = phis[phi_id]
-            the_theta = thetas[theta_id]
-            the_phi_range = phi_bins[phi_id:phi_id+1]+[-1,1]*dangresp
-            the_theta_range = theta_bins[theta_id:theta_id+1]+[-1,1]*dangresp
-            stop
+    ;dAngResp = 0d
+    del_angle = dangresp+theta_bin_size*0.5
+    full_fluxs = fltarr(ntime,nphi*ntheta,nen_bin)
+    full_counts = fltarr(ntime,nphi*ntheta,nen_bin)
+    for sid=0,nsensor-1 do begin
+        the_phis = fac_phis[*,sid]
+        the_thetas = fac_thetas[*,sid]
+        the_pps = the_phis*rad
+        the_tts = the_thetas*rad
+        sensor_xxs = sin(the_tts)*cos(the_pps)
+        sensor_yys = sin(the_tts)*sin(the_pps)
+        sensor_zzs = cos(the_tts)
+        
+        for tid=0,ntime-1 do begin
+            the_fluxs = reform(fluxs[tid,sid,*])
+            energy_index = where(finite(the_fluxs) and the_fluxs gt 0, ngood_flux)
+            if ngood_flux eq 0 then continue
+            
+            angles = acos(fac_xxs*sensor_xxs[tid]+fac_yys*sensor_yys[tid]+fac_zzs*sensor_zzs[tid])*deg
+            angle_index = where(angles le del_angle, count)
+            if count eq 0 then continue
+            foreach aid, angle_index do begin
+                full_fluxs[tid,aid,energy_index] += the_fluxs[energy_index]
+                full_counts[tid,aid,energy_index] += 1
+            endforeach
         endfor
     endfor
+    full_fluxs = reform(full_fluxs,[ntime,nphi,ntheta,nen_bin])
+    full_counts = reform(full_counts,[ntime,nphi,ntheta,nen_bin])
+;    for sid=0,nsensor-1 do begin
+;        the_phis = fac_phis[*,sid]
+;        the_thetas = fac_thetas[*,sid]
+;        for tid=0,ntime-1 do begin
+;            the_fluxs = reform(fluxs[tid,sid,*])
+;            index = where(finite(the_fluxs) and the_fluxs gt 0, ngood_flux)
+;            good_fluxs = the_fluxs[index]
+;            if ngood_flux eq 0 then continue
+;            the_phi_range = the_phis[tid]+[-1,1]*(dangresp+phi_bin_size*0.5)
+;            the_theta_range = the_thetas[tid]+[-1,1]*(dangresp+theta_bin_size*0.5)
+;            phi_index_range = (the_phi_range-phi_bins[0])/phi_bin_size
+;            theta_index_range = (the_theta_range-theta_bins[0])/theta_bin_size
+;            phi_index = make_bins(floor(phi_index_range),1)
+;            theta_index = make_bins(floor(theta_index_range),1)
+;;            index = where_pro(theta_index,'[]',theta_bin_range, count=count)
+;;            if count eq 0 then continue
+;            index = where(theta_index le 0, count)
+;            if count ne 0 then theta_index[index] = 0-theta_index[index]
+;            index = where(theta_index gt (ntheta-1), count)
+;            if count ne 0 then begin
+;                theta_index[index] = 2*(ntheta-1)-theta_index[index]
+;            endif
+;            index = where(phi_index lt 0, count)
+;            if count ne 0 then phi_index[index] += nphi
+;            index = where(phi_index gt (nphi-1), count)
+;            if count ne 0 then phi_index[index] -= nphi
+;            
+;            foreach good_flux, good_fluxs, eid do begin
+;                full_fluxs[tid,phi_index,theta_index,eid] += good_flux
+;                full_counts[tid,phi_index,theta_index,eid] += 1
+;            endforeach
+;        endfor
+;    endfor
+    index = where(full_counts ne 0, count)
+    full_fluxs[index] /= full_counts[index]
+
+
+;    for phi_id=0,nphi-1 do begin
+;        for theta_id=0,ntheta-1 do begin
+;            the_phi = phis[phi_id]
+;            the_theta = thetas[theta_id]
+;            the_phi_range = phi_bins[phi_id:phi_id+1]+[-1,1]*dangresp
+;            the_theta_range = theta_bins[theta_id:theta_id+1]+[-1,1]*dangresp
+;            
+;            phi_index = where_pro(fac_phis, '[]', the_phi_range, count=nphi_index)
+;            if nphi eq 0 then continue
+;            theta_index = where_pro(fac_thetas, '[]', the_theta_range, count=ntheta_index)
+;            if ntheta eq 0 then continue
+;            fac_index = intersect(phi_index,theta_index)
+;            tmp = array_indices([ntime,nsensor], fac_index, dimension=1)
+;            time_index = reform(tmp[0,*])
+;            sensor_index = reform(tmp[1,*])
+;            foreach tid, time_index, ii do begin
+;                sid = sensor_index[ii]
+;                the_fluxs = reform(fluxs[tid,sid,*])
+;                eid = where(finite(the_fluxs) and the_fluxs ge 0, count)
+;                if count eq 0 then continue
+;                full_fluxs[tid,phi_id,theta_id,eid] += fluxs[tid,sid,eid]
+;                full_counts[tid,phi_id,theta_id,eid] += 1
+;            endforeach
+;        endfor
+;    endfor
+;    stop
     
 ;    theta_grids = ((fltarr(nphi)+1) # thetas)[*]
 ;    phi_grids = (phis # (fltarr(ntheta)+1))[*]
@@ -228,7 +324,11 @@ function mms_ld_feeps_pad_ele_gen_file_v03, input_time_range, probe=probe, filen
 
     if keyword_set(test) then begin
         ; eliminate phi.
-        pad_fluxs = total(full_fluxs,2)/nphi
+        index = where(full_fluxs eq 0, count)
+        if count ne 0 then full_fluxs[index] = !values.f_nan
+        pad_fluxs = total(full_fluxs,2,nan=1)/nphi
+        index = where(pad_fluxs eq 0, count)
+        if count ne 0 then pad_fluxs[index] = !values.f_nan
     
         ; spin averaged fluxs.
         spin_sectors = get_var_data(spin_var)
@@ -241,10 +341,17 @@ function mms_ld_feeps_pad_ele_gen_file_v03, input_time_range, probe=probe, filen
             i1 = spin_index[ii+1]-1
             drec = (i1-i0)+1
             sp_pad_fluxs[ii,*,*] = total(pad_fluxs[i0:i1,*,*],1,nan=1)/drec
-        endfor
+        endfor  
+        index = where(sp_pad_fluxs eq 0, count)
+        if count ne 0 then sp_pad_fluxs[index] = !values.f_nan      
     
+        smooth_width = 1
         sp_omni_var2 = prefix+'epd_'+instr_str+'_'+mode_str+'_'+level_str+'_'+species_str+'_omni_flux_spin_pad'
-        store_data, sp_omni_var2, sp_times, mean(sp_pad_fluxs,dimension=2,nan=1), en_centers*1e-3
+        en_spec = mean(sp_pad_fluxs,dimension=2,nan=1)
+        index = where(en_spec eq 0, count)
+        if count ne 0 then en_spec[index] = !values.f_nan
+        for ii=0,nen_bin-1 do en_spec[*,ii] = smooth(en_spec[*,ii],smooth_width,nan=1)
+        store_data, sp_omni_var2, sp_times, en_spec, en_centers*1e-3
         add_setting, sp_omni_var2, smart=1, dictionary($
             'display_type', 'spec', $
             'ylog', 1, $
@@ -253,8 +360,33 @@ function mms_ld_feeps_pad_ele_gen_file_v03, input_time_range, probe=probe, filen
             'zrange', [0.1,1e5], $
             'unit', '#/cm!U2!N-s-sr-keV' )
     
+        pa_var = mms_read_pa_spec_ele_kev_cdaweb(time_range, probe=probe)
+        settings = get_var_setting(pa_var)
+        sp_pa_var = prefix+'pa_spec'
+        pa_spec = mean(sp_pad_fluxs,dimension=3,nan=1)
+        index = where(pa_spec eq 0, count)
+        if count ne 0 then pa_spec[index] = !values.f_nan
+        for ii=0,ntheta-1 do pa_spec[*,ii] = smooth(pa_spec[*,ii],smooth_width,nan=1)
+        store_data, sp_pa_var, sp_times, pa_spec, thetas
+        add_setting, sp_pa_var, smart=1, dictionary($
+            'display_type', 'spec', $
+            'ylog', 0, $
+            'zlog', 1, $
+            'yrange', [0,180], $
+            'ytickv', [30,90,150], $
+            'yticks', 2, $
+            'yminor', 6, $
+            'unit', '#/cm!U2!N-s-sr-keV' )
+    
         vars = [sp_omni_var,sp_omni_var2,target_var]
-        tplot, vars
+        options, vars, yrange=[60,500], zrange=[0.1,1e5]
+        vars = [sp_pa_var,pa_var]
+        options, vars, yrange=[0,180], zrange=[0.1,1e5], color_table=49
+        plot_vars = [sp_omni_var,sp_omni_var2,target_var,$
+            sp_pa_var,pa_var]
+        ;options, plot_vars, color_table=40
+        ;options, [target_var,pa_var], zrange=[0.1,1e5]*2
+        tplot, plot_vars, trange=time_range
         ; c.f. mms_feeps_pad for directly binning in pitch angle. I think the griddata results are better than direcly binning b/c it also provide the phi info.
         stop
     endif
@@ -266,7 +398,7 @@ function mms_ld_feeps_pad_ele_gen_file_v03, input_time_range, probe=probe, filen
     
     ; flux in #/cm^2-s-sr-keV, convert to eV/cm^2-s-sr-eV.
     for eid=0,nen_bin-1 do begin
-        full_fluxs[*,*,eid] *= en_centers[eid]*1e-3
+        full_fluxs[*,*,*,eid] *= en_centers[eid]*1e-3
     endfor
 
     gatt = dictionary($
@@ -371,7 +503,7 @@ function mms_ld_feeps_pad_ele_gen_file_v02, input_time_range, probe=probe, filen
     nsensor = n_elements(sensor_vars)
     sensor_vars = sensor_vars.toarray()
 
-    vars = mms_read_feeps_flux_cdaweb(time_range, probe=probe, $
+    vars = mms_read_feeps_flux_cdaweb(time_range, probe=probe, species_str=species_str, $
         errmsg=errmsg, update=1)
     if errmsg ne '' then return, retval
     spin_var = prefix2+'spinsectnum'
@@ -485,9 +617,10 @@ function mms_ld_feeps_pad_ele_gen_file_v02, input_time_range, probe=probe, filen
     r_coords = ct_mms_fcs2mms_bcs(flux_r_fcs)  ; in [nsensor,ndim]
 
     coord = 'gse'
-    b_var = mms_read_bfield(time_range, probe=probe, coord=coord)
-    r_var = mms_read_orbit(time_range, probe=probe, coord=coord)
-    q_fac = lets_define_fac(b_var=b_var, r_var=r_var, time_var=flux_var, update=1)
+    b_var = mms_read_bfield(time_range, probe=probe, coord=coord, errmsg=errmsg)
+    r_var = mms_read_orbit(time_range, probe=probe, coord=coord, errmsg=errmsg)
+    q_fac = lets_define_fac(b_var=b_var, r_var=r_var, time_var=flux_var, errmsg=errmsg)
+    if errmsg ne '' then return, retval
     m_xxx2fac = qtom(get_var_data(q_fac))
 
     ndim = 3
@@ -748,9 +881,31 @@ function mms_ld_feeps_pad_ele, input_time_range, id=datatype, probe=probe, $
 
 end
 
+tr_list = list()
+;tr_list.add, ['2015-08-19','2016-03-10']
+;tr_list.add, ['2015-12-25','2016-03-10']
+tr_list.add, ['2016-12-31','2017-02-09']
+dates = list()
+secofday = constant('secofday')
+foreach tr, tr_list do begin
+    tr = time_double(tr)
+    dates.add, make_bins(tr,secofday), extract=1
+endforeach
+
+probes = ['1']
+foreach date, dates do begin
+    tr = date+[0,secofday]
+    foreach probe, probes do begin
+        file = mms_ld_feeps_pad_ele(tr, probe=probe)
+    endforeach
+endforeach
+stop
+
 
 tr = ['2016-11-01','2016-11-02']
-tr = ['2016-03-05','2016-03-06']
+;tr = ['2016-03-05','2016-03-06']
+;tr = ['2017-01-12','2017-01-13']
+tr = ['2015-09-01','2015-09-02']
 probe = '1'
 ;file = join_path([homedir(),'mms_ld_feeps_pad_ele_test_file_v03.cdf'])
 ;file = mms_ld_feeps_pad_ele_gen_file_v03(tr, probe=probe, filename=file)

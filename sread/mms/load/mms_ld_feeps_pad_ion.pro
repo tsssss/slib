@@ -3,7 +3,274 @@
 ; Save this data because calculating them is slow.
 ;-
 
-function mms_ld_feeps_pad_ion_gen_file, input_time_range, probe=probe, filename=cdf_file, errmsg=errmsg  
+function mms_ld_feeps_pad_ion_gen_file_v03, input_time_range, probe=probe, filename=cdf_file, errmsg=errmsg
+
+    errmsg = ''
+    retval = !null
+
+    date = time_double(input_time_range[0])
+    secofday = constant('secofday')
+    time_range = date+[0,secofday]
+
+    ; Collect active sensors.
+    instr_str = 'feeps'
+    mode_str = 'srvy'
+    level_str = 'l2'
+    species_str = 'ion'
+    species_str2 = 'ion'
+    nall_sensor = 12
+    sensor_ids = findgen(nall_sensor)+1
+    sensor_types = ['top','bottom']
+    unit_type = 'intensity'
+    prefix = 'mms'+probe+'_'
+    prefix2 = prefix+'epd_'+instr_str+'_'+mode_str+'_'+level_str+'_'+species_str+'_'
+
+    ; from mms_feeps_correct_energies.
+    active_sensors = mms_feeps_active_eyes(time_range, probe, mode_str, species_str, level_str)
+    
+    sensor_vars = list()
+    foreach sensor_type, sensor_types do begin
+        sensor_strs = string(active_sensors[sensor_type],format='(I0)')
+        sensor_vars.add, prefix2+sensor_type+'_'+unit_type+'_sensorid_'+sensor_strs+'_clean_sun_removed', extract=1
+    endforeach
+    nsensor = n_elements(sensor_vars)
+    sensor_vars = sensor_vars.toarray()
+
+    vars = mms_read_feeps_flux_cdaweb(time_range, probe=probe, species_str=species_str, $
+        errmsg=errmsg, update=update)
+    if errmsg ne '' then return, retval
+    spin_var = prefix2+'spinsectnum'
+
+    ; combine sensor fluxs.
+    the_fluxs = get_var_data(sensor_vars[0], times=times)
+    ntime = n_elements(the_fluxs[*,0])
+    nen_bin = n_elements(the_fluxs[0,*])
+    fluxs = fltarr(ntime,nsensor,nen_bin)
+
+    ; from mms_feeps_omni.
+    energies = [33.200000d, 51.900000d, 70.600000d, 89.400000d, 107.10000d, 125.20000d, 146.50000d, 171.30000d, $
+        200.20000d, 234.00000d, 273.40000, 319.40000d, 373.20000d, 436.00000d, 509.20000d]
+    iEcorr = [0.0, 0.0, 0.0, 0.0]
+    iGfact = [0.84, 1.0, 1.0, 1.0]
+    probe_index = float(probe)-1
+    en_centers = (energies+iEcorr[probe_index])*1e3  ; from keV to eV
+    en_errors = en_centers*0.10 ; en_chk = 0.10 Line 85 in mms_feeps_omni
+    nen_bin = n_elements(en_centers)
+    de0 = mean(en_centers[1:nen_bin-1]/en_centers[0:nen_bin-2])
+
+    ; to uniform energy bins.
+    sensor_flux_vars = sensor_vars
+    foreach sensor_flux_var, sensor_flux_vars, sid do begin
+        the_fluxs = get_var_data(sensor_flux_var, en_bins)  ; in [ntime,nen]
+        fluxs[*,sid,*] = the_fluxs*iGfact[probe_index]
+        en_bins *= 1e3  ; from keV to eV
+        index = where(abs(en_centers-en_bins) gt en_errors, count)
+        if count ne 0 then fluxs[*,sid,index] = !values.f_nan
+    endforeach    
+    index = where(finite(fluxs,nan=1),count)
+    if count ne 0 then fluxs[index] = 0d
+    flux_var = prefix+'epd_'+instr_str+'_'+mode_str+'_'+level_str+'_'+species_str+'_sensor_flux'
+    store_data, flux_var, times, fluxs
+    options, flux_var, en_centers=en_centers
+
+
+    ; Rotate to FAC.
+    rad = constant('rad')
+    deg = constant('deg')
+
+    ; Get unit vectors for all sensors.
+    top_sensor_r_fcs = transpose([$
+        [ 0.347,-0.837, 0.423], $
+        [ 0.347,-0.837,-0.423], $
+        [ 0.837,-0.347, 0.423], $
+        [ 0.837,-0.347,-0.423], $
+        [-0.087, 0.000, 0.996], $
+        [ 0.104, 0.180, 0.978], $
+        [ 0.654,-0.377, 0.656], $
+        [ 0.654,-0.377,-0.656], $
+        [ 0.837, 0.347, 0.423], $
+        [ 0.837, 0.347,-0.423], $
+        [ 0.347, 0.837, 0.423], $
+        [ 0.347, 0.837,-0.423] ])
+    
+    ; a rotation around y-axis by 180 deg.
+    sint = 0d
+    cost = -1d
+    m_bottom_to_top = transpose([$
+        [cost, 0, sint], $
+        [0,1,0], $
+        [-sint, 0, cost]])
+    bottom_sensor_r_fcs = rotate_vector(top_sensor_r_fcs, m_bottom_to_top)
+    
+    flux_r_fcs = -[top_sensor_r_fcs[active_sensors['top']-1,*],bottom_sensor_r_fcs[active_sensors['bottom']-1,*]]
+    r_coords = ct_mms_fcs2mms_bcs(flux_r_fcs)  ; in [nsensor,ndim]
+
+
+    coord = 'gse'
+    b_var = mms_read_bfield(time_range, probe=probe, coord=coord)
+    data_time_range = time_range+[-1,1]*30d
+    r_var = mms_read_orbit(data_time_range, probe=probe, coord=coord)
+    q_fac = lets_define_fac(b_var=b_var, r_var=r_var, time_var=flux_var, update=1)
+    m_coord2fac = qtom(get_var_data(q_fac))
+
+    ndim = 3
+    r_fac = fltarr(ntime,nsensor,ndim)
+    tmp_r_var = prefix+'tmp_r_'+coord
+    for sid=0,nsensor-1 do begin
+        the_r_bcs = (fltarr(ntime)+1) # reform(r_coords[sid,*])
+        the_r_coord = cotran_pro(the_r_bcs, times, coord_msg=['mms_bcs',coord], probe=probe)
+        tmp = rotate_vector(the_r_coord, m_coord2fac)
+        index = where(finite(snorm(tmp)),count)
+        if count ne ntime then tmp = sinterpol(tmp[index,*],times[index],times, interp_range=time_range)
+        r_fac[*,sid,*] = tmp
+    endfor
+
+    ; fac: [b,w,o], maps to [z,x,y]
+    fac_phis = atan(r_fac[*,*,2],r_fac[*,*,1])*deg  ; in [ntime,nsensor]
+    fac_thetas = acos(r_fac[*,*,0])*deg     ; colat, in [0,180].
+    index = where(fac_phis lt 0, count)
+    if count ne 0 then fac_phis[index] += 360  
+
+    ; Uniform fac phi and theta bins.
+    ntheta = 16d
+    nphi = 2*ntheta
+    ntheta = 11d        ; to be consistent with mms_feeps_pad.
+    ;ntheta = 12d
+    nphi = 24
+    theta_bin_range = [0,180d]
+    theta_bins = smkarthm(theta_bin_range[0],theta_bin_range[1],ntheta+1,'n')
+    thetas = (theta_bins[0:ntheta-1]+theta_bins[1:ntheta])*0.5
+    theta_bin_size = total(thetas[0:1]*[-1,1])
+    phi_bin_range = [0,360d]
+    phi_bins = smkarthm(phi_bin_range[0],phi_bin_range[1],nphi+1,'n')
+    phis = (phi_bins[0:nphi-1]+phi_bins[1:nphi])*0.5
+    phi_bin_size = total(phis[0:1]*[-1,1])
+
+    ; 2D meshed grids, in [nphi,ntheta]
+    tts = thetas*rad ## (fltarr(nphi)+1)
+    pps = (fltarr(ntheta)+1) ## phis*rad
+    tts = tts[*]
+    pps = pps[*]
+    fac_xxs = sin(tts)*cos(pps)
+    fac_yys = sin(tts)*sin(pps)
+    fac_zzs = cos(tts)
+
+
+;---Obtain the 3D PAD.
+    dAngResp = 10d    ; from mms_feeps_pad.
+    ;dAngResp = 0d
+    del_angle = dangresp+theta_bin_size*0.5
+    full_fluxs = fltarr(ntime,nphi*ntheta,nen_bin)
+    full_counts = fltarr(ntime,nphi*ntheta,nen_bin)
+    for sid=0,nsensor-1 do begin
+        the_phis = fac_phis[*,sid]
+        the_thetas = fac_thetas[*,sid]
+        the_pps = the_phis*rad
+        the_tts = the_thetas*rad
+        sensor_xxs = sin(the_tts)*cos(the_pps)
+        sensor_yys = sin(the_tts)*sin(the_pps)
+        sensor_zzs = cos(the_tts)
+        
+        for tid=0,ntime-1 do begin
+            the_fluxs = reform(fluxs[tid,sid,*])
+            energy_index = where(finite(the_fluxs) and the_fluxs gt 0, ngood_flux)
+            if ngood_flux eq 0 then continue
+            
+            angles = acos(fac_xxs*sensor_xxs[tid]+fac_yys*sensor_yys[tid]+fac_zzs*sensor_zzs[tid])*deg
+            angle_index = where(angles le del_angle, count)
+            if count eq 0 then continue
+            foreach aid, angle_index do begin
+                full_fluxs[tid,aid,energy_index] += the_fluxs[energy_index]
+                full_counts[tid,aid,energy_index] += 1
+            endforeach
+        endfor
+    endfor
+    full_fluxs = reform(full_fluxs,[ntime,nphi,ntheta,nen_bin])
+    full_counts = reform(full_counts,[ntime,nphi,ntheta,nen_bin])
+    index = where(full_counts ne 0, count)
+    full_fluxs[index] /= full_counts[index]
+
+;---Save data
+    pa_centers = thetas
+    phi_centers = phis
+    spin_sectors = get_var_data(spin_var)
+    
+    ; flux in #/cm^2-s-sr-keV, convert to eV/cm^2-s-sr-eV.
+    for eid=0,nen_bin-1 do begin
+        full_fluxs[*,*,*,eid] *= en_centers[eid]*1e-3
+    endfor
+
+    gatt = dictionary($
+        'title', 'MMS '+strupcase(instr_str)+' pitch angle distribution, calculated based on l2 data', $
+        'text', 'Calculated by Sheng Tian, email:ts0110@atmos.ucla.edu' )
+    cdf_save_setting, gatt, filename=cdf_file
+
+    time_var = 'time'
+    vatt = dictionary($
+        'FIELDNAM', 'Unix time', $
+        'UNITS', 'sec', $
+        'VAR_TYPE', 'support_data' )
+    cdf_save_var, time_var, value=times, filename=cdf_file, cdf_type='CDF_DOUBLE'
+    cdf_save_setting, vatt, varname=time_var, filename=cdf_file
+
+    phi_var = prefix+'phi_centers'
+    phi_unit = 'deg'
+    vatt = dictionary($
+        'FIELDNAM', 'Gyro phase at the center of each bin', $
+        'UNITS', phi_unit, $
+        'VAR_TYPE', 'support_data' )
+    cdf_save_var, phi_var, value=phi_centers, filename=cdf_file, save_as_one=1
+    cdf_save_setting, vatt, varname=phi_var, filename=cdf_file
+
+    pa_var = prefix+'pa_centers'
+    pa_unit = 'deg'
+    vatt = dictionary($
+        'FIELDNAM', 'Pitch angle at the center of each bin', $
+        'UNITS', pa_unit, $
+        'VAR_TYPE', 'support_data' )
+    cdf_save_var, pa_var, value=pa_centers, filename=cdf_file, save_as_one=1
+    cdf_save_setting, vatt, varname=pa_var, filename=cdf_file
+
+    en_var = prefix+'en_centers'
+    en_unit = 'eV'
+    vatt = dictionary($
+        'FIELDNAM', 'Energy at the center of each bin', $
+        'UNITS', en_unit, $
+        'VAR_TYPE', 'support_data' )
+    cdf_save_var, en_var, value=en_centers, filename=cdf_file, save_as_one=1
+    cdf_save_setting, vatt, varname=en_var, filename=cdf_file
+
+    pad_var = prefix+'pad_'+instr_str+'_'+species_str2
+    pad_unit = 'eV/cm!U2!N-s-sr-eV'
+    vatt = dictionary($
+        'FIELDNAM', 'flux', $
+        'UNITS', pad_unit, $
+        'VAR_TYPE', 'data', $
+        'DEPEND_0', time_var, $ ; in sec.
+        'DEPEND_1', phi_var, $  ; in deg.
+        'DEPEND_2', pa_var, $   ; in deg.
+        'DEPEND_3', en_var, $   ; in eV.
+        'species', species_str2 )
+    cdf_save_var, pad_var, value=full_fluxs, filename=cdf_file
+    cdf_save_setting, vatt, varname=pad_var, filename=cdf_file
+
+;    spin_sec_var = prefix+'spin_sector_number'
+;    spin_unit = '#'
+;    vatt = dictionary($
+;        'FIELDNAM', 'spin sector number', $
+;        'UNITS', spin_unit, $
+;        'VAR_TYPE', 'data', $
+;        'DEPEND_0', time_var )
+;    cdf_save_var, spin_sec_var, value=spin_sectors, filename=cdf_file
+;    cdf_save_setting, vatt, varname=spin_sec_var, filename=cdf_file
+
+    return, cdf_file
+
+
+end
+
+
+function mms_ld_feeps_pad_ion_gen_file_v02, input_time_range, probe=probe, filename=cdf_file, errmsg=errmsg  
 
     errmsg = ''
     retval = !null
@@ -338,7 +605,7 @@ function mms_ld_feeps_pad_ion, input_time_range, id=datatype, probe=probe, $
     if n_elements(local_root) eq 0 then local_root = join_path([default_local_root(),'sdata','mms'])
 ;    if n_elements(remote_root) eq 0 then remote_root = 'https://cdaweb.gsfc.nasa.gov/pub/data/mms'
     if n_elements(remote_root) eq 0 then remote_root = !null
-    if n_elements(version) eq 0 then version = 'v02'
+    if n_elements(version) eq 0 then version = 'v03'
 
     if size(input_time_range[0],type=1) eq 7 then begin
         time_range = time_double(input_time_range)
@@ -360,7 +627,7 @@ function mms_ld_feeps_pad_ion, input_time_range, id=datatype, probe=probe, $
     the_key = strjoin(keys,'%')
 
     base_name = mission_str+probe+'_'+instr_str+'_'+mode_str+'_'+level_str+'_'+type_str+'_%Y%m%d_'+version+'.cdf'
-    local_path = [local_root,mission_str+probe,instr_str,mode_str,level_str,type_str,'%Y','%m']
+    local_path = [local_root,mission_str+probe,instr_str,mode_str,level_str,type_str+'_'+version,'%Y','%m']
     type_dispatch[the_key] = dictionary($
         'pattern', dictionary($
             'local_file', join_path([local_path,base_name]), $
@@ -397,7 +664,8 @@ function mms_ld_feeps_pad_ion, input_time_range, id=datatype, probe=probe, $
         foreach file, request.nonexist_files do begin
             file_time = file.file_time
             local_file = file.local_file
-            local_file = mms_ld_feeps_pad_ion_gen_file(file_time, filename=local_file, probe=probe)
+            routine = 'mms_ld_feeps_pad_ion_gen_file_'+version
+            local_file = call_function(routine, file_time, filename=local_file, probe=probe)
         endforeach
         files = prepare_files(request=request, errmsg=errmsg, $
             file_times=file_times, time=time_range, nonexist_files=nonexist_files)
@@ -415,4 +683,5 @@ probe = '1'
 ;file = mms_ld_feeps_pad_ion_gen_file(tr, probe=probe, filename=file)
 ;stop
 files = mms_ld_feeps_pad_ion(tr, probe=probe)
+ion_var2 = mms_read_pad_ion_kev(tr, probe=probe)
 end

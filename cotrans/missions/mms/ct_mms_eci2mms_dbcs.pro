@@ -1,7 +1,6 @@
 
-function ct_mms_eci2mms_dbcs, vec0, times, probe=probe, errmsg=errmsg
+function ct_mms_eci2mms_dbcs, vec0, times, probe=probe, errmsg=errmsg, inverse=inverse
 
-    prefix = 'mms'+probe+'_'
     errmsg = ''
     retval = !null
 
@@ -9,13 +8,23 @@ function ct_mms_eci2mms_dbcs, vec0, times, probe=probe, errmsg=errmsg
     q_var = mms_read_q_mms_eci2mms_dbcs(time_range, probe=probe, errmsg=errmsg)
     if errmsg ne '' then return, retval
     
+    eq_tolerance = 1e-3
     quaternion = get_var_data(q_var, times=ut_cotran)
-    eq_tolerance = 1e-8
+    index = where(abs(snorm(quaternion)-1) le eq_tolerance, count)
+    if count eq 0 then begin
+        errmsg = 'Invalid quaternion ...'
+        return, retval
+    endif
+    quaternion = quaternion[index,*]
+    ut_cotran = ut_cotran[index]
 
     quaternion = qslerp(quaternion, ut_cotran, times, eq_tolerance=eq_tolerance)
     matrix = qtom(quaternion)
+    if keyword_set(inverse) then begin
+        n1 = n_elements(vec1)/3
+        for ii=0,n1-1 do matrix[ii,*,*] = transpose(matrix[ii,*,*])
+    endif
     vec1 = double(vec0)
-    n1 = n_elements(vec1)/3
     vec1 = rotate_vector(vec1, matrix)
     
     return, vec1

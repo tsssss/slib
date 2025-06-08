@@ -1,25 +1,7 @@
 
 function ct_gse2mms_eci, vec0, times, probe=probe, errmsg=errmsg
 
-    prefix = 'mms'+probe+'_'
-    errmsg = ''
-    retval = !null
-
-    time_range = minmax(times)
-    q_var = mms_read_q_mms_eci2gse(time_range, probe=probe, errmsg=errmsg)
-    if errmsg ne '' then return, retval
-    
-    quaternion = get_var_data(q_var, times=ut_cotran)
-    eq_tolerance = 1e-8
-
-    quaternion = qslerp(quaternion, ut_cotran, times, eq_tolerance=eq_tolerance)
-    matrix = qtom(quaternion)
-    n1 = n_elements(vec1)/3
-    for ii=0,n1-1 do matrix[ii,*,*] = transpose(matrix[ii,*,*])
-    vec1 = double(vec0)
-    vec1 = rotate_vector(vec1, matrix)
-    
-    return, vec1
+    return, ct_mms_eci2gse(vec0, times, probe=probe, errmsg=errmsg, inverse=1)
 
 end
 

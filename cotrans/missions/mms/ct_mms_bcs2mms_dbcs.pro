@@ -1,6 +1,6 @@
 
 
-function ct_mms_bcs2mms_dbcs, vec0, times, probe=probe, errmsg=errmsg
+function ct_mms_bcs2mms_dbcs, vec0, times, probe=probe, errmsg=errmsg, inverse=inverse
     errmsg = ''
     retval = !null
 
@@ -10,6 +10,7 @@ function ct_mms_bcs2mms_dbcs, vec0, times, probe=probe, errmsg=errmsg
     zphase = spin_phase_interpol(zphase, ut_cotran, times)
 
     vec1 = double(vec0)
+    if keyword_set(inverse) then zphase = -zphase
     srotate, vec1, zphase, 2, deg=1
 
     return, vec1
