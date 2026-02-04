@@ -6,7 +6,7 @@ function dmsp_gen_polar_region_survey_plot, input_time_range, probe=probe, $
     plot_dir=plot_dir, position=full_pos, errmsg=errmsg, test=test, $
     local_root=local_root
 
-    version = 'v02'
+    version = 'v03'
     routine = 'dmsp_gen_polar_region_survey_plot_'+version
     return, call_function(routine, input_time_range, probe=probe, $
         local_root=local_root, errmsg=errmsg, test=test, $
@@ -48,6 +48,7 @@ input_time_range = ['2016-05-08','2016-12-31']
 
 input_time_range = ['2010-04-06','2010-04-07']
 input_time_range = ['2016-08-03','2016-08-05']
+input_time_range = ['2015-06-24','2015-06-27']
 ;input_time_range = ['2015-03-04','2015-05-31']
 ; '2015-03-03 has problem.
 secofday = constant('secofday')

@@ -40,7 +40,8 @@ function plot_line, var, time_range=time_range, $
     if n_elements(novtitle) eq 0 then novtitle = 0
     if n_elements(var_labels) eq 0 then var_labels = ''
     if n_elements(vlab_margin) eq 0 then vlab_margin = 10
-
+    ylog = var_get_setting(var, 'ylog')
+    if n_elements(ylog) eq 0 then ylog = 0
 
 ;---Linear part.
     my_var = var
@@ -76,7 +77,7 @@ function plot_line, var, time_range=time_range, $
     my_noerase = noerase
     my_labels = get_var_setting(my_var, 'labels')
     options, my_var, yrange=yrange, ystyle=1, ytitle=ytitle, $
-        xstyle=xstyle, xtickformat=my_xtickformat, labels=my_labels, ylog=0, $
+        xstyle=xstyle, xtickformat=my_xtickformat, labels=my_labels, ylog=ylog, $
         xticklen=xticklen, yticklen=yticklen
     if n_elements(tick_setting) ne 0 then begin
         foreach key, tick_setting.keys() do options, my_var, key, tick_setting[key]

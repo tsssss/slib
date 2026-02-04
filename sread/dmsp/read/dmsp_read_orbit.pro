@@ -5,9 +5,9 @@
 ; noaa is not checked closely.
 ;-
 
-function dmsp_read_orbit, input_time_range, probe=probe, errmsg=errmsg, coord=coord, get_name=get_name, suffix=suffix, _extra=ex
-
-    sources = ['madrigal','noaa','cdaweb']
+function dmsp_read_orbit, input_time_range, probe=probe, id=sources, errmsg=errmsg, $
+    coord=coord, get_name=get_name, suffix=suffix, _extra=ex
+    if n_elements(sources) eq 0 then sources = ['madrigal','noaa','cdaweb']
     foreach source, sources do begin
         func_name = 'dmsp_read_orbit_'+source
         retval = call_function(func_name, input_time_range, probe=probe, errmsg=errmsg, coord=coord, get_name=get_name, suffix='', _extra=ex)

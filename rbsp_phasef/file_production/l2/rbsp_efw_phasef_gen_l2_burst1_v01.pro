@@ -214,7 +214,7 @@ case host of
         end
     'xwaves7.space.umn.edu': begin
         in_local_root = '/Volumes/DataA/RBSP/data/rbsp'
-        out_local_root = '/Volumes/UserA/user_volumes/kersten/data_external/rbsp'
+        
         end
     else: begin
         out_local_root = '/Volumes/data/rbsp'

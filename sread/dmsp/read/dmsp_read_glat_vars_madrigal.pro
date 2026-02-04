@@ -4,7 +4,7 @@
 ; geodetic=. Set to return geodetic glat/glon/alt.
 ;-
 
-function dmsp_read_glat_vars_madrigal, input_time_range, probe=probe, errmsg=errmsg, get_name=get_namem, suffix=suffix, geodetic=geodetic, _extra=ex
+function dmsp_read_glat_vars_madrigal, input_time_range, probe=probe, errmsg=errmsg, get_name=get_name, suffix=suffix, geodetic=geodetic, _extra=ex
 
     prefix = 'dmsp'+probe+'_'
     errmsg = ''

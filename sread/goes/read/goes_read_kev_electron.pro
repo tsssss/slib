@@ -19,51 +19,74 @@ function goes_read_kev_electron, input_time_range, probe=probe, $
     !goes.local_data_dir = join_path([default_local_root(),'goes'])
     goes_lib
     time_range = time_double(input_time_range)
-    goes_load_data, trange=time_range, probe=probe, datatype='maged', noephem=1
+    probe_num = fix(probe)
 
-    ; Energy channels for the MAGED instrument, from the GOES-N databook
-    energy_bin_ranges = [30.,50,100,200,350,600]
-    nenergy_bin = n_elements(energy_bin_ranges)-1
-    energy_bins = round(energy_bin_ranges[1:nenergy_bin]+energy_bin_ranges[0:nenergy_bin-1])*0.5
+    if probe_num ge 16 then begin
+        ntelescope = 5
+        telescope_ids = string(indgen(ntelescope),format='(I0)')
+        prefix2 = 'goes'+probe+'_'
+        suffix2 = '_goes'+probe
+        goesr_load_data, trange=time_range, probe=probe, datatype='mpsh', suffix=suffix2
+        
+        energy_bin_var = prefix2+'DiffElectronEffectiveEnergy'+suffix2
+        energy_bins = mean(var_get_data(energy_bin_var), dimension=2)
+        nenergy_bin = n_elements(energy_bins)
+        
+        flux_vars = prefix2+'AvgDiffElectronFlux'+suffix2+'_'+telescope_ids
+        times = var_get_time(flux_vars[0])
+        ntime = n_elements(times)
+        fluxs = fltarr(ntime,ntelescope,nenergy_bin)
+        foreach flux_var, flux_vars, ii do fluxs[*,ii,*] = var_get_data(flux_var, at=times)
+        flux = mean(fluxs,dimension=2,nan=1)
+    endif else begin
+        goes_load_data, trange=time_range, probe=probe, datatype='maged', noephem=1
+        
+        ; Energy channels for the MAGED instrument, from the GOES-N databook
+        energy_bin_ranges = [30.,50,100,200,350,600]
+        nenergy_bin = n_elements(energy_bin_ranges)-1
+        energy_bins = round(energy_bin_ranges[1:nenergy_bin]+energy_bin_ranges[0:nenergy_bin-1])*0.5
 
-    ; Combine to omni directional flux.
-    ; From goes_part_omni_flux. The problem is it doesn't treat nan.
-    vars = prefix+'maged_'+string(energy_bins,format='(I0)')+'keV_dtc_uncor_flux'
-    get_data, vars[0], times
-    ntime = n_elements(times)
-    if ntime eq 1 and times[0] eq 0 then begin
-        errmsg = 'No data ...'
-        return, retval
-    endif
-    flux = fltarr(ntime,nenergy_bin)
-    frac_total_sa = 18.*!pi*(1-cos(15*!dtor))/(4*!pi) ;for all 9 telescopes, sr
-    for ii=0,nenergy_bin-1 do begin
-        get_data, vars[ii], uts, tflux
-        tflux = sinterpol(tflux, uts, times)
-        flux[*,ii] = total(tflux,2,/nan)/frac_total_sa
-    endfor
+        ; Combine to omni directional flux.
+        ; From goes_part_omni_flux. The problem is it doesn't treat nan.
+        vars = prefix+'maged_'+string(energy_bins,format='(I0)')+'keV_dtc_uncor_flux'
+        get_data, vars[0], times
+        ntime = n_elements(times)
+        if ntime eq 1 and times[0] eq 0 then begin
+            errmsg = 'No data ...'
+            return, retval
+        endif
+        flux = fltarr(ntime,nenergy_bin)
+        frac_total_sa = 18.*!pi*(1-cos(15*!dtor))/(4*!pi) ;for all 9 telescopes, sr
+        for ii=0,nenergy_bin-1 do begin
+            get_data, vars[ii], uts, tflux
+            tflux = sinterpol(tflux, uts, times)
+            flux[*,ii] = total(tflux,2,/nan)/frac_total_sa
+        endfor
 
-    ; Apply energy range.
-    nenergy_bin = n_elements(energy_bins)
-    if n_elements(energy) eq 0 then energy_index = findgen(nenergy_bin) else begin
-        case n_elements(energy) of
-            1: tmp = min(energy_bins-energy[0], /absolute, energy_index)
-            2: begin
-                energy_index = where_pro(energy_bins, energy, count=count)
-                if count eq 0 then begin
-                    errmsg = handle_error('No energy in given range ...')
+        ; Apply energy range.
+        nenergy_bin = n_elements(energy_bins)
+        if n_elements(energy) eq 0 then energy_index = findgen(nenergy_bin) else begin
+            case n_elements(energy) of
+                1: tmp = min(energy_bins-energy[0], /absolute, energy_index)
+                2: begin
+                    energy_index = where_pro(energy_bins, energy, count=count)
+                    if count eq 0 then begin
+                        errmsg = handle_error('No energy in given range ...')
+                        return, retval
+                    endif
+                end
+                else: begin
+                    errmsg = handle_error('Wrong # of input energy ...')
                     return, retval
-                endif
                 end
-            else: begin
-                errmsg = handle_error('Wrong # of input energy ...')
-                return, retval
-                end
-        endcase
+            endcase
+        endelse
+        flux = flux[*,energy_index]
+        energy_bins = energy_bins[energy_index]
     endelse
-    flux = flux[*,energy_index]
-    energy_bins = energy_bins[energy_index]
-
+    
+    
+    
     ; Save data.
     yrange = 10d^ceil(alog10(minmax(flux)))
     flux_unit = '#/cm!U2!N-s-sr-keV'
@@ -71,6 +94,7 @@ function goes_read_kev_electron, input_time_range, probe=probe, $
     short_name = 'e!U-!N'
     ct = 52
     store_data, out_var, times, flux, energy_bins
+
     add_setting, out_var, smart=1, {$
         display_type: 'list', $
         ylog:1, $

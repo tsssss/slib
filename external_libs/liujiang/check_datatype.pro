@@ -1,4 +1,4 @@
-function check_datatype, datatype, dim = dim, single = single, efi = efi, spec = spec, etype = etype, dsl = dsl, resolution = resolution, file_prefix = file_prefix
+function check_datatype, datatype, dim = dim, single = single, efi = efi, spec = spec, etype = etype, dsl = dsl, resolution = resolution, file_prefix = file_prefix, iloc_sc = iloc_sc
 ;;; chech the tvname, dimension of a certain parameter, for prestore quantities.
 ; define the dim of the data name to be used
 ; input: datatype
@@ -9,7 +9,7 @@ function check_datatype, datatype, dim = dim, single = single, efi = efi, spec =
 ; output: dsl: check whether this quantity is in dsl
 ; output: resolution: the resolution of the data type in seconds
 ; output: file_prefix: the prefix for the data file
-
+; output: iloc_sc: the i location of sc name in the tvname
 
 ;;;;; tplot name ;;;;;;
 ;; tplot names
@@ -93,31 +93,73 @@ case datatype of
 	'vperp_efw_rbsp': tv_name = 'thx_efw_vperp_gsm' ;; for RBSP
 
 	;;;;;;;;;;;; MMS quantities ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	'fgs_mms': tv_name = 'mmsx_fgs_gsm'
+	'tqf_mms': tv_name = 'mms_tetrahedron_qf'
+	'fgs_mms': tv_name = 'mmsx_fgs_gsm' ;;; note that this is a fake interpolation
 	'fgl_mms': tv_name = 'mmsx_fgl_gsm'
+	'fgl_dmpa_mms': tv_name = 'mmsx_fgs_b_dmpa_srvy_l2_bvec'
+	'fgh_dmpa_mms': tv_name = 'mmsx_fgm_b_dmpa_brst_l2_bvec'
+	'efl_gse_mms': tv_name = 'mmsx_edp_dce_gse_fast_l2'
+	'eff_gse_mms': tv_name = 'mmsx_edp_dce_gse_brst_l2'
 	'pos_mms': tv_name = 'mmsx_mec_r_gsm' ;; this is in km
+	'Pth_mms': tv_name = 'mmsx_Pth'
+	'beta_mms': tv_name = 'mmsx_beta'
+	've_mms': tv_name = 'mmsx_des_bulkv_gsm_fast'
+	'vi_mms': tv_name = 'mmsx_vi_gsm' ;;; this is a combination of dis (4.5s) and HPCA (11s)--HPCA fills the gaps of dis.
+
+	;;;;;;;;;;;; Cluster quantities ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	'fgs_cl': tv_name = 'cx_fgs_gsm'
+	'fgl_cl': tv_name = 'cx_fgl_gsm'
+	'pos_cl': tv_name = 'cx_pos_gsm' ;; this is in km
+	'tqr_cl': tv_name = 'cl_tqr' ;; 0-1
+	'tqg_cl': tv_name = 'cl_tqg'
+	'ni_cl': tv_name = 'cx_ni'
+	'vi_cl': tv_name = 'cx_vi_gsm'
+	'Ti_cl': tv_name = 'cx_tempi'
+	'Pi_cl': tv_name = 'cx_Pi'
+	'ne_cl': tv_name = 'cx_ne'
+	've_cl': tv_name = 'cx_ve_gsm'
+	'Te_cl': tv_name = 'cx_tempe'
+	'Pe_cl': tv_name = 'cx_Pe'
+	'Pth_cl': tv_name = 'cx_Pth'
 
 	;;;;;;;;;;;; DMSP quantities ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	'dmag_sc_dmsp': tv_name = 'dmspxx_dmag_sc'
+	'dmag_sc_dmsp': tv_name = 'dmspxx_dmag_sc' ;;; components: |down|forward|perpright|
 	'dmag_nec_dmsp': tv_name = 'dmspxx_dmag_nec'
 	'dmagigrf_nec_dmsp': tv_name = 'dmspxx_dmagigrf_nec'
-	'vih_dmsp': tv_name = 'dmspxx_vih'
+	'vih_dmsp': tv_name = 'dmspxx_vih' ;;; positive: perpleft
+	'vi_dmsp': tv_name = 'dmspxx_vi' ;;; | perpleft | up |
 	'viE_dmsp': tv_name = 'dmspxx_viE'
+	'viinf_dmsp': tv_name = 'dmspxx_viinf' ;;; The Knipp inferred velocity. Components: |forward|perpleft|up|
+	'dmagk_sc_dmsp': tv_name = 'dmspxx_dmagk_sc' ;;; the Knipp-Kilcommons better-detrended magnetic field; components: |down|forward|perpright|
+	'einf_dmsp': tv_name = 'dmspxx_efieldinf' ;;; the Knipp-Kilcommons better-detrended electric field; components: |forward|perpleft|up|
+	'pf_dmsp': tv_name = 'dmspxx_pf_vert'
+	'alpf_dmsp': tv_name = 'dmspxx_alpf_vert'
 	'mlat_dmsp': tv_name = 'dmspxx_mlat'
 	'mlt_dmsp': tv_name = 'dmspxx_mlt'
+	'lat_dmsp': tv_name = 'dmspxx_lat'
+	'lon_dmsp': tv_name = 'dmspxx_lon'
+	'robcond_dmsp': tv_name = 'dmspxx_robcond'
 
-	;;;;;;;;;;;; swarm quantities ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;;;;;;;;;;;; Swarm quantities ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	'dmag_nec_swarm': tv_name = 'smx_dmag_nec'
-	'vih_swarm': tv_name = 'smx_vih'
+	'vih_swarm': tv_name = 'smx_vih' ;;; horiontal velocity: |forward|perp_right|
+	'vic_swarm': tv_name = 'smx_vic' ;;; cross-track velocity: |perp_right|downward|
+	'ilat_swarm': tv_name = 'smx_aagcmlat'
 	'mlat_swarm': tv_name = 'smx_mlat'
 	'mlt_swarm': tv_name = 'smx_mlt'
+	'lat_swarm': tv_name = 'smx_lat'
+	'lon_swarm': tv_name = 'smx_lon'
 
 	;;;;;;;;;;;; single quantities, Solar wind or GBOs ;;;;;;;;;;;
 	'kyoto_ae': tv_name = 'kyoto_ae'
 	'kyoto_al': tv_name = 'kyoto_al'
 	'kyoto_dst': tv_name = 'kyoto_dst'
+	'supermag_al': tv_name = 'supermag_al'
+	'supermag_au': tv_name = 'supermag_au'
+	'supermag_ae': tv_name = 'supermag_ae'
 	'pseudo_ae': tv_name = 'thg_idx_ae'
 	'pseudo_al': tv_name = 'thg_idx_al'
+	'noaa_kp': tv_name = 'Kp'
 	'omni_b_gsm': tv_name = 'omni_b_gsm'
 	'omni_v_gsm': tv_name = 'omni_v_gsm'
 	'omni_ni': tv_name = 'omni_ni'
@@ -222,31 +264,68 @@ case datatype of
 	'hope_sa_e': resolution = 11.
 
 	;;;;;;;;;;;; MMS quantities ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	'fgs_mms': resolution = 3.
+	'tqf_mms': resolution = 30.
+	'fgs_mms': resolution = 3. ;;; note that this is a fake interpolation
 	'fgl_mms': resolution = 0.0625
 	'pos_mms': resolution = 30.
+	'Pth_mms': resolution = 11.
+	'beta_mms': resolution = 11.
+	'vi_mms': resolution = 4.5
+
+	;;;;;;;;;;;; Cluster quantities ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	'fgs_cl': resolution = 4.
+	'fgl_cl': resolution = 0.04
+	'pos_cl': resolution = 4.
+	'tqr_cl': resolution = 60.
+	'tqg_cl': resolution = 60.
+	'ni_cl': resolution = 4.
+	'Ti_cl': resolution = 4.
+	'vi_cl': resolution = 4.
+	'Pi_cl': resolution = 4.
+	'ne_cl': resolution = 4.2
+	'Te_cl': resolution = 4.2
+	'vi_cl': resolution = 4.2
+	'Pi_cl': resolution = 4.2
+	'Pth_cl': resolution = 4.
 
 	;;;;;;;;;;;; DMSP quantities ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	'dmag_sc_dmsp': resolution = 1.
 	'dmag_nec_dmsp': resolution = 1.
 	'dmagigrf_nec_dmsp': resolution = 1.
 	'vih_dmsp': resolution = 1.
+	'vi_dmsp': resolution = 1.
 	'viE_dmsp': resolution = 1.
+	'viinf_dmsp': resolution = 1. ;;; sometimes 1 sec, sometimes 4 sec
+	'dmagk_sc_dmsp': resolution = 1. ;;; sometimes 1 sec, sometimes 4 sec
+	'einf_dmsp': resolution = 1. ;;; sometimes 1 sec, sometimes 4 sec
+	'pf_dmsp': resolution = 1. ;;; sometimes 1 sec, sometimes 4 sec
+	'alpf_dmsp': resolution = 1. ;;; sometimes 1 sec, sometimes 4 sec
 	'mlat_dmsp': resolution = 1.
 	'mlt_dmsp': resolution = 1.
+	'lat_dmsp': resolution = 1.
+	'lon_dmsp': resolution = 1.
+	'robcond_dmsp': resolution = 1.
 
 	;;;;;;;;;;;; swarm quantities ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	'dmag_nec_swarm': resolution = 1.
 	'vih_swarm': resolution = 0.5
+	'vic_swarm': resolution = 0.5
+	'ilat_swarm': resolution = 1.
 	'mlat_swarm': resolution = 1.
 	'mlt_swarm': resolution = 1.
+	'lat_swarm': resolution = 1.
+	'lon_swarm': resolution = 1.
 
 	;;;;;;;;;;;; single quantities, Solar wind or GBOs ;;;;;;;;;;;
 	'kyoto_ae': resolution = 60.
 	'kyoto_al': resolution = 60.
 	'kyoto_dst': resolution = 3600.
+	'supermag_al': resolution = 60.
+	'supermag_au': resolution = 60.
+	'supermag_ae': resolution = 60.
 	'pseudo_ae': resolution = 60.
 	'pseudo_al': resolution = 60.
+	'noaa_kp': resolution = 10800.
 	'omni_b_gsm': resolution = 60.
 	'omni_v_gsm': resolution = 60.
 	'omni_ni': resolution = 60.
@@ -339,31 +418,68 @@ case datatype of
 	'efw_density': dim = 1 ;; RBSP efw inferred electron density
 
 	;;;;;;;;;;;; MMS quantities ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	'tqf_mms': dim = 1
 	'fgs_mms': dim = 3
 	'fgl_mms': dim = 3
 	'pos_mms': dim = 3
+	'Pth_mms': dim = 3
+	'beta_mms': dim = 1
+	'vi_mms': dim = 3
+
+	;;;;;;;;;;;; Cluster quantities ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	'fgs_cl': dim = 3
+	'fgl_cl': dim = 3
+	'pos_cl': dim = 3
+	'tqr_cl': dim = 1
+	'tqg_cl': dim = 1
+	'ni_cl': dim = 1
+	'vi_cl': dim = 3
+	'Ti_cl': dim = 3
+	'Pi_cl': dim = 1
+	'ne_cl': dim = 1
+	've_cl': dim = 3
+	'Te_cl': dim = 3
+	'Pe_cl': dim = 1
+	'Pth_cl': dim = 3
 
 	;;;;;;;;;;;; DMSP quantities ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	'dmag_sc_dmsp': dim = 3 ;; spacecraft frame
 	'dmag_nec_dmsp': dim = 3 ;; N, E, C
 	'dmagigrf_nec_dmsp': dim = 3 ;; N, E, C
-	'vih_dmsp': dim = 1 ;; perp-track component
+	'vih_dmsp': dim = 1 ;; perp-left component
+	'vi_dmsp': dim = 2 ;; | perp-left | up |
 	'viE_dmsp': dim = 1 ;; eastward component
+	'viinf_dmsp': dim = 3
+	'dmagk_sc_dmsp': dim = 3 ;; |down|forward|perpright| Unit: nT
+	'einf_dmsp': dim = 3 ;; |forward|perpleft|up| Unit: V/m
+	'pf_dmsp': dim = 1
+	'alpf_dmsp': dim = 1
 	'mlat_dmsp': dim = 1
 	'mlt_dmsp': dim = 1
+	'lat_dmsp': dim = 1
+	'lon_dmsp': dim = 1
+	'robcond_dmsp': dim = 2 ;;; |Pederson|Hall|
 
 	;;;;;;;;;;;; swarm quantities ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	'dmag_nec_swarm': dim = 3
 	'vih_swarm': dim = 2
+	'vic_swarm': dim = 2
+	'ilat_swarm': dim = 1
 	'mlat_swarm': dim = 1
 	'mlt_swarm': dim = 1
+	'lat_swarm': dim = 1
+	'lon_swarm': dim = 1
 
 	;;;;;;;;;;;; single quantities, Solar wind or GBOs ;;;;;;;;;;;
 	'kyoto_ae': dim = 1
 	'kyoto_al': dim = 1
 	'kyoto_dst': dim = 1
+	'supermag_al': dim = 1
+	'supermag_au': dim = 1
+	'supermag_ae': dim = 1
 	'pseudo_ae': dim = 1
 	'pseudo_al': dim = 1
+	'noaa_kp': dim = 1
 	'omni_b_gsm': dim = 3
 	'omni_v_gsm': dim = 3
 	'omni_ni': dim = 1
@@ -379,11 +495,19 @@ case 1 of
 strmatch(datatype, '*_rbsp') or strmatch(datatype, '*_dmsp'): file_prefix = strmid(datatype, 0, strlen(datatype)-5)
 strmatch(datatype, '*_swarm'): file_prefix = strmid(datatype, 0, strlen(datatype)-6)
 strmatch(datatype, '*_mms'): file_prefix = strmid(datatype, 0, strlen(datatype)-4)
+strmatch(datatype, '*_cl'): file_prefix = strmid(datatype, 0, strlen(datatype)-3)
+strcmp(datatype, 'noaa_kp'): file_prefix = 'kp'
 else: file_prefix = datatype
 endcase
 
+case 1 of
+strmatch(datatype, '*_dmsp'): iloc_sc = 4
+strmatch(datatype, '*_mms'): iloc_sc = 3
+else: iloc_sc = 2
+endcase
+
 ;;;;;;;;; type of quantities
-single_quantities = ['kyoto_ae', 'kyoto_al', 'kyoto_dst', 'pseudo_ae', 'pseudo_al', 'omni_b_gsm', 'omni_v_gsm', 'omni_ni', 'omni_Pdyn', 'omni_vxb']
+single_quantities = ['kyoto_ae', 'kyoto_al', 'kyoto_dst', 'supermag_al', 'supermag_au', 'supermag_ae', 'pseudo_ae', 'pseudo_al', 'noaa_kp', 'omni_b_gsm', 'omni_v_gsm', 'omni_ni', 'omni_Pdyn', 'omni_vxb', 'tqf_mms', 'tqr_cl', 'tqg_cl']
 spec_quantities = ['mageis_p', 'mageis_e']
 efi_quantities = ['efs_dsl', 'efs_dot0_dsl', 'efs_gsm', 'eff_dsl', 'eff_dot0_dsl', 'intEy', 'intEy_dsl', 'efw', 'efs_rbsp', 'vsvy_rbsp', 'vperp_efs', 'vperp_efs_rbsp', 'vperp_efw', 'vperp_efw_rbsp']
 dsl_quantities = ['efs_dsl', 'efs_dot0_dsl', 'eff_dsl', 'eff_dot0_dsl', 'intEy_dsl']

@@ -129,6 +129,7 @@ function plot_linlog, var, ypans=ypans, time_range=time_range, $
 ;---Linear part.
     my_var = var+'_tmp'
     copy_data, var, my_var
+    if n_elements(constant) eq 0 then constant = [0]
 
     yrange = linear_yrange
     tpos = linear_pos
@@ -149,7 +150,7 @@ function plot_linlog, var, ypans=ypans, time_range=time_range, $
     my_labels = orig_labels
     options, my_var, yrange=yrange, ystyle=1, ytitle=ytitle, $
         xstyle=xstyle, xtickformat=my_xtickformat, labels=my_labels, ylog=0, $
-        xticklen=xticklen, yticklen=yticklen
+        xticklen=xticklen, yticklen=yticklen, constant=constant
     if n_elements(linear_tick_setting) ne 0 then begin
         foreach key, linear_tick_setting.keys() do options, my_var, key, linear_tick_setting[key]
     endif

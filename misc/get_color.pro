@@ -1,16 +1,21 @@
 ;+
 ; Return n colors.
+; 
+; ncolor.
+; color_table=.
+; bottom_color=.
+; top_color=.
 ;-
 function get_color, ncolor, color_table=color_table, bottom_color=bottom_color, top_color=top_color
 
         default_colors = ['red','green','blue','purple','cyan','orange','black',$
             'deep_pink','olive','dodger_blue','indigo','dark_cyan','firebrick','grey']
         ndefault_color = n_elements(default_colors)
-        if ncolor le ndefault_color then return, sgcolor(default_colors[0:ncolor-1])
+        if ncolor le ndefault_color and n_elements(color_table) eq 0 then return, sgcolor(default_colors[0:ncolor-1])
 
         named_colors = (dictionary(!color)).keys()
         nnamed_color = n_elements(named_colors)
-        if ncolor gt nnamed_color then begin
+        if ncolor gt nnamed_color or keyword_set(color_table) then begin
             if n_elements(bottom_color) eq 0 then bottom_color = 50
             if n_elements(top_color) eq 0 then top_color = 200
             if n_elements(color_table) eq 0 then color_table = 52
