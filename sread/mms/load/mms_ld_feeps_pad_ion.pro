@@ -132,10 +132,8 @@ function mms_ld_feeps_pad_ion_gen_file_v03, input_time_range, probe=probe, filen
     if count ne 0 then fac_phis[index] += 360  
 
     ; Uniform fac phi and theta bins.
-    ntheta = 16d
-    nphi = 2*ntheta
     ntheta = 11d        ; to be consistent with mms_feeps_pad.
-    ;ntheta = 12d
+    ntheta = 12d
     nphi = 24
     theta_bin_range = [0,180d]
     theta_bins = smkarthm(theta_bin_range[0],theta_bin_range[1],ntheta+1,'n')

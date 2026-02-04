@@ -10,8 +10,7 @@ function mms_read_pa_spec_ele_kev_cdaweb, time_range, probe=probe, $
     errmsg = ''
     retval = ''
 
-    if n_elements(suffix) eq 0 then suffix = ''
-    suffix = ''
+    if n_elements(suffix) eq 0 then suffix = '_cdaweb'
     out_var = prefix+'pa_spec_ele_kev'+suffix
     if keyword_set(get_name) then return, out_var
     if n_elements(energy_range) ne 2 then energy_range = [50d,500]
@@ -56,7 +55,7 @@ function mms_read_pa_spec_ele_kev_cdaweb, time_range, probe=probe, $
     if errmsg ne '' then return, retval
     
     
-    flux_vars = mms_read_feeps_flux_cdaweb(time_range, probe=probe, $
+    flux_vars = mms_read_feeps_flux_cdaweb(time_range, probe=probe, species_str=species_str, $
         errmsg=errmsg, get_name=get_name, suffix=suffix, update=update)
 
 
@@ -76,7 +75,7 @@ function mms_read_pa_spec_ele_kev_cdaweb, time_range, probe=probe, $
         'yrange', [0d,180], $
         'ytickv', [30d,90,150], $
         'yticks', 2, $
-        'yminor', 3, $
+        'yminor', 6, $
         'energy_range', energy_range, $
         'requested_time_range', time_range )
     
@@ -90,6 +89,13 @@ tr = ['2016-03-05','2016-03-06']
 tr = ['2017-01-12','2017-01-13']
 probe = '1'
 energy_range = [60,300]
+prefix = 'mms'+probe+'_'
 var1 = mms_read_pa_spec_ele_kev_cdaweb(tr, probe=probe, suffix='_test', energy_range=energy_range)
+pa_spec = get_var_data(var1, times=times, pas)
 ;var2 = mms_read_kev_electron(tr, probe=probe, energy_range=[40,600]*1e3, spec=1)
+flux_90 = mean(pa_spec[*,5:6],dimension=2,nan=1)
+flux_0 = mean(pa_spec[*,[[0,1],[10,11]]],dimension=2,nan=1)
+aniso_var = prefix+'aniso'
+store_data, aniso_var, times, [[flux_0],[flux_90]], limits={labels:['0','90'],colors:sgcolor(['red','blue']), ylog:1}
+tplot, [aniso_var,var1]
 end

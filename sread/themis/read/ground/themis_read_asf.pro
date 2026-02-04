@@ -86,5 +86,8 @@ site = 'kuuj'
 time_range = time_double(['2019-03-28/08:00','2019-03-28/09:00'])
 site = 'whit'
 
+time_range = time_double(['2010-02-03/03:00','2010-02-03/13:00'])
+site = 'gill'
+
 var = themis_read_asf(time_range, site=site)
 end

@@ -118,6 +118,18 @@ end
 time_range = time_double(['2014-08-28/09:30','2014-08-28/11:30'])
 time_range = time_double(['2017-01-01','2017-01-02'])
 time_range = time_double(['2013-01-01','2013-01-02'])
+time_range = time_double(['2024-03-05/06:00','2024-03-05/16:00'])
+time_range = time_double(['2024-03-07/18:00','2024-03-07/23:00'])
+
+time_range = time_double(['2024-03-08','2024-03-09'])
+
 probe = 'e'
-var = themis_read_kev_electron(time_range, probe=probe, spec=1)
+en_high_var = themis_read_kev_electron(time_range, probe=probe, spec=1)
+options, en_high_var, color_table=40, zrange=[1e-2,1e4]*2, no_interp=1
+b_var = themis_read_bfield(time_range, probe=probe)
+u_var = themis_read_ion_vel(time_range, probe=probe)
+en_low_var = themis_read_en_spec(time_range, probe=probe, species='e', id='esa_l2')
+options, en_low_var, color_table=40, no_interp=1
+plot_vars = [en_high_var,en_low_var,b_var,u_var]
+tplot, plot_vars, trange=time_range
 end

@@ -1,8 +1,11 @@
 ;+
 ; Loads FEEPS flux and clean the data. This is to replicate mms_load_feeps in the framework of slib.
+; 
+; species_str=. ['electron','ion']
 ;-
 
 function mms_read_feeps_flux_cdaweb, input_time_range, probe=probe, $
+    species_str=species_str, $
     errmsg=errmsg, get_name=get_name, suffix=suffix, update=update
 
 
@@ -18,8 +21,7 @@ function mms_read_feeps_flux_cdaweb, input_time_range, probe=probe, $
     instr_str = 'feeps'
     mode_str = 'srvy'
     level_str = 'l2'
-    species_str = 'electron'
-    species_str2 = 'ele'
+    species_str2 = (species_str eq 'electron')? 'ele': 'ion'
     nall_sensor = 12
     sensor_ids = findgen(nall_sensor)+1
     sensor_types = ['top','bottom']

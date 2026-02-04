@@ -3,7 +3,7 @@
 ;-
 
 function themis_read_en_spec_combo, input_time_range, probe=probe, $
-    id=id, species=species0, $
+    ids=ids, species=species0, $
     errmsg=errmsg, get_name=get_name, update=update
 
 
@@ -12,6 +12,10 @@ function themis_read_en_spec_combo, input_time_range, probe=probe, $
 
 
 ;---Check input.
+    ; ids.
+    if n_elements(ids) eq 0 then ids = 'esa_sst'
+    type_letter = themis_get_type_letter(ids)
+    
     ; probe.
     if ~themis_probe_is_valid(probe) then begin
         errmsg = 'Invalid probe: '+probe+' ...'
@@ -34,10 +38,6 @@ function themis_read_en_spec_combo, input_time_range, probe=probe, $
     
     ; time_range and coord.
     time_range = time_double(input_time_range)
-    
-    
-    ; id.
-    if n_elements(id) eq 0 then id = 'esa_sst'
     
     
     
@@ -69,7 +69,7 @@ function themis_read_en_spec_combo, input_time_range, probe=probe, $
     
 ;---Load needed data.
     mom_dist_var = themis_read_mom_dist(time_range, probe=probe, species=species, errmsg=errmsg, update=update)
-    the_dist = get_setting(mom_dist_var, id)
+    the_dist = get_setting(mom_dist_var, ids)
 
     ; this is adopted from thm_load_esansst2.
     b_var = prefix+'fgs_dsl'
@@ -86,7 +86,7 @@ function themis_read_en_spec_combo, input_time_range, probe=probe, $
         
     foreach key, vinfo.keys() do begin
         pitch_angle_range = pa_settings[key]
-        orig_var = prefix+'pt'+species+'rf_'+unit+'_energy'
+        orig_var = prefix+'p'+type_letter+species+'r_'+unit+'_energy'
         del_data, orig_var
         thm_part_products, dist_array=the_dist, outputs='fac_energy', $
             sc_pot_name=vsc_var, mag_name=b_var, pitch=pitch_angle_range, units=unit
@@ -94,12 +94,18 @@ function themis_read_en_spec_combo, input_time_range, probe=probe, $
         if errmsg ne '' then return, retval
         spec_var = rename_var(orig_var, output=vinfo[key])
         get_data, spec_var, times, data, val, limits=lim
-        data *= 1e3 ; convert from #/cm!U2-s-sr-eV to #/cm!U2-s-sr-keV.
+        ; convert from #/cm!U2-s-sr-eV to eV/cm!U2-s-sr-eV.
+        unit = 'eV/cm!E2!N-s-sr-eV'
+        if n_elements(val) eq n_elements(data[0,*]) then begin
+            foreach en, val, ii do data[*,ii] *= en
+        endif else begin
+            data *= val
+        endelse
         store_data, spec_var, times, data, val
 
         add_setting, spec_var, smart=1, dictionary($
             'display_type', 'spec', $
-            'unit', '#/cm!E2!N-s-sr-keV', $
+            'unit', unit, $
             'zrange', zrange, $
             'species_name', species_name, $
             'ytitle', 'Energy!C(eV)', $
@@ -123,11 +129,11 @@ species = ['e','p']
 probes = 'd'
 species = 'p'
 update = 0
-id = 'esa_sst'
+ids = 'esa_sst'
 foreach the_species, species do begin
     foreach probe, probes do begin
         vinfo = themis_read_en_spec_combo(time_range, probe=probe, $
-            species=the_species, id=id, update=update)
+            species=the_species, ids=ids, update=update)
         stop
     endforeach
 endforeach

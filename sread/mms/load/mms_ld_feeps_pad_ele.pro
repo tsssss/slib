@@ -180,10 +180,8 @@ test = 0
     if count ne 0 then fac_phis[index] += 360
 
     ; Uniform fac phi and theta bins.
-    ntheta = 16d
-    nphi = 2*ntheta
     ntheta = 11d        ; to be consistent with mms_feeps_pad.
-    ;ntheta = 12d
+    ntheta = 12d
     nphi = 24
     theta_bin_range = [0,180d]
     theta_bins = smkarthm(theta_bin_range[0],theta_bin_range[1],ntheta+1,'n')
@@ -207,7 +205,8 @@ test = 0
 ;---Obtain the 3D PAD.
     dAngResp = 21.4d    ; from mms_feeps_pad.
     ;dAngResp = 0d
-    del_angle = dangresp+theta_bin_size*0.5
+    ;del_angle = dangresp+theta_bin_size*0.5
+    del_angle = dangresp+theta_bin_size
     full_fluxs = fltarr(ntime,nphi*ntheta,nen_bin)
     full_counts = fltarr(ntime,nphi*ntheta,nen_bin)
     for sid=0,nsensor-1 do begin
@@ -381,7 +380,7 @@ test = 0
         vars = [sp_omni_var,sp_omni_var2,target_var]
         options, vars, yrange=[60,500], zrange=[0.1,1e5]
         vars = [sp_pa_var,pa_var]
-        options, vars, yrange=[0,180], zrange=[0.1,1e5], color_table=49
+        options, vars, yrange=[0,180], zrange=[0.1,1e5], color_table=40
         plot_vars = [sp_omni_var,sp_omni_var2,target_var,$
             sp_pa_var,pa_var]
         ;options, plot_vars, color_table=40
@@ -883,7 +882,7 @@ end
 
 tr_list = list()
 ;tr_list.add, ['2015-08-19','2016-03-10']
-;tr_list.add, ['2015-12-25','2016-03-10']
+tr_list.add, ['2015-09-01','2016-03-10']
 tr_list.add, ['2016-12-31','2017-02-09']
 dates = list()
 secofday = constant('secofday')

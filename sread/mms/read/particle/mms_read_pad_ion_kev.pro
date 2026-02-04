@@ -108,13 +108,13 @@ function mms_read_pad_ion_kev, input_time_range, id=datatype, probe=probe, speci
         store_data, pad_var, times, pad_fluxs
     endelse
 
-    ; Convert to #/cm^2-s-sr-keV.
-    get_data, pad_var, times, pad_fluxs
-    nen_center = n_elements(en_centers)
-    for ii=0,nen_center-1 do begin
-        pad_fluxs[*,*,ii] /= en_centers[ii]*1e-3
-    endfor
-    pad_unit = '#/cm!U2!N-s-sr-keV'
+    ; Use unit eV/cm^2-s-sr-eV, so that fluxes can be added directly in pa and en.
+;    get_data, pad_var, times, pad_fluxs
+;    nen_center = n_elements(en_centers)
+;    for ii=0,nen_center-1 do begin
+;        pad_fluxs[*,*,ii] /= en_centers[ii]*1e-3
+;    endfor
+    pad_unit = 'eV/cm!U2!N-s-sr-eV'
     
     add_setting, pad_var, dictionary($
         'requested_time_range', time_range, $

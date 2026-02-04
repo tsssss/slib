@@ -69,7 +69,7 @@ function mms_read_pad_ele_kev, input_time_range, id=datatype, probe=probe, speci
     pad3d_var = out_vars[0]
     pad3d_fluxs = get_var_data(pad3d_var, times=times)
     nphi = n_elements(phi_centers)
-    pad_fluxs = total(pad3d_fluxs,2)/nphi
+    pad_fluxs = total(pad3d_fluxs,2,nan=1)/nphi
     
     pad_var = var_info
     if ~keyword_set(no_spin_average) then begin
@@ -108,13 +108,13 @@ function mms_read_pad_ele_kev, input_time_range, id=datatype, probe=probe, speci
         store_data, pad_var, times, pad_fluxs
     endelse
 
-    ; Convert to #/cm^2-s-sr-keV.
-    get_data, pad_var, times, pad_fluxs
-    nen_center = n_elements(en_centers)
-    for ii=0,nen_center-1 do begin
-        pad_fluxs[*,*,ii] /= en_centers[ii]*1e-3
-    endfor
-    pad_unit = '#/cm!U2!N-s-sr-keV'
+    ; Use unit eV/cm^2-s-sr-eV, so that fluxes can be added directly in pa and en.
+;    get_data, pad_var, times, pad_fluxs
+;    nen_center = n_elements(en_centers)
+;    for ii=0,nen_center-1 do begin
+;        pad_fluxs[*,*,ii] /= en_centers[ii]*1e-3
+;    endfor
+    pad_unit = 'eV/cm!U2!N-s-sr-eV'
     
     add_setting, pad_var, dictionary($
         'requested_time_range', time_range, $

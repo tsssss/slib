@@ -52,6 +52,7 @@ function themis_read_moment_combo, input_time_range, probe=probe, $
         store_data, var_out, times, vec
         settings = dictionary(lim)
         settings.coord = coord
+        settings.colors = constant('rgb')
         add_setting, var_out, smart=1, settings
     endforeach
     
@@ -63,6 +64,7 @@ end
 
 
 time_range = time_double(['2017-03-09/06:30','2017-03-09/09:00'])
+time_range = time_double(['2008-05-15/24:00','2008-05-16/05:00'])
 probes = ['d']
 species = ['e','p']
 update = 0

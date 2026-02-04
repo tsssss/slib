@@ -1,5 +1,5 @@
 function themis_read_en_spec_esa_l2, input_time_range, probe=probe, errmsg=errmsg, $
-    species=species0, get_name=get_name, id=id
+    species=species0, get_name=get_name, id=id, update=update
 
     prefix = 'th'+probe+'_'
     errmsg = ''
@@ -14,11 +14,14 @@ function themis_read_en_spec_esa_l2, input_time_range, probe=probe, errmsg=errms
     endif
     species1 = species
     if species1 eq 'i' then species1 = 'p'
+    if n_elements(suffix) eq 0 then suffix = '_esa_l2'
 
-    spec_var = prefix+species1+'_en_spec'
-    if keyword_set(get_name) then return, spec_var
-
+    var_info = prefix+species1+'_en_spec'+suffix
+    if keyword_set(get_name) then return, var_info
+    if keyword_set(update) then res = delete_var_from_memory(var_info)
     time_range = time_double(input_time_range)
+    if ~check_if_update_memory(var_info, time_range) then return, var_info
+
     files = themis_load_esa(time_range, id='l2', probe=probe, errmsg=errmsg)
     if errmsg ne '' then return, retval
 
@@ -27,7 +30,7 @@ function themis_read_en_spec_esa_l2, input_time_range, probe=probe, errmsg=errms
     var_list = list()
     var_list.add, dictionary($
         'in_vars', prefix+the_type+'_en_eflux'+['','_yaxis'], $
-        'out_vars', spec_var+['','_en'], $
+        'out_vars', var_info+['','_en'], $
         'time_var_name', prefix+the_type+'_time', $
         'time_var_type', 'unix')
     
@@ -35,27 +38,30 @@ function themis_read_en_spec_esa_l2, input_time_range, probe=probe, errmsg=errms
     if errmsg ne '' then return, retval
 
 
-    get_data, spec_var, times, spec
-    get_data, spec_var+'_en', times, en_bins
+    get_data, var_info, times, spec
+    get_data, var_info+'_en', times, en_bins
     ; Convert unit from eV/(cm^2-s-sr-eV) to #/cm^2-s-sr-keV
-    spec = spec/(en_bins*1e-3)
-    store_data, spec_var, times, spec, en_bins
+    ; spec = spec/(en_bins*1e-3)
+    ; unit = '#/cm!E2!N-s-sr-keV'
+    store_data, var_info, times, spec, en_bins
+    unit = 'eV/cm!E2!N-s-sr-eV'
 
     zrange = (species eq 'e')? [1e4,1e9]: [1e4,5e6]
     species_name = themis_esa_get_species_name(species)
     ct = (species eq 'e')? get_ct('electron'): get_ct('proton')
-    add_setting, spec_var, smart=1, dictionary($
+    add_setting, var_info, smart=1, dictionary($
         'display_type', 'spec', $
-        'unit', '#/cm!E2!N-s-sr-keV', $
+        'unit', unit, $
         'zrange', zrange, $
         'species_name', species_name, $
         'ytitle', 'Energy!C(eV)', $
         'ylog', 1, $
         'zlog', 1, $
+        'zticklen', -0.5, $
         'color_table', ct, $
         'short_name', '' )
 
-    return, spec_var
+    return, var_info
 end
 
 

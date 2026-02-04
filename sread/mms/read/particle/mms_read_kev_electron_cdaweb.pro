@@ -30,7 +30,7 @@ function mms_read_kev_electron_cdaweb, time_range, probe=probe, $
     prefix2 = prefix+'epd_'+instr_str+'_'+mode_str+'_'+level_str+'_'+species_str+'_'
     active_sensors = mms_feeps_active_eyes(time_range, probe, mode_str, species_str, level_str)
 
-    tmp = mms_read_feeps_flux_cdaweb(time_range, probe=probe, $
+    tmp = mms_read_feeps_flux_cdaweb(time_range, probe=probe, species_str=species_str, $
         errmsg=errmsg, get_name=get_name, suffix=suffix)
 
     ; Calculate the energy spectrogram.
