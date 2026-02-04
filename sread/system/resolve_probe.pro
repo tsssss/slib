@@ -1,5 +1,5 @@
 
-function resolve_probe, probe
+function resolve_probe, probe_in
 
     missions = dictionary()
     missions.rbsp = dictionary($
@@ -43,7 +43,8 @@ function resolve_probe, probe
         'short_name','c', $
         'routine_name','cluster')
 
-    probe = strlowcase(probe)
+    probe = strlowcase(probe_in)
+    if n_elements(probe_in) gt 1 then probe = probe_in[0]+probe_in[1]
     found_probe = 0
     foreach key, missions.keys() do begin
         mission = missions[key]

@@ -46,6 +46,7 @@ function get_var_data, var, val, in=time_range, at=time, raw=raw, times=times, l
         if count eq 0 then return, retval
         dat = dat[index,*,*,*,*,*,*,*]
         times = times[index]
+        if size(val,n_dimensions=1) ge 2 then val = val[index,*,*,*,*,*,*,*]
     endif
     
     if keyword_set(raw) then return, dat
