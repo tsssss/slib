@@ -69,6 +69,13 @@ function cotran_pro, input_vec, times, msg, coord_msg=coord_msg, errmsg=errmsg, 
     ; This needs to be updated.
     supported_funcs = [$
     ;---mission specific
+        ; TRACERS.
+        'ts_mag2ts_tscs', 'ts_tscs2ts_mag', $
+        'ts_efi2ts_tscs', 'ts_tscs2ts_efi', $
+        'ts_ace2ts_tscs', 'ts_tscs2ts_ace', $
+        'ts_aci2ts_tscs', 'ts_tscs2ts_aci', $
+        'ts_msc2ts_tscs', 'ts_tscs2ts_msc', $
+        'ts_magic2ts_tscs', 'ts_tscs2ts_magic', $
         ; MMS.
         'mms_dbcs2mms_eci', 'mms_eci2mms_dbcs', $
         'mms_dbcs2mms_bcs', 'mms_bcs2mms_dbcs', $

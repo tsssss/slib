@@ -3,7 +3,9 @@
 ; Note: only mlat and mlon are obtained. dis is just 1.
 ;-
 
-function ct_geo2aacgm, r_geo, times, glat=glat, glon=glon, dis=dis
+function ct_geo2aacgm, r_geo, times, glat=glat, glon=glon, dis=dis, errmsg=errmsg
+
+    errmsg = ''
 
     aacgm_coef_var = aacgm_read_coef()
     coef_v2 = (get_var_data(aacgm_coef_var, times=coef_times))['geo2aacgm']

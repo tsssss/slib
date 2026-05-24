@@ -13,7 +13,8 @@
 
 function ct_rbsp_mgse2gse, vec0, time, wsc=wsc_gse, probe=probe, use_orig_quaternion=use_orig_quaternion, _extra=ex
 
-    compile_opt idl2 & on_error, 2
+    compile_opt idl2
+    on_error, 2
 
     vec1 = double(vec0)
     n1 = n_elements(vec1)/3 & n2 = n1+n1 & n3 = n2+n1
