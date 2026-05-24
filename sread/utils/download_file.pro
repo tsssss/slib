@@ -57,12 +57,12 @@ function download_file_callback, status, progress, data
     return, 1
 end
 
-pro download_file, local_file, remote_file, errmsg=errmsg
+pro download_file, local_file, remote_file, errmsg=errmsg, username=username, password=password
 
     errmsg = ''
     catch, errorstatus
     if errorstatus ne 0 then begin
-        catch, /cancel
+        catch, cancel=1
         errmsg = handle_error(!error_state.msg)
         return
     endif
@@ -76,6 +76,13 @@ pro download_file, local_file, remote_file, errmsg=errmsg
 ;stop
 ;    tmp = spd_download_file(url=remote_file, filename=local_file)
 ;stop
+; 
+    if n_elements(username) ne 0 then begin
+        cmd = 'curl -u '+username+':'+password+' -f -L -o '+local_file+' '+remote_file
+        spawn, cmd, res, errmsg
+        if file_test(local_file) eq 1 then errmsg = ''
+        return
+    endif
 
 ;---Prepare header.
     headers = ['User-Agent: IDL']

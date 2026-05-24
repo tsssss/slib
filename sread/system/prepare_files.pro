@@ -63,6 +63,10 @@ function prepare_files, request=request, errmsg=errmsg, $
     ; The extension for the files, e.g., 'cdf'.
     extension = request.haskey('extension')? request.extension: !null
 
+    ; Credentials for downloading files.
+    username = request.haskey('username')? request.username: !null
+    password = request.haskey('password')? request.password: !null
+
 
 ;---1. String operations to construct filenames.
 ;   The effect is to add files to request, where files is a list of dictionaries
@@ -207,7 +211,7 @@ function prepare_files, request=request, errmsg=errmsg, $
                         lprmsg, msg
                     endif
                     if has_connection_to_remote then begin
-                        download_file, file.local, file.remote, errmsg=errmsg
+                        download_file, file.local, file.remote, errmsg=errmsg, username=username, password=password
                         test = lookup_index_file('not found', file.local)
                         if test ne '' then begin
                             lprmsg, '    Remote file is not found, cleaning up ...'
@@ -338,7 +342,7 @@ function prepare_files, request=request, errmsg=errmsg, $
                             lprmsg, msg
                         endif else download_flag = 1
                         if download_flag then begin
-                            download_file, local_file, remote_file, errmsg=errmsg
+                            download_file, local_file, remote_file, errmsg=errmsg, username=username, password=password
                         endif
                     endif
                 endif else lprmsg, '    File is good to go ...'
