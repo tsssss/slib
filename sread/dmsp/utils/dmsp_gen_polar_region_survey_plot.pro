@@ -3,14 +3,14 @@
 ;-
 
 function dmsp_gen_polar_region_survey_plot, input_time_range, probe=probe, $
-    plot_dir=plot_dir, position=full_pos, errmsg=errmsg, test=test, $
-    local_root=local_root
+    plot_dir=plot_dir, errmsg=errmsg, test=test, $
+    local_root=local_root, version=version
 
-    version = 'v03'
+    if n_elements(version) eq 0 then version = 'v04'
     routine = 'dmsp_gen_polar_region_survey_plot_'+version
     return, call_function(routine, input_time_range, probe=probe, $
         local_root=local_root, errmsg=errmsg, test=test, $
-        plot_dir=plot_dir, position=full_pos )
+        plot_dir=plot_dir)
 
 end
 

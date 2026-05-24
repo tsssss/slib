@@ -6,6 +6,7 @@ function dmsp_read_orbit_noaa, input_time_range, probe=probe, errmsg=errmsg, coo
 
     prefix = 'dmsp'+probe+'_'
     errmsg = ''
+    retval = !null
     if n_elements(suffix) eq 0 then suffix = '_noaa'
 
     if n_elements(coord) eq 0 then coord = 'gsm'

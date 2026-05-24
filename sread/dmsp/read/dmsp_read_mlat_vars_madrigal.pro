@@ -24,10 +24,18 @@ function dmsp_read_mlat_vars_madrigal, input_time_range, probe=probe, $
         if errmsg ne '' then return, retval
         r_geo_var = dmsp_read_orbit(time_range, probe=probe, errmsg=errmsg, coord='geo')
         r_geo = get_var_data(r_geo_var, times=times)
+
+        ; Down sample to 1-min because there are jumps every 60 sec.
+        window = 60d
+        uts = make_bins(time_range, window)
+        r_geo = sinterpol(r_geo,times, uts)
+        times = uts
+
         r_aacgm = cotran(r_geo, times, 'geo2aacgm')
         mlat = r_get_lat(r_aacgm, degree=1)
         mlon = r_get_lon(r_aacgm, degree=1)
         mlt = aacgm_mlon2mlt(mlon, times)
+
     endif else begin
         files = dmsp_load_ssj_madrigal(time_range, probe=probe, errmsg=errmsg)
         if errmsg ne '' then return, retval

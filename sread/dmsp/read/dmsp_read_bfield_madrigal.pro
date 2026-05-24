@@ -48,7 +48,6 @@ function dmsp_read_bfield_madrigal, input_time_range, probe=probe, errmsg=errmsg
     db_perp = db_perp[time_index]*1e9       ; T to nT.
     db_down = db_down[time_index]*1e9       ; T to nT.
 
-    ntime = n_elements(times)
     store_data, b_coord_var, times, [[db_forward],[db_perp],[db_down]]
     add_setting, b_coord_var, smart=1, dictionary($
         'requested_time_range', time_range, $
