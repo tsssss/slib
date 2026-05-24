@@ -65,7 +65,7 @@ function themis_read_pa_spec, input_time_range, probe=probe, $
 
 
 ;---Calculate the en_spec.
-    ct = get_ct(species)        
+    ct = get_ct(species)
     unit = 'flux'
 
     orig_var = prefix+'p'+type_letter+species+'?_'+unit+'_pa'
