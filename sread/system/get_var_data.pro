@@ -10,14 +10,20 @@
 ; settings=. A dictionary of options (essentially the same as limits but in dict).
 ;-
 ;
-function get_var_data, var, val, in=time_range, at=time, raw=raw, times=times, limits=lim, settings=settings, _extra=ex
+function get_var_data, var, val, in=time_range, at=time, raw=raw, times=times, limits=lim, settings=settings, errmsg=errmsg, _extra=ex
 
     retval = !null
-    if n_elements(var) ne 1 then message, 'Invalid input var ...'   ; want to stop instead of return.
+    if n_elements(var) ne 1 then begin
+        errmsg = 'Invalid input var ...'
+        return, retval
+    endif
     if tnames(var) eq '' then return, retval
     
     get_data, var, data=info, limits=lim
-    if size(info,type=1) ne 8 then return, retval   ; no data. info should be struct if there are data.
+    if size(info,type=1) ne 8 then begin
+        errmsg = 'No data'
+        return, retval   ; no data. info should be struct if there are data.
+    endif
     tags = strlowcase(tag_names(info))
     index = where(tags eq 'x', count)
     if count eq 0 then times = !null else times = info.(index)

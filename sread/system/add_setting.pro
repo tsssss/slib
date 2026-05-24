@@ -29,14 +29,18 @@ pro add_setting, var, settings, smart=smart, id=id, errmsg=errmsg
             if settings.haskey('id') then id = settings['id']
         endif
     endif
-    if n_elements(id) ne 0 then smart = 1    
-    if n_elements(settings) eq 0 then begin
+    if n_elements(id) ne 0 then smart = 1
+    if n_elements(settings) eq 0 and keyword_set(smart) eq 0 then begin
         errmsg = 'No input settings ...'
         return
     endif
     
-    if size(settings, /type) eq 8 then settings = dictionary(settings)
-    foreach key, settings.keys() do options, var, key, settings[key]
+    if n_elements(settings) eq 0 then begin
+        settings = dictionary()
+    endif else begin
+        if size(settings, /type) eq 8 then settings = dictionary(settings)
+        foreach key, settings.keys() do options, var, key, settings[key]
+    endelse
 ;    keys = strlowcase(tag_names(settings))
 ;    for i=0, n_elements(keys)-1 do options, var, keys[i], settings.(i)
 
@@ -85,10 +89,11 @@ pro add_setting, var, settings, smart=smart, id=id, errmsg=errmsg
                 'unit', 'Re' )
         endif
         
-        
-        foreach key, default_settings.keys() do begin
-            if ~settings.haskey(key) then options, var, key, default_settings[key]
-        endforeach
+        if n_elements(default_settings) ne 0 then begin
+            foreach key, default_settings.keys() do begin
+                if ~settings.haskey(key) then options, var, key, default_settings[key]
+            endforeach
+        endif
     endif
     
     
@@ -101,8 +106,11 @@ pro add_setting, var, settings, smart=smart, id=id, errmsg=errmsg
         dims = size(data, dimensions=1)
         ndim = size(data, n_dimensions=1)
         nval = n_elements(val)
-        if ndim eq 1 and ntime eq dims[0] then begin
-            dtype = 'scalar'
+        dtype = ''
+        if ndim eq 1 then begin
+            if ntime eq dims[0] then begin
+                dtype = 'scalar'
+            endif
         endif else if ndim gt 2 then begin
             errmsg = handle_error('Unknown display type ...')
             return

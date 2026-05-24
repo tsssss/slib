@@ -42,6 +42,11 @@ function resolve_probe, probe_in
         'prefix_name', 'c', $
         'short_name','c', $
         'routine_name','cluster')
+    missions.tracers = dictionary($
+        'name','ts', $
+        'prefix_name', 'ts', $
+        'short_name','ts', $
+        'routine_name','tracers')
 
     probe = strlowcase(probe_in)
     if n_elements(probe_in) gt 1 then probe = probe_in[0]+probe_in[1]
