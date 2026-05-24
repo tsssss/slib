@@ -73,6 +73,8 @@ function panel_init, plot_file, $
         panid = [0,0]
     endif
 
+    xpans = double(xpans)
+    ypans = double(ypans)
     xpansize = pansize[0]*xpans/xpans[panid[0]]
     ypansize = pansize[1]*ypans/ypans[panid[1]]
 
