@@ -15,7 +15,7 @@ function mms_read_pa_spec_kev_ele, input_time_range, probe=probe, $
     retval = ''
 
     pad_var = mms_read_pad_ele_kev(input_time_range, probe=probe, errmsg=errmsg)
-    if errmsg ne '' then return, retrval
+    if errmsg ne '' then return, retval
     
     prefix = 'mms'+probe+'_'
     if n_elements(var_info) eq 0 then var_info = prefix+'pa_spec_kev_ele'
@@ -33,7 +33,7 @@ function mms_read_pa_spec_kev_ion, input_time_range, probe=probe, $
     retval = ''
 
     pad_var = mms_read_pad_ion_kev(input_time_range, probe=probe, errmsg=errmsg)
-    if errmsg ne '' then return, retrval
+    if errmsg ne '' then return, retval
 
     prefix = 'mms'+probe+'_'
     if n_elements(var_info) eq 0 then var_info = prefix+'pa_spec_kev_ion'
@@ -104,6 +104,7 @@ function mms_read_pa_spec_kev, input_time_range, probe=probe, $
         if total(my_energy_range eq energy_range) ne 2 then update = 1
     endelse
     if keyword_set(update) then tmp = delete_var_from_memory(out_var)
+    time_range = time_double(input_time_range)
     if ~check_if_update_memory(out_var, time_range) then return, out_var
 
     if species eq 'e' then begin
@@ -114,15 +115,20 @@ function mms_read_pa_spec_kev, input_time_range, probe=probe, $
     pa_var = call_function(routine, input_time_range, probe=probe, $
         energy_range=energy_range_ev, var_info=out_var, errmsg=errmsg, get_name=get_name, update=update)
     options, pa_var, extend_y_edges=1, $
-        energy_range=energy_range, requested_time_range=time_range, $
+        energy_range=energy_range, requested_time_range=time_range
     set_ytick, pa_var, yrange=[0,180], ytickv=[30,90,150], yminor=6
     return, pa_var
 end
 
 
-tr = ['2015-09-01','2015-09-02']
-probe = '4'
-energy_range = [60d,500]
+compile_opt idl2
+tr = ['2015-09-02','2015-09-04']
+tr = ['2015-09-25','2015-09-26']
+probe = '1'
+energy_range = [60d,300]
 pa_var = mms_read_pa_spec_kev(tr, probe=probe, energy_range=energy_range, species='e')
 pa_var2 = mms_read_pa_spec_kev(tr, probe=probe, energy_range=energy_range, species='e', id='cdaweb')
+sgopen, 1
+plot_vars = [pa_var, pa_var2]
+tplot, plot_vars, trange=tr
 end

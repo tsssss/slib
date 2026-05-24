@@ -92,7 +92,6 @@ test = 0
             'display_type', 'spec', $
             'unit', '#/cm!U2!N-s-sr-keV' )
     
-    
         ; spin averaged fluxs.
         spin_sectors = get_var_data(spin_var)
         spin_index = where(spin_sectors[0:ntime-2] ge spin_sectors[1:ntime-1], count)+1
@@ -154,7 +153,8 @@ test = 0
 
 
     coord = 'gse'
-    b_var = mms_read_bfield(time_range, probe=probe, coord=coord)
+    b_var = mms_read_bfield(time_range, probe=probe, coord=coord, err=errmsg)
+    if errmsg ne '' then return, retval
     data_time_range = time_range+[-1,1]*30d
     r_var = mms_read_orbit(data_time_range, probe=probe, coord=coord)
     q_fac = lets_define_fac(b_var=b_var, r_var=r_var, time_var=flux_var, update=1)
@@ -832,7 +832,9 @@ function mms_ld_feeps_pad_ele, input_time_range, id=datatype, probe=probe, $
 
     base_name = mission_str+probe+'_'+instr_str+'_'+mode_str+'_'+level_str+'_'+type_str+'_%Y%m%d_'+version+'.cdf'
     local_path = [local_root,mission_str+probe,instr_str,mode_str,level_str,type_str+'_'+version,'%Y','%m']
+    log_file = [local_root,mission_str+probe,instr_str,mode_str,level_str,type_str+'_'+version,'mms_ld_feeps_pad_ele_log_'+version+'.cdf']
     type_dispatch[the_key] = dictionary($
+        'log_file', log_file, $
         'pattern', dictionary($
             'local_file', join_path([local_path,base_name]), $
             'local_index_file', join_path([local_path,default_index_file(/sync)])), $
@@ -864,17 +866,44 @@ function mms_ld_feeps_pad_ele, input_time_range, id=datatype, probe=probe, $
 ;---Find files, read variables, and store them in memory.
     files = prepare_files(request=request, errmsg=errmsg, local_files=files, $
         file_times=file_times, time=time_range, nonexist_files=nonexist_files)
+
+    ; Load log.
+    log_file = request.log_file
+    if file_test(log_file) eq 0 then cdf_touch, log_file
+    log_var = 'requested_file_times'
+    if ~cdf_has_var(log_var, filename=log_file) then begin
+        requested_file_times = file_times
+        cdf_save_var, log_var, value=file_times, filename=log_file
+    endif
+    requested_file_times = cdf_read_var(log_var, filename=log_file)
+    ; Add existing files to the log.
+    foreach file, files, fid do begin
+        if file_test(file) eq 0 then continue
+        file_time = file_times[fid]
+        index = where(requested_file_times eq file_time, count)
+        if count ne 0 then continue
+        requested_file_times = [requested_file_times, file_time]
+    endforeach
+
+
     if n_elements(nonexist_files) ne 0 then begin
         foreach file, request.nonexist_files do begin
             file_time = file.file_time
+            index = where(requested_file_times eq file_time, count)
+            if count ne 0 then continue
             local_file = file.local_file
             routine = 'mms_ld_feeps_pad_ele_gen_file_'+version
             local_file = call_function(routine, file_time, filename=local_file, probe=probe)
+            requested_file_times = [requested_file_times, file_time]
         endforeach
         files = prepare_files(request=request, errmsg=errmsg, $
             file_times=file_times, time=time_range, nonexist_files=nonexist_files)
     endif
-    
+
+    ; Update the log with the new requested file times.
+    requested_file_times = sort_uniq(requested_file_times)
+    cdf_save_var, log_var, value=requested_file_times, filename=log_file
+
     if n_elements(files) eq 0 then return, '' else return, files
 
 
