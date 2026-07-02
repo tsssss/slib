@@ -37,8 +37,10 @@ function sdatarate, t0s
     endif
     
     ; compute predominant data rate.
-    minrate = min(diff)
-    rate = mean(diff[where(diff lt minrate*1.2)])
+    median_rate = median(diff)
+    rate = mean(diff[[where_pro(diff,'[]',[0.8,1.2]*median_rate)]])
+;    minrate = min(diff)
+;    rate = mean(diff[where(diff lt minrate*1.2)])
     return, rate
 
 end
