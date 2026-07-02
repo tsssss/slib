@@ -2,7 +2,7 @@
 ; Read DMSP orbit, aagcm mlat, mlon, mlt.
 ;-
 
-function dmsp_read_mlat_vars_cdaweb, input_time_range, probe=probe, errmsg=errmsg, coord=coord, get_name=get_name, suffix=suffix, _extra=ex
+function dmsp_read_mlat_vars_cdaweb, input_time_range, probe=probe, errmsg=errmsg, get_name=get_name, suffix=suffix, _extra=ex
 
     prefix = 'dmsp'+probe+'_'
     errmsg = ''
