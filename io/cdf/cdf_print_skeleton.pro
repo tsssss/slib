@@ -67,13 +67,13 @@ pro cdf_print_skeleton, skeleton, filename=out_file
             dimvary = strjoin(string(var.dimvary,format='(I0)'),', ')
             printf, lun, ii, var.name, format = '(I4, " ", A)'
             printf, lun, str_enter
-            printf, lun, format = '("!", T6, "CDF Type", T20, "# Elem", T30,'+$
-                '"Max Rec", T42, "Rec Vary", T55, "Dimensions", T70,"Dim Vary")'
-            printf, lun, format = '("!", T6, "--------", T20, "------", T30,'+$
-                '"-------", T42, "--------", T55, "----------", T70,"--------")'
+            printf, lun, format = '("!", T6, "CDF Type", T24, "# Elem", T34,'+$
+                '"Max Rec", T46, "Rec Vary", T59, "Dimensions", T74,"Dim Vary")'
+            printf, lun, format = '("!", T6, "--------", T24, "------", T34,'+$
+                '"-------", T46, "--------", T59, "----------", T74,"--------")'
             printf, lun, var.cdftype, var.nelem, var.maxrec, recvary, $
                 strjoin(string(var.dims, format = '(I0)'), ', '), dimvary, $
-                format = '(T6, A, T20, I0, T30, I0, T42, A, T55, A, T70, A)'
+                format = '(T6, A, T24, I0, T34, I0, T46, A, T59, A, T74, A)'
             printf, lun, str_enter
             ; variable attribute.
             vatt = var.setting

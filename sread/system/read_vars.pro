@@ -16,7 +16,7 @@
 ;      The generic independent variable should be monotonically increase.
 ;-
 ;
-pro read_vars, input_time_range, files=files, var_list=var_lists, errmsg=errmsg
+pro read_vars, input_time_range, files=files, var_list=var_lists, errmsg=errmsg, fix_dim=fix_dim
 
     errmsg = ''
 
@@ -148,7 +148,7 @@ pro read_vars, input_time_range, files=files, var_list=var_lists, errmsg=errmsg
         ptr_dats = ptrarr(ndep_var)
         var_flag = bytarr(ndep_var)
         for i=0, ndep_var-1 do begin
-            ptr_dats[i] = read_data(files, dep_vars[i], rec_info=rec_infos, errmsg=errmsg)
+            ptr_dats[i] = read_data(files, dep_vars[i], rec_info=rec_infos, errmsg=errmsg, fix_dim=fix_dim)
             if errmsg ne '' then begin
                 lprmsg, 'Variable: '+dep_vars[i]+' does not exist in files ...'
                 var_flag[i] = 1

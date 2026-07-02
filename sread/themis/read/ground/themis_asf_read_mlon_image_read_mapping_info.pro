@@ -160,7 +160,7 @@ pro themis_asf_read_mlon_image_read_mapping_info, input_time_range, site=site
     local_dir = join_path([local_root,'thg','mlon_image','mapping_info'])
     file = join_path([local_dir,base_name])
     if file_test(local_dir,/directory) eq 0 then file_mkdir, local_dir
-    if keyword_set(renew) then if file_test(file) eq 1 then file_delete, file
+    if keyword_set(update) then if file_test(file) eq 1 then file_delete, file
 
 
     if file_test(file) eq 0 then begin

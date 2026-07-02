@@ -23,7 +23,7 @@ function themis_read_asf, input_time_range, site=site, errmsg=errmsg, get_name=g
         'out_vars', asf_var, $
         'time_var_name', 'thg_asf_'+site+'_time', $
         'time_var_type', 'unix' )
-    read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg
+    read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg, fix_dim=1
     if errmsg ne '' then return, retval
 
 
@@ -76,6 +76,12 @@ function themis_read_asf, input_time_range, site=site, errmsg=errmsg, get_name=g
     return, asf_var
 
 end
+
+time_range = ['2026-02-16/03:55:00','2026-02-16/05:05:00']
+site = 'rank'
+var = themis_read_asf(time_range, site=site)
+
+stop
 
 time_range = time_double(['2016-10-13/12:00','2016-10-13/13:00'])   ; stable arc.
 site = 'gako'

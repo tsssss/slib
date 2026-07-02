@@ -61,7 +61,9 @@
 ;   2012-10-03, Sheng Tian, documented.
 ;   2013-03-06, Sheng Tian, revised.
 ;-
-function scdfread, cdf0, vnames, recs0, rec_info=recs1, drec=drec, skt=skt, silent=silent
+function scdfread, cdf0, vnames, recs0, rec_info=recs1, drec=drec, skt=skt, silent=silent, fix_dim=fix_dim
+
+; add fix_dim to fix dimension problem when a data in [n,m] is saved as 1 record of [n,m] instead of n records of [m]. 
     
     compile_opt idl2
     on_error, 0
@@ -112,8 +114,12 @@ function scdfread, cdf0, vnames, recs0, rec_info=recs1, drec=drec, skt=skt, sile
         endif else begin
             ; deal with negative recs. [-1,-1] read all.
             if recs[i,0] lt 0 or recs[i,1] lt 0 then recs[i,*] = [0,vinfo.maxrec]
-            rec0 = recs[i,0]>0 & recs[i,1]<=vinfo.maxrec
-            nrec = recs[i,1]-rec0+1
+            rec0 = recs[i,0]>0
+            rec1 = recs[i,1]
+            if recs[i,1] gt vinfo.maxrec then begin
+                if ~keyword_set(fix_dim) then rec1 = vinfo.maxrec
+            endif
+            nrec = rec1-rec0+1
             if nrec le 0 then nrec = 1      ; read one record.
             rec0 <= vinfo.maxrec-1
             if rec0 le 0 then rec0 = 0      ; fix vinfo.maxrec = 0 
@@ -134,17 +140,27 @@ function scdfread, cdf0, vnames, recs0, rec_info=recs1, drec=drec, skt=skt, sile
             tmp = [nrec,vinfo.dims]
             vals = make_array(type = size(tval,/type), $
                 tmp[where([1,vinfo.dimvary] eq 1)])
-            for j = 0, nrec-1 do begin
+            for j=0, nrec-1 do begin
                 cdf_varget, cdfid, vinfo.name, tval, /string, $
                     rec_start = rec0+j*drec
                 vals[j,*,*,*,*,*,*,*] = srmdim(tval, vinfo.dimvary)
             endfor
         endif else begin
-            cdf_varget, cdfid, vinfo.name, vals, /string, $
-                rec_start = rec0, rec_interval = drec, rec_count = nrec
-            ; permute dimensions.
-            if nrec ne 1 and size(vals,/n_dimensions) gt 1 then $
-                vals = transpose(vals,shift(indgen(n_elements(vinfo.dims)+1),1))
+            if keyword_set(fix_dim) then begin
+                cdf_varget, cdfid, vinfo.name, vals, /string, $
+                    rec_start=0, rec_count=1
+                ; fix dimension problem when a data in [n,m] is saved as 1 record of [n,m] instead of n records of [m].
+                rec0 = recs[i,0]
+                rec1 = recs[i,1]
+                vals = vals[rec0:rec1:drec,*,*,*,*,*,*,*]
+                ;if nrec eq 1 and size(vals,/n_dimensions) eq 2 then vals = reform(vals, [1,size(vals,/dimensions)])
+            endif else begin
+                cdf_varget, cdfid, vinfo.name, vals, /string, $
+                    rec_start=rec0, rec_interval=drec, rec_count=nrec
+                ; permute dimensions.
+                if nrec ne 1 and size(vals,/n_dimensions) gt 1 then $
+                    vals = transpose(vals,shift(indgen(n_elements(vinfo.dims)+1),1))
+            endelse
             ; vals = reform(vals), reform causes problem when concatenate data.
             if nrec eq 1 and n_elements(vals) ne 1 then vals = reform(vals, [1,size(vals,/dimensions)])
         endelse

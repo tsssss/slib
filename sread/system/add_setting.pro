@@ -260,8 +260,11 @@ pro add_setting, var, settings, smart=smart, id=id, errmsg=errmsg
             end
         'scalar': begin
             options, var, 'spec', 0
-            tname = get_setting(var, 'short_name')
-            options, var, 'labels', tname
+            tname = get_var_setting(var, 'labels', exist)
+            if ~exist then begin
+                tname = get_setting(var, 'short_name')
+                options, var, 'labels', tname
+            endif
             
             ; use unit to init ytitle.
             unit = get_setting(var, 'unit', exist)

@@ -13,7 +13,7 @@
 ;
 
 function read_data, files, var0, rec_info=ranges, errmsg=errmsg, $
-    no_merge=no_merge, data=data, $
+    no_merge=no_merge, data=data, fix_dim=fix_dim, $
     _extra=ex
     
     retval = ptr_new(!null)
@@ -70,7 +70,7 @@ function read_data, files, var0, rec_info=ranges, errmsg=errmsg, $
         rec_info = reform(ranges[i,*])
         if rec_info[0] eq rec_info[1] then rec_info = rec_info[0]
         case extension of
-            'cdf': dat = scdfread(files[i], var, rec_info=rec_info, _extra=ex)
+            'cdf': dat = scdfread(files[i], var, rec_info=rec_info, fix_dim=fix_dim, _extra=ex)
             'netcdf': dat = snetcdfread(files[i], var, rec_info=rec_info, _extra=ex)
             else: begin
                 errmsg = handle_error('Does not support '+extension+' yet ...')
