@@ -33,7 +33,14 @@ function dmsp_gen_polar_region_survey_plot_v04, input_time_range, probe=probe, $
     
     time_ranges = lim.time_range
     index = where_pro(times, '[]', time_range, count=ntime_range)
-    if ntime_range eq 0 then return, retval
+    if ntime_range eq 0 then begin
+        ; Find overlapping time range.
+        index = where(time_ranges[*,0] le time_range[1] and time_ranges[*,1] ge time_range[0], ntime_range)
+        if ntime_range eq 0 then begin
+            errmsg = 'No DMSP data in the time range.'
+            return, retval
+        endif
+    endif
     mlt_images = mlt_images[index,*,*]
     times = times[index]
     time_ranges = time_ranges[index,*]

@@ -12,6 +12,8 @@ function dmsp_read_bfield, input_time_range, probe=probe, errmsg=errmsg, $
         retval = call_function(func_name, input_time_range, probe=probe, $
             errmsg=errmsg, get_name=get_name, suffix=suffix, get_b0=get_b0, _extra=ex)
         if errmsg eq '' then begin
+            ; Madrigal is dB.
+            if source eq 'madrigal' then return, retval
             if keyword_set(keep_baseline) then return, retval
             b_base_var = dmsp_read_bfield_baseline(input_time_range, probe=probe, errmsg=errmsg)
             if errmsg eq '' then begin

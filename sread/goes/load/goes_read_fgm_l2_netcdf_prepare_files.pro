@@ -34,6 +34,8 @@ function goes_read_fgm_l2_netcdf_prepare_files, time, probe=probe, errmsg=errmsg
         'g15': valid_range = ['2011-01-01','2017-12-10']
         'g16': valid_range = ['2018-08-29']
         'g17': valid_range = ['2018-08-01']
+        'g18': valid_range = ['2022-01-01']
+        'g19': valid_range = ['2025-01-01']
         else: begin
             errmsg = handle_error('Do not support '+gxx+' ...')
             return, retval
