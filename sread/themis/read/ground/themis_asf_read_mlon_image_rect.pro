@@ -59,7 +59,7 @@ function themis_asf_read_mlon_image_rect, input_time_range, sites=sites, $
     endforeach
 
     store_data, mlon_image_var, common_times, mlon_images
-    mlon_image_info = mlon_image_rect_info()
+    mlon_image_info = mlon_image_rect_get_info()
     mlon_image_info['display_type'] = 'image'
     mlon_image_info['unit'] = 'Count #'
     mlon_image_info['min_elev'] = min_elev

@@ -5,7 +5,7 @@ function themis_asf_read_mlon_image_rect_gen_merge_info, sites=sites, $
     the_var = 'thg_mlon_image_rect_merge_weight'
     if keyword_set(get_name) then return, the_var
 
-    mlon_image_rect_info = mlon_image_rect_info()
+    mlon_image_rect_info = mlon_image_rect_get_info()
     image_size = mlon_image_rect_info.image_size
 
     if n_elements(min_elev) eq 0 then min_elev = 5d

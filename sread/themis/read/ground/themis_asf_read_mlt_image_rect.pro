@@ -87,6 +87,15 @@ function themis_asf_read_mlt_image_rect, input_time_range, $
     
 end
 
+compile_opt idl2
+
+time_range = time_double(['2013-05-01/07:00:00','2013-05-01/09:30:00'])
+sites = ['fsmi','gako','atha','tpas','fsim']
+min_elev = [0.5, 0.5, 0.5, 0.5, 15]
+var = themis_asf_read_mlt_image_rect(time_range, $
+    sites=sites, min_elev=min_elev, mlat_range=[55,70], mlt_range=[-4,2])
+stop
+
 
 mlat_range = [55,70]
 mlt_range = [-2,0.5]

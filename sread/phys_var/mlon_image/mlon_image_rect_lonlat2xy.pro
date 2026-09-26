@@ -10,7 +10,7 @@
 pro mlon_image_rect_lonlat2xy, mlon=mlon, mlat=mlat, xpos=xpos, ypos=ypos, $
     info=mlon_image_rect_info
 
-    if n_elements(mlon_image_rect_info) eq 0 then mlon_image_rect_info = mlon_image_rect_info()
+    if n_elements(mlon_image_rect_info) eq 0 then mlon_image_rect_info = mlon_image_rect_get_info()
     mlat_range = mlon_image_rect_info.mlat_range
     mlon_range = mlon_image_rect_info.mlon_range
     image_size = mlon_image_rect_info.image_size

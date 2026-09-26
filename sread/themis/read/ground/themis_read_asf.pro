@@ -4,35 +4,64 @@
 ; input_time_range. Input time in string or unix time.
 ; site=. Required input, a string for site.
 ;-
-function themis_read_asf, input_time_range, site=site, errmsg=errmsg, get_name=get_name
+function themis_read_asf, input_time_range, site=site, errmsg=errmsg, get_name=get_name, update=update, _extra=ex
 
     asf_var = 'thg_'+site+'_asf'
     if keyword_set(get_name) then return, asf_var
+    if keyword_set(update) then tmp = delete_var_from_memory(asf_var)
+
+    time_range = time_double(input_time_range)
+    if ~check_if_update_memory(asf_var, time_range) then return, asf_var
 
     retval = !null
     errmsg = ''
 
-    time_range = time_double(input_time_range)
     files = themis_load_asi(time_range, site=site, id='l1%asf', errmsg=errmsg)
     if errmsg ne '' then return, retval
 
-    var_list = list()
+;    var_list = list()
+;    var_list.add, dictionary($
+;        'in_vars', 'thg_asf_'+site, $
+;        'out_vars', asf_var, $
+;        'time_var_name', 'thg_asf_'+site+'_time', $
+;        'time_var_type', 'unix' )
+;    read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg, fix_dim=1
+;    if errmsg ne '' then return, retval
+    ; 2026-07-24, Sheng: it keeps breaking recently, so I just read vars directly.
+    time_var_name = 'thg_asf_'+site+'_time'
+    image_var_name = 'thg_asf_'+site
+    times = []
+    foreach file, files do begin
+        times = [times,cdf_read_var(time_var_name, filename=file)]
+    endforeach
+    time_index = where_pro(times, '[]', time_range, count=ntime)
+    if ntime eq 0 then begin
+        errmsg = 'No data in the given time range ...'
+        return, retval
+    endif
 
-    var_list.add, dictionary($
-        'in_vars', 'thg_asf_'+site, $
-        'out_vars', asf_var, $
-        'time_var_name', 'thg_asf_'+site+'_time', $
-        'time_var_type', 'unix' )
-    read_vars, time_range, files=files, var_list=var_list, errmsg=errmsg, fix_dim=1
-    if errmsg ne '' then return, retval
-
+    asf_images = []
+    foreach file, files do begin
+        tmp = cdf_read_var(image_var_name, filename=file)
+        asf_images = [asf_images,temporary(tmp)]
+    endforeach
+    times = times[time_index]
+    asf_images = asf_images[time_index,*,*]
 
     ; Read the raw image, convert it to float.
-    get_data, asf_var, times, raw_images
-    ntime = n_elements(times)
-    if ntime eq 1 then raw_images = reform(raw_images, [1,size(raw_images,/dimensions)])
-    raw_images = float(raw_images)  ; It's crucial to cast uint to float.
-    image_size = size(reform(raw_images[0,*,*]),dimensions=1)
+    asf_images = float(asf_images)  ; It's crucial to cast uint to float.
+    if ntime eq 1 then begin
+        image_size = size(asf_images,/dimensions)
+        asf_images = reform(asf_images, [1,image_size])
+    endif
+    image_size = size(reform(asf_images[0,*,*]),dimensions=1)
+
+;    ; Read the raw image, convert it to float.
+;    get_data, asf_var, times, raw_images
+;    ntime = n_elements(times)
+;    if ntime eq 1 then raw_images = reform(raw_images, [1,size(raw_images,/dimensions)])
+;    raw_images = float(raw_images)  ; It's crucial to cast uint to float.
+;    image_size = size(reform(raw_images[0,*,*]),dimensions=1)
     
     ; Sometimes times are not uniform.
     time_step = 3
@@ -42,19 +71,20 @@ function themis_read_asf, input_time_range, site=site, errmsg=errmsg, get_name=g
         images = fltarr([ncommon_time,image_size])
         for ii=0,image_size[0]-1 do begin
             for jj=0,image_size[1]-1 do begin
-                images[*,ii,jj] = interpol(raw_images[*,ii,jj],times, common_times)
+                images[*,ii,jj] = interpol(asf_images[*,ii,jj],times, common_times)
             endfor
         endfor
-        raw_images = temporary(images)
+        asf_images = temporary(images)
         times = temporary(common_times)
     endif
 
     ; Save the raw image.
-    store_data, asf_var, times, raw_images
-    add_setting, asf_var, /smart, {$
+    store_data, asf_var, times, asf_images
+    add_setting, asf_var, smart=1, {$
         display_type: 'image', $
         image_size: image_size, $
         unit: 'Count', $
+        requested_time_range: time_range, $
         short_name: strupcase(site[0])}
         
     ; Read pixel and site info.
@@ -70,12 +100,27 @@ function themis_read_asf, input_time_range, site=site, errmsg=errmsg, get_name=g
     ; Add center and edge pixel index (1d).
     pixel_elevs = pixel_info.pixel_elev
     edge_index = where(finite(pixel_elevs,nan=1) or pixel_elevs le 0, complement=center_index)
-    options, asf_var, 'edge_index', edge_index
-    options, asf_var, 'center_index', center_index
+    options, asf_var, edge_index=edge_index, center_index=center_index
+
 
     return, asf_var
 
 end
+
+
+compile_opt idl2
+
+tr = ['2013-05-01/07:00','2013-05-01/09:30']
+site = 'fsim'
+tr = ['2015-04-16/07:45','2015-04-16/08:20']
+site = 'mcgr'
+site = 'whit'
+var = themis_read_asf(tr, site=site)
+asf_images = var_get_data(var, times=times)
+sgopen, 0, size=[6,6]
+foreach time, times, tid do sgtv, bytscl(reform(asf_images[tid,*,*]), max=20000, min=-20000, top=254), ct=70
+stop
+
 
 time_range = ['2026-02-16/03:55:00','2026-02-16/05:05:00']
 site = 'rank'

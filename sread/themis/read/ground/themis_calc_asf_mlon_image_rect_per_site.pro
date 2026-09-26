@@ -26,7 +26,7 @@ pro themis_calc_asf_mlon_image_rect_per_site, asf_var, errmsg=errmsg, no_crop=no
     pixel_elev = mlon_image_rect_map_old2new(lim.pixel_elev, site=site, crop=crop)
     pixel_azim = mlon_image_rect_map_old2new(lim.pixel_azim, site=site, crop=crop)
 
-    mlon_image_rect_info = mlon_image_rect_info()
+    mlon_image_rect_info = mlon_image_rect_get_info()
     image_size = mlon_image_rect_info.image_size
     image_pos = [0d,0]
     pixel_mlon = mlon_image_rect_info.pixel_mlon

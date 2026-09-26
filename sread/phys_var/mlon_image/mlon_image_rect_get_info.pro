@@ -1,5 +1,5 @@
 
-function mlon_image_rect_info
+function mlon_image_rect_get_info
 
 ;    sites = themis_read_asi_sites()
 ;    mlon_range = list()
@@ -49,5 +49,5 @@ function mlon_image_rect_info
 end
 
 
-info = mlon_image_rect_info()
+info = mlon_image_rect_get_info()
 end
